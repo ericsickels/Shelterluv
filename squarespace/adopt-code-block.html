@@ -57,11 +57,20 @@
   /* ---- Gallery (left) ---- */
   .slv-gallery { position: relative; background: #111; display: flex; flex-direction: column; min-height: 0; }
   .slv-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
-  .slv-stage-bg {
+  /* Photos sit side by side in a native scroller so they follow the finger and snap into place. */
+  .slv-track {
+    display: flex; height: 100%; overflow-x: auto; overflow-y: hidden;
+    scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .slv-track::-webkit-scrollbar { display: none; }
+  .slv-slide { position: relative; flex: 0 0 100%; height: 100%; overflow: hidden; scroll-snap-align: center; scroll-snap-stop: always; }
+  .slv-slide-bg {
     position: absolute; inset: -20px; background-size: cover; background-position: center;
     filter: blur(24px) brightness(.6); transform: scale(1.1);
   }
-  .slv-stage img { position: relative; width: 100%; height: 100%; object-fit: contain; display: block; }
+  .slv-slide img { position: relative; width: 100%; height: 100%; object-fit: contain; display: block; }
+  .slv-nav[hidden] { display: none; }
   .slv-nav {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 40px; height: 40px;
     border-radius: 50%; border: none; cursor: pointer; font-size: 22px; line-height: 1;
@@ -115,6 +124,7 @@
     .slv-gallery { flex: 0 0 auto; }
     .slv-stage { flex: none; height: min(56vh, 100vw); }
     .slv-thumbs { display: none; }
+    .slv-nav { display: none; }
     .slv-details { flex: 1; }
     .slv-scroll { padding: 20px 20px 16px; }
     .slv-details h2 { margin-right: 0; font-size: 1.7em; }
@@ -201,17 +211,29 @@
     ].filter(function (f) { return f[1]; });
   }
 
-  function showPhoto(i) {
-    var photos = current.photos;
-    if (!photos.length) return;
-    photoIndex = (i + photos.length) % photos.length;
-    var src = photos[photoIndex];
-    modal.querySelector(".slv-stage img").src = src;
-    modal.querySelector(".slv-stage-bg").style.backgroundImage = 'url("' + src.replace(/"/g, "%22") + '")';
+  function track() {
+    return modal.querySelector(".slv-track");
+  }
+
+  // Scroll the photo strip to photo i; the scroll listener updates the counter and thumbnails.
+  function showPhoto(i, instant) {
+    var t = track();
+    if (!t || !current.photos.length) return;
+    i = Math.max(0, Math.min(current.photos.length - 1, i));
+    t.scrollTo({ left: i * t.clientWidth, behavior: instant ? "auto" : "smooth" });
+    if (instant) markPhoto(i);
+  }
+
+  function markPhoto(i) {
+    photoIndex = i;
+    var n = current.photos.length;
     var count = modal.querySelector(".slv-count");
-    if (count) count.textContent = (photoIndex + 1) + " / " + photos.length;
-    modal.querySelectorAll(".slv-thumbs button").forEach(function (b, n) {
-      b.setAttribute("aria-current", String(n === photoIndex));
+    if (count) count.textContent = (i + 1) + " / " + n;
+    var prev = modal.querySelector(".slv-prev"), next = modal.querySelector(".slv-next");
+    if (prev) prev.hidden = i === 0;
+    if (next) next.hidden = i === n - 1;
+    modal.querySelectorAll(".slv-thumbs button").forEach(function (b, k) {
+      b.setAttribute("aria-current", String(k === i));
     });
   }
 
@@ -232,8 +254,10 @@
     modal.innerHTML =
       '<button type="button" class="slv-close" aria-label="Close">&times;</button>' +
       '<div class="slv-gallery">' +
-        '<div class="slv-stage"><div class="slv-stage-bg"></div>' +
-          '<img alt="Photo of ' + esc(a.name) + '">' +
+        '<div class="slv-stage"><div class="slv-track">' + a.photos.map(function (src, i) {
+            return '<div class="slv-slide"><div class="slv-slide-bg" style="background-image:url(&quot;' + esc(src) + '&quot;)"></div>' +
+              '<img ' + (i > 1 ? 'loading="lazy" ' : "") + 'src="' + esc(src) + '" alt="Photo ' + (i + 1) + " of " + esc(a.name) + '"></div>';
+          }).join("") + "</div>" +
           (many ? '<button type="button" class="slv-nav slv-prev" aria-label="Previous photo">&#8249;</button>' +
                   '<button type="button" class="slv-nav slv-next" aria-label="Next photo">&#8250;</button>' +
                   '<span class="slv-count"></span>' : "") +
@@ -256,9 +280,15 @@
         "</div>" +
       "</div>";
 
-    if (a.photos.length) showPhoto(0);
-    else modal.querySelector(".slv-gallery").style.display = "none";
+    if (!a.photos.length) modal.querySelector(".slv-gallery").style.display = "none";
     if (!modal.open) { modal.showModal(); document.documentElement.classList.add("slv-lock"); }
+    if (a.photos.length) {
+      showPhoto(0, true);
+      track().addEventListener("scroll", function () {
+        var t = track(), i = Math.round(t.scrollLeft / t.clientWidth);
+        if (i !== photoIndex) markPhoto(i);
+      }, { passive: true });
+    }
     modal.querySelector(".slv-scroll").scrollTop = 0;
     modal.querySelector(".slv-close").focus();
     if (location.hash !== "#animal-" + a.id) history.replaceState(null, "", "#animal-" + a.id);
@@ -291,20 +321,14 @@
 
   modal.addEventListener("keydown", function (e) {
     if (!current || current.photos.length < 2) return;
-    if (e.key === "ArrowLeft") showPhoto(photoIndex - 1);
-    if (e.key === "ArrowRight") showPhoto(photoIndex + 1);
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    showPhoto(photoIndex + (e.key === "ArrowRight" ? 1 : -1));
   });
 
-  // Swipe between photos on touch screens.
-  var touchX = null;
-  modal.addEventListener("touchstart", function (e) {
-    touchX = e.target.closest(".slv-stage") ? e.touches[0].clientX : null;
-  }, { passive: true });
-  modal.addEventListener("touchend", function (e) {
-    if (touchX == null || !current) return;
-    var dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 40) showPhoto(photoIndex + (dx < 0 ? 1 : -1));
-    touchX = null;
+  // Keep the current photo in place if the window is resized or the phone is rotated.
+  window.addEventListener("resize", function () {
+    if (current && modal.open) showPhoto(photoIndex, true);
   });
 
   modal.addEventListener("close", function () {
