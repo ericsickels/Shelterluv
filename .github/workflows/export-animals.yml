@@ -31,6 +31,9 @@ jobs:
           PUBLISH_STATUSES: ${{ vars.PUBLISH_STATUSES || 'Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending' }}
         run: python3 scripts/export_animals.py public/animals.json
 
+      - name: Add the website widget (adopt.js, adopt.css, preview page)
+        run: cp web/* public/
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3

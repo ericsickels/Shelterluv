@@ -7,10 +7,11 @@ API instead of the Shelterluv iFrame.
 Shelterluv API ──(API key, secret)──▶ GitHub Action (every 30 min)
                                         │ keeps only public statuses + public fields
                                         ▼
-                         GitHub Pages: …/animals.json (public, no private data)
+                         GitHub Pages: animals.json (public, no private data)
+                                       adopt.js + adopt.css (the widget, from web/)
                                         │
                                         ▼
-                         Squarespace Code Block renders cards + detail pop-up
+                         Squarespace Code Block just loads adopt.js
 ```
 
 The API key lives only in GitHub's encrypted secrets. Visitors only ever see
@@ -21,8 +22,10 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 | File | Purpose |
 |---|---|
 | `scripts/export_animals.py` | Fetches in-custody animals, filters by status, writes sanitized JSON. No dependencies. |
-| `.github/workflows/export-animals.yml` | Runs the export every 30 minutes and publishes it to GitHub Pages. |
-| `squarespace/adopt-code-block.html` | Paste into a Squarespace Code Block. |
+| `.github/workflows/export-animals.yml` | Every 30 minutes and on every merge to `main`: runs the export and publishes it with the widget to GitHub Pages. |
+| `web/adopt.js`, `web/adopt.css` | The widget: animal cards, filters and the detail pop-up. Edit these to change the site. |
+| `web/index.html` | Preview page: `https://ericsickels.github.io/Shelterluv/` shows the widget outside Squarespace. |
+| `squarespace/adopt-code-block.html` | The two-line embed pasted into Squarespace once. |
 
 ## One-time setup
 
@@ -39,11 +42,18 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 
 ### Squarespace (Core plan or higher — needed for JavaScript in Code Blocks)
 1. Edit your Adopt page → add a **Code Block** → set it to HTML, *Display Source* off.
-2. Paste the full contents of `squarespace/adopt-code-block.html` and save.
-3. Check the two settings at the top of the `<script>`:
-   - `DATA_URL` — the GitHub Pages URL above.
-   - `APPLY_URL` — where "Apply to adopt" links; `{id}` becomes the Shelterluv animal ID.
-     Currently `https://new.shelterluv.com/matchme/adopt/RES-A-{id}` (Shelterluv's hosted adoption application, opens in a new tab).
+2. Paste the contents of `squarespace/adopt-code-block.html` and save. This is a one-time step:
+   ```html
+   <div id="slv-adopt"></div>
+   <script src="https://ericsickels.github.io/Shelterluv/adopt.js" defer></script>
+   ```
+
+Settings live at the top of `web/adopt.js`:
+- `APPLY_URL`: where "Apply to adopt" links; `{id}` becomes the Shelterluv animal ID.
+  Currently `https://new.shelterluv.com/matchme/adopt/RES-A-{id}` (Shelterluv's hosted adoption application, opens in a new tab).
+- `STATUS_BADGES`: which statuses get a badge, and its wording.
+
+Button colour is `--slv-accent` at the top of `web/adopt.css`.
 
 Code Blocks don't run scripts in the Squarespace editor preview; view the live page (or
 preview in a logged-out window) to see the animals.
@@ -52,6 +62,9 @@ preview in a logged-out window) to see the animals.
 
 - Nothing to do: change an animal's status in Shelterluv and the site updates within ~30–40 minutes.
 - Need it now? Run the workflow manually from the Actions tab.
+- Changing the widget: edit `web/adopt.js` / `web/adopt.css` and merge to `main`. The site picks it
+  up automatically, usually within ~10 minutes (browser cache), with no Squarespace changes.
+  Check the preview page first if you like.
 - Individual animals can be linked directly: `yoursite.org/adopt#animal-9608`.
 - GitHub pauses scheduled workflows after 60 days with no commits to the repo. If that
   happens you'll get an email; click **Enable workflow** in the Actions tab.

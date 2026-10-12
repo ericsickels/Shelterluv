@@ -1,0 +1,121 @@
+/* Styles for the adoptable animals widget (adopt.js). Change --slv-accent to restyle buttons. */
+.slv, .slv-modal { --slv-accent: #222; --slv-accent-text: #fff; --slv-radius: 14px; }
+
+/* ---- Grid ---- */
+.slv-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; }
+.slv-filters button {
+  font: inherit; padding: 8px 18px; border-radius: 999px; cursor: pointer;
+  border: 1px solid currentColor; background: transparent; color: inherit; opacity: .7;
+}
+.slv-filters button[aria-pressed="true"] { opacity: 1; font-weight: 600; border-width: 2px; }
+.slv-grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.slv-card {
+  position: relative; font: inherit; color: inherit; text-align: left; cursor: pointer; padding: 0;
+  border: 1px solid rgba(127,127,127,.25); border-radius: var(--slv-radius);
+  background: transparent; overflow: hidden; display: flex; flex-direction: column;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.slv-card:hover, .slv-card:focus-visible { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+.slv-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; background: rgba(127,127,127,.15); }
+.slv-card-body { padding: 14px 16px 18px; }
+.slv-card h3 { margin: 0 0 4px; font-size: 1.25em; }
+.slv-card p { margin: 0; opacity: .75; font-size: .92em; line-height: 1.4; }
+.slv-card .slv-badge { position: absolute; top: 10px; left: 10px; }
+.slv-msg { grid-column: 1 / -1; opacity: .75; }
+.slv-badge {
+  display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  letter-spacing: .02em; background: #fff3d6; color: #6b4a00; border: 1px solid #f0d58a;
+}
+
+/* ---- Modal shell ---- */
+html.slv-lock { overflow: hidden; }
+.slv-modal {
+  width: min(1000px, calc(100vw - 32px)); height: min(640px, calc(100vh - 48px));
+  max-width: none; max-height: none; padding: 0; border: none; border-radius: var(--slv-radius);
+  color: #222; background: #fff; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,.35);
+}
+.slv-modal[open] { display: grid; grid-template-columns: 1.1fr 1fr; }
+.slv-modal::backdrop { background: rgba(0,0,0,.6); }
+.slv-close {
+  position: absolute; top: 12px; right: 12px; z-index: 3; width: 40px; height: 40px;
+  border-radius: 50%; border: none; cursor: pointer; font-size: 26px; line-height: 1;
+  background: rgba(255,255,255,.92); color: #222; box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+
+/* ---- Gallery (left) ---- */
+.slv-gallery { position: relative; background: #111; display: flex; flex-direction: column; min-height: 0; }
+.slv-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+/* Photos sit side by side in a native scroller so they follow the finger and snap into place. */
+.slv-track {
+  display: flex; height: 100%; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.slv-track::-webkit-scrollbar { display: none; }
+.slv-slide { position: relative; flex: 0 0 100%; height: 100%; overflow: hidden; scroll-snap-align: center; scroll-snap-stop: always; }
+.slv-slide-bg {
+  position: absolute; inset: -20px; background-size: cover; background-position: center;
+  filter: blur(24px) brightness(.6); transform: scale(1.1);
+}
+.slv-slide img { position: relative; width: 100%; height: 100%; object-fit: contain; display: block; }
+.slv-nav[hidden] { display: none; }
+.slv-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 40px; height: 40px;
+  border-radius: 50%; border: none; cursor: pointer; font-size: 22px; line-height: 1;
+  background: rgba(255,255,255,.9); color: #222; box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.slv-prev { left: 12px; } .slv-next { right: 12px; }
+.slv-count {
+  position: absolute; bottom: 12px; right: 12px; z-index: 2; padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; background: rgba(0,0,0,.55); color: #fff;
+}
+.slv-thumbs { display: flex; gap: 8px; padding: 10px; overflow-x: auto; background: #111; }
+.slv-thumbs button {
+  padding: 0; border: 2px solid transparent; border-radius: 8px; cursor: pointer;
+  background: none; flex: 0 0 auto; opacity: .6;
+}
+.slv-thumbs button[aria-current="true"] { border-color: #fff; opacity: 1; }
+.slv-thumbs img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; display: block; }
+
+/* ---- Details (right) ---- */
+.slv-details { display: flex; flex-direction: column; min-height: 0; }
+.slv-scroll { flex: 1; overflow-y: auto; padding: 32px 32px 24px; }
+.slv-details h2 { margin: 0 48px 6px 0; font-size: 2em; line-height: 1.1; }
+.slv-sub { margin: 0 0 12px; font-size: 1.05em; color: #555; }
+.slv-section-title {
+  margin: 28px 0 12px; font-size: 12px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: #777;
+}
+.slv-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 0; background: #e7e7e7; border: 1px solid #e7e7e7; border-radius: 10px; overflow: hidden; }
+.slv-facts div { background: #fafafa; padding: 10px 14px; }
+.slv-facts dt { margin: 0; font-size: 12px; color: #777; }
+.slv-facts dd { margin: 2px 0 0; font-weight: 600; }
+.slv-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.slv-tags span { padding: 4px 10px; border-radius: 999px; background: #f0f0f0; font-size: 13px; }
+.slv-desc p { margin: 0 0 14px; line-height: 1.65; }
+.slv-cta {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 16px 32px; border-top: 1px solid #eee; background: #fff;
+}
+.slv-fee { font-size: .95em; color: #555; }
+.slv-fee strong { display: block; font-size: 1.3em; color: #222; }
+.slv-apply {
+  flex: 0 0 auto; display: inline-block; padding: 14px 28px; border-radius: 999px; text-align: center;
+  background: var(--slv-accent); color: var(--slv-accent-text) !important; text-decoration: none !important; font-weight: 600;
+}
+.slv-apply:hover { filter: brightness(1.15); }
+
+/* ---- Phones: single column, gallery on top, Apply pinned at bottom ---- */
+@media (max-width: 760px) {
+  .slv-modal { width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; }
+  .slv-modal[open] { display: flex; flex-direction: column; }
+  .slv-gallery { flex: 0 0 auto; }
+  .slv-stage { flex: none; height: min(56vh, 100vw); }
+  .slv-thumbs { display: none; }
+  .slv-nav { display: none; }
+  .slv-details { flex: 1; }
+  .slv-scroll { padding: 20px 20px 16px; }
+  .slv-details h2 { margin-right: 0; font-size: 1.7em; }
+  .slv-cta { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); }
+  .slv-apply { flex: 1; }
+}
