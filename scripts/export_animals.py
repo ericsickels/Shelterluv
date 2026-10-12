@@ -53,6 +53,7 @@ def to_public(animal):
         "id": animal.get("ID"),
         "name": (animal.get("Name") or "").strip(),
         "type": animal.get("Type"),
+        "status": animal.get("Status"),
         "breed": animal.get("Breed"),
         "sex": animal.get("Sex"),
         "ageMonths": animal.get("Age"),
