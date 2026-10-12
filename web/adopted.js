@@ -11,6 +11,9 @@
   // ---- Configuration -------------------------------------------------------
   // Text on the ribbon across each card's photo.
   var RIBBON_TEXT = "Adopted!";
+  // Shown in place of the cards when there are no recent adoptions.
+  var EMPTY_TITLE = "Happy tails coming soon";
+  var EMPTY_TEXT = "Our most recent adoptions will appear here. Check back soon!";
   // --------------------------------------------------------------------------
 
   // adopted.json and adopt.css are published next to this script.
@@ -59,9 +62,14 @@
     return "Adopted " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
 
+  function emptyState(title, text) {
+    return '<div class="slv-empty"><div class="slv-empty-icon" aria-hidden="true"></div>' +
+      '<p class="slv-empty-title">' + esc(title) + '</p><p class="slv-empty-text">' + esc(text) + "</p></div>";
+  }
+
   function render(animals) {
     if (!animals.length) {
-      grid.innerHTML = '<p class="slv-msg">Check back soon for our latest happy tails!</p>';
+      grid.innerHTML = emptyState(EMPTY_TITLE, EMPTY_TEXT);
       return;
     }
     grid.innerHTML = animals.map(function (a) {
@@ -84,6 +92,6 @@
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (data) { render(data.animals || []); })
     .catch(function () {
-      grid.innerHTML = '<p class="slv-msg">We couldn\u2019t load our recent adoptions right now. Please try again later.</p>';
+      grid.innerHTML = emptyState("We couldn\u2019t load our recent adoptions", "Please refresh the page or try again in a few minutes.");
     });
 })();
