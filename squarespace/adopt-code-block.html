@@ -1,0 +1,188 @@
+<!--
+  Adoptable animals for Squarespace.
+  Paste this whole file into a Code Block (Display Source off) on your Adopt page.
+  Requires a Squarespace plan that allows JavaScript in Code Blocks (Core or higher).
+-->
+<div id="slv-adopt" class="slv">
+  <div class="slv-filters" role="group" aria-label="Filter animals"></div>
+  <div class="slv-grid" aria-live="polite"><p class="slv-msg">Loading our adoptable animals…</p></div>
+  <dialog class="slv-modal" aria-labelledby="slv-modal-title"></dialog>
+</div>
+
+<style>
+  .slv { --slv-accent: currentColor; --slv-radius: 12px; }
+  .slv-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; }
+  .slv-filters button {
+    font: inherit; padding: 8px 18px; border-radius: 999px; cursor: pointer;
+    border: 1px solid currentColor; background: transparent; color: inherit; opacity: .7;
+  }
+  .slv-filters button[aria-pressed="true"] { opacity: 1; font-weight: 600; border-width: 2px; }
+  .slv-grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .slv-card {
+    font: inherit; color: inherit; text-align: left; cursor: pointer; padding: 0;
+    border: 1px solid rgba(127,127,127,.25); border-radius: var(--slv-radius);
+    background: transparent; overflow: hidden; display: flex; flex-direction: column;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .slv-card:hover, .slv-card:focus-visible { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+  .slv-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; background: rgba(127,127,127,.15); }
+  .slv-card-body { padding: 14px 16px 18px; }
+  .slv-card h3 { margin: 0 0 4px; font-size: 1.25em; }
+  .slv-card p { margin: 0; opacity: .75; font-size: .92em; line-height: 1.4; }
+  .slv-msg { grid-column: 1 / -1; opacity: .75; }
+
+  .slv-modal {
+    width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0;
+    border: none; border-radius: var(--slv-radius); color: #222; background: #fff;
+  }
+  .slv-modal::backdrop { background: rgba(0,0,0,.6); }
+  .slv-modal-inner { padding: 24px; }
+  .slv-close {
+    position: sticky; top: 8px; float: right; margin: 8px 8px 0 0; z-index: 1;
+    font-size: 28px; line-height: 1; width: 40px; height: 40px; border-radius: 50%;
+    border: none; background: rgba(255,255,255,.9); cursor: pointer; color: #222;
+  }
+  .slv-main-photo { width: 100%; max-height: 460px; object-fit: contain; background: #f2f2f2; border-radius: 8px; display: block; }
+  .slv-thumbs { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; }
+  .slv-thumbs button { padding: 0; border: 2px solid transparent; border-radius: 6px; cursor: pointer; background: none; flex: 0 0 auto; }
+  .slv-thumbs button[aria-current="true"] { border-color: #222; }
+  .slv-thumbs img { width: 64px; height: 64px; object-fit: cover; border-radius: 4px; display: block; }
+  .slv-modal h2 { margin: 20px 0 6px; }
+  .slv-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 16px; padding: 0; list-style: none; opacity: .8; }
+  .slv-desc p { margin: 0 0 12px; line-height: 1.6; }
+  .slv-apply {
+    display: inline-block; margin-top: 8px; padding: 12px 28px; border-radius: 999px;
+    background: #222; color: #fff !important; text-decoration: none; font-weight: 600;
+  }
+</style>
+
+<script>
+(function () {
+  // ---- Configuration -------------------------------------------------------
+  // URL of the JSON file published by the GitHub Action.
+  var DATA_URL = "https://ericsickels.github.io/Shelterluv/animals.json";
+  // Link for the "Apply to adopt" button. {id} is replaced with the Shelterluv animal ID.
+  var APPLY_URL = "https://www.shelterluv.com/matchme/adopt/WCHS-A-{id}";
+  // --------------------------------------------------------------------------
+
+  var root = document.getElementById("slv-adopt");
+  if (!root) return;
+  var grid = root.querySelector(".slv-grid");
+  var filters = root.querySelector(".slv-filters");
+  var modal = root.querySelector(".slv-modal");
+  var animals = [];
+  var currentType = "All";
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function age(months) {
+    if (months == null || months === "") return "";
+    var y = Math.floor(months / 12), m = months % 12;
+    if (y === 0) return m + (m === 1 ? " month" : " months");
+    return y + (y === 1 ? " year" : " years") + (m ? " " + m + " mo" : "");
+  }
+
+  function summary(a) {
+    return [a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" · ");
+  }
+
+  function renderFilters() {
+    var types = ["All"];
+    animals.forEach(function (a) { if (a.type && types.indexOf(a.type) < 0) types.push(a.type); });
+    if (types.length <= 2) { filters.innerHTML = ""; return; }
+    filters.innerHTML = types.map(function (t) {
+      var label = t === "All" ? "All" : t + "s";
+      return '<button type="button" data-type="' + esc(t) + '" aria-pressed="' + (t === currentType) + '">' + esc(label) + "</button>";
+    }).join("");
+  }
+
+  function renderGrid() {
+    var list = animals.filter(function (a) { return currentType === "All" || a.type === currentType; });
+    if (!list.length) {
+      grid.innerHTML = '<p class="slv-msg">No animals are listed right now — please check back soon!</p>';
+      return;
+    }
+    grid.innerHTML = list.map(function (a) {
+      return '<button type="button" class="slv-card" data-id="' + esc(a.id) + '">' +
+        '<img loading="lazy" src="' + esc(a.photos[0] || "") + '" alt="Photo of ' + esc(a.name) + '">' +
+        '<div class="slv-card-body"><h3>' + esc(a.name) + "</h3><p>" + esc(summary(a)) + "</p></div></button>";
+    }).join("");
+  }
+
+  function openAnimal(id) {
+    var a = animals.filter(function (x) { return String(x.id) === String(id); })[0];
+    if (!a) return;
+    var facts = [a.type, a.sex, age(a.ageMonths), a.breed, a.color, a.size,
+      a.weightLbs ? a.weightLbs + " lbs" : "",
+      a.altered === "Yes" ? "Spayed/neutered" : "",
+      a.adoptionFee ? "Adoption fee $" + a.adoptionFee : ""].concat(a.attributes || []).filter(Boolean);
+    var paragraphs = (a.description || "").split(/\n\s*\n/).filter(Boolean)
+      .map(function (p) { return "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>"; }).join("");
+    var thumbs = a.photos.length > 1 ? '<div class="slv-thumbs">' + a.photos.map(function (src, i) {
+      return '<button type="button" data-photo="' + esc(src) + '" aria-current="' + (i === 0) + '" aria-label="Photo ' + (i + 1) + '">' +
+        '<img loading="lazy" src="' + esc(src) + '" alt=""></button>';
+    }).join("") + "</div>" : "";
+
+    modal.innerHTML =
+      '<button type="button" class="slv-close" aria-label="Close">&times;</button>' +
+      '<div class="slv-modal-inner">' +
+      (a.photos[0] ? '<img class="slv-main-photo" src="' + esc(a.photos[0]) + '" alt="Photo of ' + esc(a.name) + '">' : "") +
+      thumbs +
+      '<h2 id="slv-modal-title">' + esc(a.name) + "</h2>" +
+      '<ul class="slv-facts">' + facts.map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("") + "</ul>" +
+      '<div class="slv-desc">' + paragraphs + "</div>" +
+      '<a class="slv-apply" target="_blank" rel="noopener" href="' + esc(APPLY_URL.replace("{id}", encodeURIComponent(a.id))) + '">Apply to adopt ' + esc(a.name) + "</a>" +
+      "</div>";
+    if (!modal.open) modal.showModal();
+    if (location.hash !== "#animal-" + a.id) history.replaceState(null, "", "#animal-" + a.id);
+  }
+
+  function closeModal() {
+    if (modal.open) modal.close();
+  }
+
+  filters.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-type]");
+    if (!b) return;
+    currentType = b.getAttribute("data-type");
+    renderFilters();
+    renderGrid();
+  });
+
+  grid.addEventListener("click", function (e) {
+    var card = e.target.closest(".slv-card");
+    if (card) openAnimal(card.getAttribute("data-id"));
+  });
+
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal || e.target.closest(".slv-close")) return closeModal();
+    var t = e.target.closest("button[data-photo]");
+    if (t) {
+      modal.querySelector(".slv-main-photo").src = t.getAttribute("data-photo");
+      modal.querySelectorAll(".slv-thumbs button").forEach(function (b) { b.setAttribute("aria-current", String(b === t)); });
+    }
+  });
+
+  modal.addEventListener("close", function () {
+    if (location.hash.indexOf("#animal-") === 0) history.replaceState(null, "", location.pathname + location.search);
+  });
+
+  // Cache-bust every 10 minutes so visitors get fresh data without hammering the server.
+  fetch(DATA_URL + "?v=" + Math.floor(Date.now() / 600000))
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (data) {
+      animals = (data.animals || []).map(function (a) { a.photos = a.photos || []; return a; });
+      renderFilters();
+      renderGrid();
+      var m = location.hash.match(/^#animal-(.+)$/);
+      if (m) openAnimal(decodeURIComponent(m[1]));
+    })
+    .catch(function () {
+      grid.innerHTML = '<p class="slv-msg">We couldn’t load our animals right now. Please refresh the page or try again later.</p>';
+    });
+})();
+</script>
