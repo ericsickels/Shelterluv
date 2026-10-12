@@ -140,3 +140,42 @@ html.slv-lock { overflow: hidden; }
   .slv-cta { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); }
   .slv-apply { flex: 1; }
 }
+
+/* ---- Adoption counts (stats.js): tiles fade up and numbers count up when scrolled into view ---- */
+.slv-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 8px 0 40px; }
+.slv-stat {
+  text-align: center; padding: 28px 18px 20px; border-radius: var(--slv-radius);
+  border: 1px solid rgba(127,127,127,.22); background: #fff; color: #222;
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1);
+}
+.slv-stats.slv-in .slv-stat { opacity: 1; transform: none; }
+.slv-stats .slv-stat:nth-child(2) { transition-delay: .12s; }
+.slv-stats .slv-stat:nth-child(3) { transition-delay: .24s; }
+.slv-stat-label { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #777; }
+.slv-stat-num {
+  margin: 10px 0 2px; font-size: clamp(44px, 6vw, 68px); font-weight: 800; line-height: 1;
+  color: var(--slv-adopted); font-variant-numeric: tabular-nums;
+}
+.slv-stat-sub { font-size: .9em; color: #666; }
+.slv-stat-split {
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 16px;
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(127,127,127,.2); font-size: .92em;
+}
+.slv-stat-split span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.slv-stat-split .slv-count-up { font-weight: 700; font-variant-numeric: tabular-nums; }
+.slv-stat-split svg { width: 22px; height: 22px; fill: var(--slv-adopted); }
+.slv-stat-featured { background: var(--slv-adopted); border-color: transparent; color: #fff; }
+.slv-stat-featured .slv-stat-label, .slv-stat-featured .slv-stat-sub { color: rgba(255,255,255,.85); }
+.slv-stat-featured .slv-stat-num { color: #fff; }
+.slv-stat-featured .slv-stat-split { border-top-color: rgba(255,255,255,.3); }
+.slv-stat-featured .slv-stat-split svg { fill: #fff; }
+@media (max-width: 640px) {
+  .slv-stats { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .slv-stat-featured { grid-column: 1 / -1; }
+  .slv-stat { padding: 20px 10px 16px; }
+  .slv-stat-sub { font-size: 13px; }
+  .slv-stat-split { gap: 4px 12px; font-size: .85em; }
+  /* The two narrow tiles list dogs and cats on separate lines so both tiles match. */
+  .slv-stat:not(.slv-stat-featured) .slv-stat-split { flex-direction: column; align-items: center; }
+}

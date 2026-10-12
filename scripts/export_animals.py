@@ -5,6 +5,7 @@ Writes two files into the output directory:
   animals.json  - animals in custody whose status is in PUBLISH_STATUSES
   adopted.json  - animals with an adoption outcome in the last ADOPTED_DAYS days
                   that are still "Healthy In Home" (i.e. not returned)
+  stats.json    - number of adoptions this month, last month and this year, by dogs/cats
 
 Only a whitelist of public fields is written. Nothing about people (fosters,
 adopters), microchips or internal attributes is ever written out.
@@ -58,26 +59,69 @@ def fetch_in_custody(api_key):
     return get_all(api_key, "animals", "animals", {"status_type": "in custody"})
 
 
-def fetch_recently_adopted(api_key, days):
-    """Animals with an Outcome.Adoption event in the last `days` days, newest first,
-    each paired with its adoption time. Returned animals are dropped by status."""
-    since = int(time.time()) - days * 86400
-    adopted_at = {}
+def fetch_all_animals(api_key):
+    """Every animal record, keyed by Internal-ID (used to look up adopted animals)."""
+    return {a["Internal-ID"]: a for a in get_all(api_key, "animals", "animals", {})}
+
+
+def fetch_adoptions(api_key, since):
+    """(time, animal internal ID) for every Outcome.Adoption event since `since`."""
+    adoptions = []
     for event in get_all(api_key, "events", "events", {"since": since}):
         if event.get("Type") != "Outcome.Adoption":
             continue
         for record in event.get("AssociatedRecords") or []:
             if record.get("Type") == "Animal":
-                t = int(event.get("Time") or 0)
-                adopted_at[record["Id"]] = max(t, adopted_at.get(record["Id"], 0))
+                adoptions.append((int(event.get("Time") or 0), record["Id"]))
+    return adoptions
+
+
+def recently_adopted(all_animals, adoptions, days):
+    """Animals adopted in the last `days` days, newest first, each paired with its
+    adoption time. Returned animals are dropped by status."""
+    since = int(time.time()) - days * 86400
+    adopted_at = {}
+    for t, internal_id in adoptions:
+        if t >= since:
+            adopted_at[internal_id] = max(t, adopted_at.get(internal_id, 0))
 
     results = []
     for internal_id, t in sorted(adopted_at.items(), key=lambda kv: -kv[1]):
-        animal = get(api_key, f"animals/{internal_id}")
-        if animal.get("Status") == ADOPTED_STATUS:
+        animal = all_animals.get(internal_id)
+        if animal and animal.get("Status") == ADOPTED_STATUS:
             results.append((animal, t))
-        time.sleep(0.2)
     return results
+
+
+def month_start(year, month, tz):
+    while month < 1:
+        year, month = year - 1, month + 12
+    return datetime(year, month, 1, tzinfo=tz)
+
+
+def adoption_stats(adoptions, all_animals, now):
+    """Counts of adoption outcomes (including any later returned) in the shelter's time zone,
+    split into dogs, cats and other species."""
+    this_month = month_start(now.year, now.month, tz=now.tzinfo)
+    last_month = month_start(now.year, now.month - 1, tz=now.tzinfo)
+    this_year = datetime(now.year, 1, 1, tzinfo=now.tzinfo)
+
+    def count(label, start, end):
+        types = [
+            (all_animals.get(internal_id) or {}).get("Type")
+            for t, internal_id in adoptions
+            if start.timestamp() <= t < end.timestamp()
+        ]
+        dogs, cats = types.count("Dog"), types.count("Cat")
+        return {"label": label, "count": len(types), "dogs": dogs, "cats": cats,
+                "other": len(types) - dogs - cats}
+
+    return {
+        "updated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "thisMonth": count(this_month.strftime("%B"), this_month, now),
+        "lastMonth": count(last_month.strftime("%B"), last_month, this_month),
+        "thisYear": count(str(now.year), this_year, now),
+    }
 
 
 def pretty_breed(breed):
@@ -164,13 +208,33 @@ def main():
 
     days = int(os.environ.get("ADOPTED_DAYS") or DEFAULT_ADOPTED_DAYS)
     tz = ZoneInfo(os.environ.get("SHELTER_TIMEZONE") or DEFAULT_TIMEZONE)
-    adopted = [to_public_adopted(a, t, tz) for a, t in fetch_recently_adopted(api_key, days)]
+    now = datetime.now(tz)
+    # One events fetch covers both the stats (back to January, or to last month in
+    # January) and the Recently Adopted window.
+    since = min(
+        month_start(now.year, now.month - 1, tz).timestamp(),
+        datetime(now.year, 1, 1, tzinfo=tz).timestamp(),
+        time.time() - days * 86400,
+    )
+    adoptions = fetch_adoptions(api_key, int(since))
+    all_animals = fetch_all_animals(api_key)
+    adopted = [to_public_adopted(a, t, tz) for a, t in recently_adopted(all_animals, adoptions, days)]
+    stats = adoption_stats(adoptions, all_animals, now)
 
     os.makedirs(out_dir, exist_ok=True)
     write_json(os.path.join(out_dir, "animals.json"), animals)
     write_json(os.path.join(out_dir, "adopted.json"), adopted)
+    with open(os.path.join(out_dir, "stats.json"), "w", encoding="utf-8") as f:
+        json.dump(stats, f, indent=1)
     print(f"Wrote {len(animals)} animals ({', '.join(sorted(statuses))}) to animals.json")
     print(f"Wrote {len(adopted)} animals adopted in the last {days} days to adopted.json")
+    print(
+        "Wrote adoption counts to stats.json: "
+        + ", ".join(
+            f"{v['label']} = {v['count']} ({v['dogs']} dogs, {v['cats']} cats)"
+            for k, v in stats.items() if k != "updated"
+        )
+    )
 
 
 if __name__ == "__main__":

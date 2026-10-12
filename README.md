@@ -7,11 +7,11 @@ API instead of the Shelterluv iFrame.
 Shelterluv API ──(API key, secret)──▶ GitHub Action (every 30 min)
                                         │ keeps only public statuses + public fields
                                         ▼
-                         GitHub Pages: animals.json + adopted.json (public, no private data)
-                                       adopt.js, adopted.js, adopt.css (widgets, from web/)
+                         GitHub Pages: animals.json, adopted.json, stats.json (public, no private data)
+                                       adopt.js, adopted.js, stats.js, adopt.css (widgets, from web/)
                                         │
                                         ▼
-                         Squarespace Code Blocks just load adopt.js / adopted.js
+                         Squarespace Code Blocks just load adopt.js / adopted.js / stats.js
 ```
 
 The API key lives only in GitHub's encrypted secrets. Visitors only ever see
@@ -21,14 +21,16 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 
 | File | Purpose |
 |---|---|
-| `scripts/export_animals.py` | Writes `animals.json` (adoptable animals, filtered by status) and `adopted.json` (adopted in the last 60 days and still "Healthy In Home"). No dependencies. |
+| `scripts/export_animals.py` | Writes `animals.json` (adoptable animals, filtered by status), `adopted.json` (adopted in the last 60 days and still "Healthy In Home") and `stats.json` (adoptions this month, last month and this year, split into dogs and cats). No dependencies. |
 | `.github/workflows/export-animals.yml` | Every 30 minutes and on every merge to `main`: runs the export and publishes it with the widget to GitHub Pages. |
 | `web/adopt.js` | Adoptable animals: cards, filters and the detail pop-up. |
 | `web/adopted.js` | Recently Adopted: non-clickable cards (name, sex, age, breed, photo, adoption date) with an "Adopted!" ribbon. |
-| `web/adopt.css` | Styles for both widgets. |
+| `web/stats.js` | Adoption counts: This Month / Last Month / This Year tiles with dog and cat counts, animated when scrolled into view. |
+| `web/adopt.css` | Styles for all widgets. |
 | `web/index.html` | Preview page: `https://ericsickels.github.io/Shelterluv/` shows the widget outside Squarespace. |
 | `squarespace/adopt-code-block.html` | Two-line embed for the Adopt page, pasted into Squarespace once. |
 | `squarespace/adopted-code-block.html` | Two-line embed for the Recently Adopted section, pasted once. |
+| `squarespace/stats-code-block.html` | Two-line embed for the adoption counts, pasted once above Recently Adopted. |
 
 ## One-time setup
 
@@ -58,6 +60,14 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
    <div id="slv-adopted"></div>
    <script src="https://ericsickels.github.io/Shelterluv/adopted.js" defer></script>
    ```
+4. For the adoption counts, add a Code Block above the Recently Adopted heading with
+   `squarespace/stats-code-block.html`:
+   ```html
+   <div id="slv-stats"></div>
+   <script src="https://ericsickels.github.io/Shelterluv/stats.js" defer></script>
+   ```
+   Counts are every adoption outcome in the period (in `SHELTER_TIMEZONE`), including any
+   animal later returned, so they match Shelterluv's outcome reports.
 
 Settings live at the top of `web/adopt.js`:
 - `APPLY_URL`: where "Apply to adopt" links; `{id}` becomes the Shelterluv animal ID.
