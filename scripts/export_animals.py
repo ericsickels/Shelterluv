@@ -20,12 +20,15 @@ import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 API_URL = "https://new.shelterluv.com/api/v1/"
 PAGE_SIZE = 100
 DEFAULT_STATUSES = "Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending"
 DEFAULT_ADOPTED_DAYS = 60
 ADOPTED_STATUS = "Healthy In Home"
+# Adoption dates are shown in the shelter's local time zone, not UTC.
+DEFAULT_TIMEZONE = "America/New_York"
 
 
 def get(api_key, path, params=None):
@@ -108,7 +111,7 @@ def to_public(animal):
     }
 
 
-def to_public_adopted(animal, adopted_time):
+def to_public_adopted(animal, adopted_time, tz):
     # Deliberately minimal: what the "Recently Adopted" cards show, nothing more.
     return {
         "id": animal.get("ID"),
@@ -118,7 +121,7 @@ def to_public_adopted(animal, adopted_time):
         "ageMonths": animal.get("Age"),
         "breed": animal.get("Breed"),
         "photo": animal.get("CoverPhoto") or ((animal.get("Photos") or [None])[0]),
-        "adoptedDate": datetime.fromtimestamp(adopted_time, timezone.utc).date().isoformat(),
+        "adoptedDate": datetime.fromtimestamp(adopted_time, tz).date().isoformat(),
     }
 
 
@@ -151,7 +154,8 @@ def main():
     animals.sort(key=lambda a: (a["type"] or "", a["name"].lower()))
 
     days = int(os.environ.get("ADOPTED_DAYS") or DEFAULT_ADOPTED_DAYS)
-    adopted = [to_public_adopted(a, t) for a, t in fetch_recently_adopted(api_key, days)]
+    tz = ZoneInfo(os.environ.get("SHELTER_TIMEZONE") or DEFAULT_TIMEZONE)
+    adopted = [to_public_adopted(a, t, tz) for a, t in fetch_recently_adopted(api_key, days)]
 
     os.makedirs(out_dir, exist_ok=True)
     write_json(os.path.join(out_dir, "animals.json"), animals)

@@ -50,19 +50,28 @@
     return y + (y === 1 ? " year" : " years") + (m ? ", " + m + " mo" : "");
   }
 
+  // "2026-10-11" -> "Oct 11, 2026", read as a calendar date so it never shifts a day.
+  function adoptedOn(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+    if (!m) return "";
+    var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return "Adopted " + d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+
   function render(animals) {
     if (!animals.length) {
       grid.innerHTML = '<p class="slv-msg">Check back soon for our latest happy tails!</p>';
       return;
     }
     grid.innerHTML = animals.map(function (a) {
-      var details = [a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" · ");
+      var details = [a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" \u00b7 ");
       return '<div class="slv-card slv-card-adopted">' +
         '<div class="slv-card-photo">' +
           (a.photo ? '<img loading="lazy" src="' + esc(a.photo) + '" alt="' + esc(a.name) + ', adopted">' : "") +
           '<span class="slv-ribbon">' + esc(RIBBON_TEXT) + "</span>" +
         "</div>" +
         '<div class="slv-card-body"><h3>' + esc(a.name) + "</h3><p>" + esc(details) + "</p></div>" +
+        (a.adoptedDate ? '<div class="slv-adopted-on">' + esc(adoptedOn(a.adoptedDate)) + "</div>" : "") +
         "</div>";
     }).join("");
   }
@@ -71,6 +80,6 @@
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (data) { render(data.animals || []); })
     .catch(function () {
-      grid.innerHTML = '<p class="slv-msg">We couldn’t load our recent adoptions right now. Please try again later.</p>';
+      grid.innerHTML = '<p class="slv-msg">We couldn\u2019t load our recent adoptions right now. Please try again later.</p>';
     });
 })();
