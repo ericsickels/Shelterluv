@@ -43,7 +43,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 3. Check the two settings at the top of the `<script>`:
    - `DATA_URL` — the GitHub Pages URL above.
    - `APPLY_URL` — where "Apply to adopt" links; `{id}` becomes the Shelterluv animal ID.
-     **Confirm this matches your Shelterluv adoption application link.**
+     Currently `https://new.shelterluv.com/matchme/adopt/RES-A-{id}` (Shelterluv's hosted adoption application, opens in a new tab).
 
 Code Blocks don't run scripts in the Squarespace editor preview; view the live page (or
 preview in a logged-out window) to see the animals.
