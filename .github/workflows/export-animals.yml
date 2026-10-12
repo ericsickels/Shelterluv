@@ -33,7 +33,7 @@ jobs:
           SHELTER_TIMEZONE: ${{ vars.SHELTER_TIMEZONE || 'America/New_York' }}
         run: python3 scripts/export_animals.py public
 
-      - name: Add the website widgets (adopt.js, adopted.js, adopt.css, preview page)
+      - name: Add the website widgets (adopt.js, adopted.js, stats.js, adopt.css, preview page)
         run: cp web/* public/
 
       - uses: actions/configure-pages@v5
