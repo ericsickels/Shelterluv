@@ -102,6 +102,8 @@ html.slv-lock { overflow: hidden; }
 .slv-details { display: flex; flex-direction: column; min-height: 0; }
 .slv-scroll { flex: 1; overflow-y: auto; padding: 32px 32px 24px; }
 .slv-details h2 { margin: 0 48px 6px 0; font-size: 2em; line-height: 1.1; }
+/* Badge sits on its own line in the pop-up, with breathing room above the name. */
+.slv-details .slv-badge { display: table; margin: 0 0 16px; }
 .slv-sub { margin: 0 0 12px; font-size: 1.05em; color: #555; }
 .slv-section-title {
   margin: 28px 0 12px; font-size: 12px; font-weight: 700; letter-spacing: .1em;
