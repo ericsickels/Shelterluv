@@ -17,30 +17,31 @@
 }
 .slv-card:hover, .slv-card:focus-visible { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
 .slv-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; background: rgba(127,127,127,.15); }
-.slv-card-body { padding: 14px 16px 18px; }
-.slv-card h3 { margin: 0 0 4px; font-size: 1.25em; }
-.slv-card p { margin: 0; opacity: .75; font-size: .92em; line-height: 1.4; }
+.slv-card-body { flex: 1; padding: 14px 16px 16px; min-width: 0; }
+.slv-card-body h3, .slv-card-body p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slv-card-body h3 { margin: 0 0 6px; font-size: 1.2em; line-height: 1.2; }
+.slv-card-body p { margin: 0; opacity: .75; font-size: .9em; line-height: 1.45; }
+.slv-card-body .slv-breed { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .slv-card .slv-badge { position: absolute; top: 10px; left: 10px; }
 .slv-msg { grid-column: 1 / -1; opacity: .75; }
 
 /* ---- Recently adopted (adopted.js): not clickable, ribbon across the photo ---- */
 .slv { --slv-adopted: #2e7d4f; --slv-adopted-text: #fff; }
-.slv-grid-adopted { grid-template-columns: repeat(auto-fill, minmax(min(180px, calc(50% - 6px)), 1fr)); gap: 20px 12px; }
-.slv-grid-adopted .slv-card-body { padding: 12px 14px 14px; }
-.slv-grid-adopted h3 { font-size: 1.1em; }
-.slv-grid-adopted .slv-card-body { flex: 1; }
+.slv-grid-adopted { grid-template-columns: repeat(auto-fill, minmax(min(210px, calc(50% - 8px)), 1fr)); gap: 24px 16px; }
+.slv-grid-adopted .slv-card-body { padding: 12px 14px 12px; }
+.slv-grid-adopted .slv-card-body h3 { font-size: 1.1em; }
 .slv-adopted-on {
-  padding: 9px 14px; border-top: 1px solid rgba(127,127,127,.2); font-size: .85em; font-weight: 600;
+  padding: 8px 14px 10px; font-size: .82em; font-weight: 600; white-space: nowrap;
   color: var(--slv-adopted);
 }
 .slv-card-adopted { cursor: default; }
 .slv-card-adopted:hover { transform: none; box-shadow: none; }
 .slv-card-photo { position: relative; overflow: hidden; }
 .slv-ribbon {
-  position: absolute; top: 22px; right: -38px; width: 150px; transform: rotate(45deg);
-  padding: 6px 0; text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .06em;
-  text-transform: uppercase; background: var(--slv-adopted); color: var(--slv-adopted-text);
-  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  position: absolute; top: 16px; right: -34px; width: 130px; transform: rotate(45deg);
+  padding: 4px 0; text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  line-height: 1.3; text-transform: uppercase; background: var(--slv-adopted); color: var(--slv-adopted-text);
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
 }
 .slv-badge {
   display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;

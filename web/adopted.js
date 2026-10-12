@@ -50,12 +50,13 @@
     return y + (y === 1 ? " year" : " years") + (m ? ", " + m + " mo" : "");
   }
 
-  // "2026-10-11" -> "Oct 11, 2026", read as a calendar date so it never shifts a day.
+  // "2026-10-11" -> "Oct 11", read as a calendar date so it never shifts a day. The year is
+  // left off because every card is from the last couple of months.
   function adoptedOn(iso) {
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
     if (!m) return "";
     var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
-    return "Adopted " + d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return "Adopted " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
 
   function render(animals) {
@@ -64,13 +65,15 @@
       return;
     }
     grid.innerHTML = animals.map(function (a) {
-      var details = [a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" \u00b7 ");
       return '<div class="slv-card slv-card-adopted">' +
         '<div class="slv-card-photo">' +
           (a.photo ? '<img loading="lazy" src="' + esc(a.photo) + '" alt="' + esc(a.name) + ', adopted">' : "") +
           '<span class="slv-ribbon">' + esc(RIBBON_TEXT) + "</span>" +
         "</div>" +
-        '<div class="slv-card-body"><h3>' + esc(a.name) + "</h3><p>" + esc(details) + "</p></div>" +
+        '<div class="slv-card-body"><h3>' + esc(a.name) + "</h3>" +
+          '<p class="slv-meta">' + esc([a.sex, age(a.ageMonths)].filter(Boolean).join(" \u00b7 ")) + "</p>" +
+          (a.breed ? '<p class="slv-breed" title="' + esc(a.breed) + '">' + esc(a.breed) + "</p>" : "") +
+        "</div>" +
         (a.adoptedDate ? '<div class="slv-adopted-on">' + esc(adoptedOn(a.adoptedDate)) + "</div>" : "") +
         "</div>";
     }).join("");

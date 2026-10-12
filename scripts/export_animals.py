@@ -80,6 +80,15 @@ def fetch_recently_adopted(api_key, days):
     return results
 
 
+def pretty_breed(breed):
+    """Shelterluv lists some breeds surname-first ("Terrier, Rat"); show "Rat Terrier"."""
+    breed = (breed or "").strip()
+    parts = breed.split(",")
+    if len(parts) == 2 and not any(c in breed for c in "/()"):
+        return f"{parts[1].strip()} {parts[0].strip()}"
+    return breed
+
+
 def to_public(animal):
     fee = animal.get("AdoptionFeeGroup") or {}
     photos = animal.get("Photos") or []
@@ -91,7 +100,7 @@ def to_public(animal):
         "name": (animal.get("Name") or "").strip(),
         "type": animal.get("Type"),
         "status": animal.get("Status"),
-        "breed": animal.get("Breed"),
+        "breed": pretty_breed(animal.get("Breed")),
         "sex": animal.get("Sex"),
         "ageMonths": animal.get("Age"),
         "size": animal.get("Size") or None,
@@ -119,7 +128,7 @@ def to_public_adopted(animal, adopted_time, tz):
         "type": animal.get("Type"),
         "sex": animal.get("Sex"),
         "ageMonths": animal.get("Age"),
-        "breed": animal.get("Breed"),
+        "breed": pretty_breed(animal.get("Breed")),
         "photo": animal.get("CoverPhoto") or ((animal.get("Photos") or [None])[0]),
         "adoptedDate": datetime.fromtimestamp(adopted_time, tz).date().isoformat(),
     }
