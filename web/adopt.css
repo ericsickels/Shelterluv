@@ -28,6 +28,11 @@
 .slv-grid-adopted { grid-template-columns: repeat(auto-fill, minmax(min(180px, calc(50% - 6px)), 1fr)); gap: 20px 12px; }
 .slv-grid-adopted .slv-card-body { padding: 12px 14px 14px; }
 .slv-grid-adopted h3 { font-size: 1.1em; }
+.slv-grid-adopted .slv-card-body { flex: 1; }
+.slv-adopted-on {
+  padding: 9px 14px; border-top: 1px solid rgba(127,127,127,.2); font-size: .85em; font-weight: 600;
+  color: var(--slv-adopted);
+}
 .slv-card-adopted { cursor: default; }
 .slv-card-adopted:hover { transform: none; box-shadow: none; }
 .slv-card-photo { position: relative; overflow: hidden; }

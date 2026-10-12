@@ -24,7 +24,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 | `scripts/export_animals.py` | Writes `animals.json` (adoptable animals, filtered by status) and `adopted.json` (adopted in the last 60 days and still "Healthy In Home"). No dependencies. |
 | `.github/workflows/export-animals.yml` | Every 30 minutes and on every merge to `main`: runs the export and publishes it with the widget to GitHub Pages. |
 | `web/adopt.js` | Adoptable animals: cards, filters and the detail pop-up. |
-| `web/adopted.js` | Recently Adopted: non-clickable cards (name, sex, age, breed, photo) with an "Adopted!" ribbon. |
+| `web/adopted.js` | Recently Adopted: non-clickable cards (name, sex, age, breed, photo, adoption date) with an "Adopted!" ribbon. |
 | `web/adopt.css` | Styles for both widgets. |
 | `web/index.html` | Preview page: `https://ericsickels.github.io/Shelterluv/` shows the widget outside Squarespace. |
 | `squarespace/adopt-code-block.html` | Two-line embed for the Adopt page, pasted into Squarespace once. |
@@ -40,6 +40,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 3. *(Optional)* **Variables** tab: `PUBLISH_STATUSES` = comma-separated Shelterluv statuses to
    show. Default: `Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending`.
    `ADOPTED_DAYS` = how far back Recently Adopted looks. Default `60`.
+   `SHELTER_TIMEZONE` = time zone for adoption dates. Default `America/New_York`.
 4. **Settings → Pages → Source:** choose **GitHub Actions**.
 5. Merge to `main`, then **Actions → Export adoptable animals → Run workflow**.
    The JSON appears at `https://ericsickels.github.io/Shelterluv/animals.json`.

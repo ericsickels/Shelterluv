@@ -30,6 +30,7 @@ jobs:
           SHELTERLUV_API_KEY: ${{ secrets.SHELTERLUV_API_KEY }}
           PUBLISH_STATUSES: ${{ vars.PUBLISH_STATUSES || 'Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending' }}
           ADOPTED_DAYS: ${{ vars.ADOPTED_DAYS || '60' }}
+          SHELTER_TIMEZONE: ${{ vars.SHELTER_TIMEZONE || 'America/New_York' }}
         run: python3 scripts/export_animals.py public
 
       - name: Add the website widgets (adopt.js, adopted.js, adopt.css, preview page)
