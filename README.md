@@ -7,7 +7,7 @@ API instead of the Shelterluv iFrame.
 Shelterluv API ──(API key, secret)──▶ GitHub Action (every 30 min)
                                         │ keeps only public statuses + public fields
                                         ▼
-                         GitHub Pages: animals.json, adopted.json, stats.json (public, no private data)
+                         GitHub Pages: animals.json, coming-soon.json, adopted.json, stats.json (public, no private data)
                                        adopt.js, adopted.js, stats.js, adopt.css (widgets, from web/)
                                         │
                                         ▼
@@ -21,15 +21,16 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 
 | File | Purpose |
 |---|---|
-| `scripts/export_animals.py` | Writes `animals.json` (adoptable animals, filtered by status), `adopted.json` (adopted in the last 60 days and still "Healthy In Home") and `stats.json` (adoptions this month, last month and this year, split into dogs and cats). No dependencies. |
+| `scripts/export_animals.py` | Writes `animals.json` (adoptable animals, filtered by status), `coming-soon.json` (Intake / Assessment animals), `adopted.json` (adopted in the last 60 days and still "Healthy In Home") and `stats.json` (adoptions this month, last month and this year, split into dogs and cats). No dependencies. |
 | `.github/workflows/export-animals.yml` | Every 30 minutes and on every merge to `main`: runs the export and publishes it with the widget to GitHub Pages. |
-| `web/adopt.js` | Adoptable animals: cards, filters and the detail pop-up. |
+| `web/adopt.js` | Adoptable animals and Coming Soon: cards, filters and the detail pop-up (Coming Soon shows a note instead of the Apply button). Missing or broken photos show a dog/cat "Photo coming soon" placeholder. |
 | `web/adopted.js` | Recently Adopted: non-clickable cards (name, sex, age, breed, photo, adoption date) with an "Adopted!" ribbon. |
 | `web/stats.js` | Adoption counts: This Month / Last Month / This Year tiles with dog and cat counts, animated when scrolled into view. |
 | `web/adopt.css` | Styles for all widgets. |
 | `web/index.html` | Preview page: `https://ericsickels.github.io/Shelterluv/` shows the widget outside Squarespace. |
 | `squarespace/adopt-code-block.html` | Two-line embed for the Adopt page, pasted into Squarespace once. |
 | `squarespace/adopted-code-block.html` | Two-line embed for the Recently Adopted section, pasted once. |
+| `squarespace/coming-soon-code-block.html` | Two-line embed for the Coming Soon section, pasted once. |
 | `squarespace/stats-code-block.html` | Two-line embed for the adoption counts, pasted once above Recently Adopted. |
 
 ## One-time setup
@@ -41,6 +42,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
    `SHELTERLUV_API_KEY` = your Shelterluv API key.
 3. *(Optional)* **Variables** tab: `PUBLISH_STATUSES` = comma-separated Shelterluv statuses to
    show. Default: `Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending`.
+   `COMING_SOON_STATUSES` = statuses shown under Coming Soon. Default `Unavailable - Intake / Assessment`.
    `ADOPTED_DAYS` = how far back Recently Adopted looks. Default `60`.
    `SHELTER_TIMEZONE` = time zone for adoption dates. Default `America/New_York`.
 4. **Settings → Pages → Source:** choose **GitHub Actions**.
@@ -60,7 +62,13 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
    <div id="slv-adopted"></div>
    <script src="https://ericsickels.github.io/Shelterluv/adopted.js" defer></script>
    ```
-4. For the adoption counts, add a Code Block above the Recently Adopted heading with
+4. For Coming Soon, add your own heading, then a Code Block below it with
+   `squarespace/coming-soon-code-block.html`:
+   ```html
+   <div id="slv-coming-soon"></div>
+   <script src="https://ericsickels.github.io/Shelterluv/adopt.js" defer></script>
+   ```
+5. For the adoption counts, add a Code Block above the Recently Adopted heading with
    `squarespace/stats-code-block.html`:
    ```html
    <div id="slv-stats"></div>
@@ -73,6 +81,7 @@ Settings live at the top of `web/adopt.js`:
 - `APPLY_URL`: where "Apply to adopt" links; `{id}` becomes the Shelterluv animal ID.
   Currently `https://new.shelterluv.com/matchme/adopt/RES-A-{id}` (Shelterluv's hosted adoption application, opens in a new tab).
 - `STATUS_BADGES`: which statuses get a badge, and its wording.
+- `WIDGETS`: per-section wording, e.g. the Coming Soon badge and the note shown in its pop-up.
 
 Button colour is `--slv-accent` at the top of `web/adopt.css`; the Adopted ribbon colour is
 `--slv-adopted`, and its text is `RIBBON_TEXT` at the top of `web/adopted.js`.
@@ -94,5 +103,5 @@ preview in a logged-out window) to see the animals.
 ## Run locally
 
 ```sh
-SHELTERLUV_API_KEY=... python3 scripts/export_animals.py public   # writes public/animals.json + public/adopted.json
+SHELTERLUV_API_KEY=... python3 scripts/export_animals.py public   # writes animals.json, coming-soon.json, adopted.json, stats.json
 ```

@@ -67,7 +67,8 @@
     grid.innerHTML = animals.map(function (a) {
       return '<div class="slv-card slv-card-adopted">' +
         '<div class="slv-card-photo">' +
-          (a.photo ? '<img loading="lazy" src="' + esc(a.photo) + '" alt="' + esc(a.name) + ', adopted">' : "") +
+          (a.photo ? '<img loading="lazy" src="' + esc(a.photo) + '" alt="' + esc(a.name) + ', adopted">'
+            : '<div class="slv-ph slv-ph-' + (a.type === "Cat" ? "cat" : a.type === "Dog" ? "dog" : "paw") + '"></div>') +
           '<span class="slv-ribbon">' + esc(RIBBON_TEXT) + "</span>" +
         "</div>" +
         '<div class="slv-card-body"><h3>' + esc(a.name) + "</h3>" +
