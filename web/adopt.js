@@ -66,6 +66,13 @@
     return [a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" \u00b7 ");
   }
 
+  // Card text: sex and age on one line, breed on its own line, so nothing wraps mid-phrase.
+  function cardText(a) {
+    return "<h3>" + esc(a.name) + "</h3>" +
+      '<p class="slv-meta">' + esc([a.sex, age(a.ageMonths)].filter(Boolean).join(" \u00b7 ")) + "</p>" +
+      (a.breed ? '<p class="slv-breed" title="' + esc(a.breed) + '">' + esc(a.breed) + "</p>" : "");
+  }
+
   function badge(a) {
     var label = STATUS_BADGES[a.status];
     return label ? '<span class="slv-badge">' + esc(label) + "</span>" : "";
@@ -90,7 +97,7 @@
     grid.innerHTML = list.map(function (a) {
       return '<button type="button" class="slv-card" data-id="' + esc(a.id) + '">' + badge(a) +
         '<img loading="lazy" src="' + esc(a.photos[0] || "") + '" alt="Photo of ' + esc(a.name) + '">' +
-        '<div class="slv-card-body"><h3>' + esc(a.name) + "</h3><p>" + esc(summary(a)) + "</p></div></button>";
+        '<div class="slv-card-body">' + cardText(a) + "</div></button>";
     }).join("");
   }
 
