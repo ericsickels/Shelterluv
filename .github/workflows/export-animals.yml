@@ -1,0 +1,41 @@
+name: Export adoptable animals
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # every 30 minutes (GitHub may delay scheduled runs)
+  workflow_dispatch:          # "Run workflow" button for an immediate refresh
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}animals.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Export animals from Shelterluv
+        env:
+          SHELTERLUV_API_KEY: ${{ secrets.SHELTERLUV_API_KEY }}
+          PUBLISH_STATUSES: ${{ vars.PUBLISH_STATUSES || 'Available - Public' }}
+        run: python3 scripts/export_animals.py public/animals.json
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
