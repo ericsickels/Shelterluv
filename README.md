@@ -32,7 +32,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 2. **Settings → Secrets and variables → Actions → New repository secret:**
    `SHELTERLUV_API_KEY` = your Shelterluv API key.
 3. *(Optional)* **Variables** tab: `PUBLISH_STATUSES` = comma-separated Shelterluv statuses to
-   show. Default is `Available - Public`. Example: `Available - Public,Hold - Pending Adoption`.
+   show. Default: `Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending`.
 4. **Settings → Pages → Source:** choose **GitHub Actions**.
 5. Merge to `main`, then **Actions → Export adoptable animals → Run workflow**.
    The JSON appears at `https://ericsickels.github.io/Shelterluv/animals.json`.
