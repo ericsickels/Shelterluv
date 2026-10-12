@@ -81,7 +81,9 @@ Settings live at the top of `web/adopt.js`:
 - `APPLY_URL`: where "Apply to adopt" links; `{id}` becomes the Shelterluv animal ID.
   Currently `https://new.shelterluv.com/matchme/adopt/RES-A-{id}` (Shelterluv's hosted adoption application, opens in a new tab).
 - `STATUS_BADGES`: which statuses get a badge, and its wording.
-- `WIDGETS`: per-section wording, e.g. the Coming Soon badge and the note shown in its pop-up.
+- `WIDGETS`: per-section wording, e.g. the Coming Soon badge, the note shown in its pop-up, and
+  the title/text shown when a section has no animals (`emptyTitle`, `emptyText`).
+  Recently Adopted's empty message is `EMPTY_TITLE` / `EMPTY_TEXT` at the top of `web/adopted.js`.
 
 Button colour is `--slv-accent` at the top of `web/adopt.css`; the Adopted ribbon colour is
 `--slv-adopted`, and its text is `RIBBON_TEXT` at the top of `web/adopted.js`.

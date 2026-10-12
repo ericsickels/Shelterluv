@@ -21,12 +21,15 @@
     {
       id: "slv-adopt", data: "animals.json", apply: true,
       loading: "Loading our adoptable animals&hellip;",
-      empty: "No animals are listed right now \u2014 please check back soon!"
+      // Shown in place of the cards when nobody is listed.
+      emptyTitle: "No animals are available right now",
+      emptyText: "New friends are on the way \u2014 please check back soon!"
     },
     {
       id: "slv-coming-soon", data: "coming-soon.json", apply: false, badge: "Coming soon",
       loading: "Loading&hellip;",
-      empty: "No new arrivals right now \u2014 check back soon!",
+      emptyTitle: "No new arrivals at the moment",
+      emptyText: "Animals appear here while they settle in with us before becoming available. Check back soon!",
       // Shown in the pop-up in place of the Apply button. {name} is the animal's name.
       notice: "{name} is settling in with us and will be available for adoption soon. Check back for updates!"
     }
@@ -100,6 +103,12 @@
       return label ? '<span class="slv-badge">' + esc(label) + "</span>" : "";
     }
 
+    // Friendly panel shown in place of the cards when a section has nothing to list.
+    function emptyState(title, text, extra) {
+      return '<div class="slv-empty"><div class="slv-empty-icon" aria-hidden="true"></div>' +
+        '<p class="slv-empty-title">' + title + '</p><p class="slv-empty-text">' + text + "</p>" + (extra || "") + "</div>";
+    }
+
     // Shown instead of a photo when an animal has none yet, or a photo fails to load.
     function placeholder(type, cls) {
       var kind = type === "Cat" ? "cat" : type === "Dog" ? "dog" : "paw";
@@ -120,7 +129,15 @@
     function renderGrid() {
       var list = animals.filter(function (a) { return currentType === "All" || a.type === currentType; });
       if (!list.length) {
-        grid.innerHTML = '<p class="slv-msg">' + w.empty + "</p>";
+        // Point to the Coming Soon section when it's on the same page, unless that's empty too.
+        // (The sections load in parallel, so an empty Coming Soon also removes this link.)
+        var soon = w.id !== "slv-coming-soon" && document.getElementById("slv-coming-soon") &&
+          !document.querySelector("#slv-coming-soon .slv-empty");
+        grid.innerHTML = emptyState(esc(w.emptyTitle), esc(w.emptyText),
+          soon ? '<button type="button" class="slv-empty-link" data-goto="slv-coming-soon">See who\u2019s coming soon</button>' : "");
+        if (w.id === "slv-coming-soon") {
+          document.querySelectorAll('[data-goto="slv-coming-soon"]').forEach(function (l) { l.remove(); });
+        }
         return;
       }
       grid.innerHTML = list.map(function (a) {
@@ -239,6 +256,12 @@
     });
 
     grid.addEventListener("click", function (e) {
+      var go = e.target.closest("[data-goto]");
+      if (go) {
+        var target = document.getElementById(go.getAttribute("data-goto"));
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
       var card = e.target.closest(".slv-card");
       if (card) openAnimal(card.getAttribute("data-id"));
     });
@@ -291,7 +314,7 @@
         if (m) openAnimal(decodeURIComponent(m[1]));
       })
       .catch(function () {
-        grid.innerHTML = '<p class="slv-msg">We couldn\u2019t load our animals right now. Please refresh the page or try again later.</p>';
+        grid.innerHTML = emptyState("We couldn\u2019t load our animals", "Please refresh the page or try again in a few minutes.");
       });
   }
 })();

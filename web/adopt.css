@@ -197,3 +197,19 @@ html.slv-lock { overflow: hidden; }
 
 /* ---- Coming Soon pop-up: a note instead of the Apply button ---- */
 .slv-notice { margin: 0; padding: 4px 0; color: #555; line-height: 1.5; }
+
+/* ---- Empty state: shown in place of the cards when a section has nothing to list ---- */
+.slv-empty {
+  grid-column: 1 / -1; text-align: center; padding: 44px 24px 40px; border-radius: var(--slv-radius);
+  border: 2px dashed rgba(127,127,127,.28); background: rgba(127,127,127,.04);
+}
+.slv-empty-icon {
+  width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; background-color: #eef3ef;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%238fa898%22%3E%3Cellipse cx=%2212%22 cy=%2216%22 rx=%225%22 ry=%224.2%22/%3E%3Cellipse cx=%225.5%22 cy=%2210.5%22 rx=%222%22 ry=%222.6%22/%3E%3Cellipse cx=%229.5%22 cy=%226.5%22 rx=%222%22 ry=%222.8%22/%3E%3Cellipse cx=%2214.5%22 cy=%226.5%22 rx=%222%22 ry=%222.8%22/%3E%3Cellipse cx=%2218.5%22 cy=%2210.5%22 rx=%222%22 ry=%222.6%22/%3E%3C/svg%3E"); background-size: 60%; background-position: center; background-repeat: no-repeat;
+}
+.slv .slv-empty-title { margin: 0 0 6px; font-size: 1.15em; font-weight: 700; opacity: 1; }
+.slv .slv-empty-text { margin: 0 auto; max-width: 440px; font-size: .95em; line-height: 1.5; opacity: .7; }
+.slv-empty-link {
+  margin-top: 18px; font: inherit; font-weight: 600; padding: 10px 22px; border-radius: 999px; cursor: pointer;
+  border: 1px solid currentColor; background: transparent; color: inherit;
+}
