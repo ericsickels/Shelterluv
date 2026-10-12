@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 
 API_URL = "https://new.shelterluv.com/api/v1/animals"
 PAGE_SIZE = 100
-DEFAULT_STATUSES = "Available - Public"
+DEFAULT_STATUSES = "Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending"
 
 
 def fetch_in_custody(api_key):

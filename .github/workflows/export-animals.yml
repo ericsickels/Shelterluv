@@ -28,7 +28,7 @@ jobs:
       - name: Export animals from Shelterluv
         env:
           SHELTERLUV_API_KEY: ${{ secrets.SHELTERLUV_API_KEY }}
-          PUBLISH_STATUSES: ${{ vars.PUBLISH_STATUSES || 'Available - Public' }}
+          PUBLISH_STATUSES: ${{ vars.PUBLISH_STATUSES || 'Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending' }}
         run: python3 scripts/export_animals.py public/animals.json
 
       - uses: actions/configure-pages@v5
