@@ -5,12 +5,15 @@
 -->
 <div id="slv-adopt" class="slv">
   <div class="slv-filters" role="group" aria-label="Filter animals"></div>
-  <div class="slv-grid" aria-live="polite"><p class="slv-msg">Loading our adoptable animals…</p></div>
+  <div class="slv-grid" aria-live="polite"><p class="slv-msg">Loading our adoptable animals&hellip;</p></div>
   <dialog class="slv-modal" aria-labelledby="slv-modal-title"></dialog>
 </div>
 
 <style>
-  .slv { --slv-accent: currentColor; --slv-radius: 12px; }
+  /* Change --slv-accent to your brand colour to restyle buttons and badges. */
+  .slv, .slv-modal { --slv-accent: #222; --slv-accent-text: #fff; --slv-radius: 14px; }
+
+  /* ---- Grid ---- */
   .slv-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; }
   .slv-filters button {
     font: inherit; padding: 8px 18px; border-radius: 999px; cursor: pointer;
@@ -19,7 +22,7 @@
   .slv-filters button[aria-pressed="true"] { opacity: 1; font-weight: 600; border-width: 2px; }
   .slv-grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
   .slv-card {
-    font: inherit; color: inherit; text-align: left; cursor: pointer; padding: 0;
+    position: relative; font: inherit; color: inherit; text-align: left; cursor: pointer; padding: 0;
     border: 1px solid rgba(127,127,127,.25); border-radius: var(--slv-radius);
     background: transparent; overflow: hidden; display: flex; flex-direction: column;
     transition: transform .15s ease, box-shadow .15s ease;
@@ -29,30 +32,94 @@
   .slv-card-body { padding: 14px 16px 18px; }
   .slv-card h3 { margin: 0 0 4px; font-size: 1.25em; }
   .slv-card p { margin: 0; opacity: .75; font-size: .92em; line-height: 1.4; }
+  .slv-card .slv-badge { position: absolute; top: 10px; left: 10px; }
   .slv-msg { grid-column: 1 / -1; opacity: .75; }
+  .slv-badge {
+    display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    letter-spacing: .02em; background: #fff3d6; color: #6b4a00; border: 1px solid #f0d58a;
+  }
 
+  /* ---- Modal shell ---- */
+  html.slv-lock { overflow: hidden; }
   .slv-modal {
-    width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0;
-    border: none; border-radius: var(--slv-radius); color: #222; background: #fff;
+    width: min(1000px, calc(100vw - 32px)); height: min(640px, calc(100vh - 48px));
+    max-width: none; max-height: none; padding: 0; border: none; border-radius: var(--slv-radius);
+    color: #222; background: #fff; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,.35);
   }
+  .slv-modal[open] { display: grid; grid-template-columns: 1.1fr 1fr; }
   .slv-modal::backdrop { background: rgba(0,0,0,.6); }
-  .slv-modal-inner { padding: 24px; }
   .slv-close {
-    position: sticky; top: 8px; float: right; margin: 8px 8px 0 0; z-index: 1;
-    font-size: 28px; line-height: 1; width: 40px; height: 40px; border-radius: 50%;
-    border: none; background: rgba(255,255,255,.9); cursor: pointer; color: #222;
+    position: absolute; top: 12px; right: 12px; z-index: 3; width: 40px; height: 40px;
+    border-radius: 50%; border: none; cursor: pointer; font-size: 26px; line-height: 1;
+    background: rgba(255,255,255,.92); color: #222; box-shadow: 0 2px 8px rgba(0,0,0,.15);
   }
-  .slv-main-photo { width: 100%; max-height: 460px; object-fit: contain; background: #f2f2f2; border-radius: 8px; display: block; }
-  .slv-thumbs { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; }
-  .slv-thumbs button { padding: 0; border: 2px solid transparent; border-radius: 6px; cursor: pointer; background: none; flex: 0 0 auto; }
-  .slv-thumbs button[aria-current="true"] { border-color: #222; }
-  .slv-thumbs img { width: 64px; height: 64px; object-fit: cover; border-radius: 4px; display: block; }
-  .slv-modal h2 { margin: 20px 0 6px; }
-  .slv-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 16px; padding: 0; list-style: none; opacity: .8; }
-  .slv-desc p { margin: 0 0 12px; line-height: 1.6; }
+
+  /* ---- Gallery (left) ---- */
+  .slv-gallery { position: relative; background: #111; display: flex; flex-direction: column; min-height: 0; }
+  .slv-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+  .slv-stage-bg {
+    position: absolute; inset: -20px; background-size: cover; background-position: center;
+    filter: blur(24px) brightness(.6); transform: scale(1.1);
+  }
+  .slv-stage img { position: relative; width: 100%; height: 100%; object-fit: contain; display: block; }
+  .slv-nav {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 40px; height: 40px;
+    border-radius: 50%; border: none; cursor: pointer; font-size: 22px; line-height: 1;
+    background: rgba(255,255,255,.9); color: #222; box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  }
+  .slv-prev { left: 12px; } .slv-next { right: 12px; }
+  .slv-count {
+    position: absolute; bottom: 12px; right: 12px; z-index: 2; padding: 3px 10px; border-radius: 999px;
+    font-size: 12px; background: rgba(0,0,0,.55); color: #fff;
+  }
+  .slv-thumbs { display: flex; gap: 8px; padding: 10px; overflow-x: auto; background: #111; }
+  .slv-thumbs button {
+    padding: 0; border: 2px solid transparent; border-radius: 8px; cursor: pointer;
+    background: none; flex: 0 0 auto; opacity: .6;
+  }
+  .slv-thumbs button[aria-current="true"] { border-color: #fff; opacity: 1; }
+  .slv-thumbs img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; display: block; }
+
+  /* ---- Details (right) ---- */
+  .slv-details { display: flex; flex-direction: column; min-height: 0; }
+  .slv-scroll { flex: 1; overflow-y: auto; padding: 32px 32px 24px; }
+  .slv-details h2 { margin: 0 48px 6px 0; font-size: 2em; line-height: 1.1; }
+  .slv-sub { margin: 0 0 12px; font-size: 1.05em; color: #555; }
+  .slv-section-title {
+    margin: 28px 0 12px; font-size: 12px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: #777;
+  }
+  .slv-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 0; background: #e7e7e7; border: 1px solid #e7e7e7; border-radius: 10px; overflow: hidden; }
+  .slv-facts div { background: #fafafa; padding: 10px 14px; }
+  .slv-facts dt { margin: 0; font-size: 12px; color: #777; }
+  .slv-facts dd { margin: 2px 0 0; font-weight: 600; }
+  .slv-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .slv-tags span { padding: 4px 10px; border-radius: 999px; background: #f0f0f0; font-size: 13px; }
+  .slv-desc p { margin: 0 0 14px; line-height: 1.65; }
+  .slv-cta {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 16px 32px; border-top: 1px solid #eee; background: #fff;
+  }
+  .slv-fee { font-size: .95em; color: #555; }
+  .slv-fee strong { display: block; font-size: 1.3em; color: #222; }
   .slv-apply {
-    display: inline-block; margin-top: 8px; padding: 12px 28px; border-radius: 999px;
-    background: #222; color: #fff !important; text-decoration: none; font-weight: 600;
+    flex: 0 0 auto; display: inline-block; padding: 14px 28px; border-radius: 999px; text-align: center;
+    background: var(--slv-accent); color: var(--slv-accent-text) !important; text-decoration: none !important; font-weight: 600;
+  }
+  .slv-apply:hover { filter: brightness(1.15); }
+
+  /* ---- Phones: single column, gallery on top, Apply pinned at bottom ---- */
+  @media (max-width: 760px) {
+    .slv-modal { width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; }
+    .slv-modal[open] { display: flex; flex-direction: column; }
+    .slv-gallery { flex: 0 0 auto; }
+    .slv-stage { flex: none; height: min(56vh, 100vw); }
+    .slv-thumbs { display: none; }
+    .slv-details { flex: 1; }
+    .slv-scroll { padding: 20px 20px 16px; }
+    .slv-details h2 { margin-right: 0; font-size: 1.7em; }
+    .slv-cta { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); }
+    .slv-apply { flex: 1; }
   }
 </style>
 
@@ -63,6 +130,8 @@
   var DATA_URL = "https://ericsickels.github.io/Shelterluv/animals.json";
   // Link for the "Apply to adopt" button. {id} is replaced with the Shelterluv animal ID.
   var APPLY_URL = "https://new.shelterluv.com/matchme/adopt/RES-A-{id}";
+  // Shelterluv statuses that get a badge on the card and in the pop-up.
+  var STATUS_BADGES = { "Hold - Applications Pending": "Applications pending" };
   // --------------------------------------------------------------------------
 
   var root = document.getElementById("slv-adopt");
@@ -72,6 +141,7 @@
   var modal = root.querySelector(".slv-modal");
   var animals = [];
   var currentType = "All";
+  var current = null, photoIndex = 0;
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -83,11 +153,16 @@
     if (months == null || months === "") return "";
     var y = Math.floor(months / 12), m = months % 12;
     if (y === 0) return m + (m === 1 ? " month" : " months");
-    return y + (y === 1 ? " year" : " years") + (m ? " " + m + " mo" : "");
+    return y + (y === 1 ? " year" : " years") + (m ? ", " + m + " mo" : "");
   }
 
   function summary(a) {
-    return [a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" · ");
+    return [a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" \u00b7 ");
+  }
+
+  function badge(a) {
+    var label = STATUS_BADGES[a.status];
+    return label ? '<span class="slv-badge">' + esc(label) + "</span>" : "";
   }
 
   function renderFilters() {
@@ -103,41 +178,89 @@
   function renderGrid() {
     var list = animals.filter(function (a) { return currentType === "All" || a.type === currentType; });
     if (!list.length) {
-      grid.innerHTML = '<p class="slv-msg">No animals are listed right now — please check back soon!</p>';
+      grid.innerHTML = '<p class="slv-msg">No animals are listed right now \u2014 please check back soon!</p>';
       return;
     }
     grid.innerHTML = list.map(function (a) {
-      return '<button type="button" class="slv-card" data-id="' + esc(a.id) + '">' +
+      return '<button type="button" class="slv-card" data-id="' + esc(a.id) + '">' + badge(a) +
         '<img loading="lazy" src="' + esc(a.photos[0] || "") + '" alt="Photo of ' + esc(a.name) + '">' +
         '<div class="slv-card-body"><h3>' + esc(a.name) + "</h3><p>" + esc(summary(a)) + "</p></div></button>";
     }).join("");
   }
 
+  function facts(a) {
+    var fixed = a.altered === "Yes" ? "Yes" : a.altered === "No" ? "Not yet" : "";
+    return [
+      ["Age", age(a.ageMonths)],
+      ["Sex", a.sex],
+      ["Breed", a.breed],
+      ["Color", [a.color, a.pattern].filter(Boolean).join(", ")],
+      ["Size", a.size],
+      ["Weight", a.weightLbs ? a.weightLbs + " lbs" : ""],
+      [a.sex === "Female" ? "Spayed" : a.sex === "Male" ? "Neutered" : "Spayed / neutered", fixed]
+    ].filter(function (f) { return f[1]; });
+  }
+
+  function showPhoto(i) {
+    var photos = current.photos;
+    if (!photos.length) return;
+    photoIndex = (i + photos.length) % photos.length;
+    var src = photos[photoIndex];
+    modal.querySelector(".slv-stage img").src = src;
+    modal.querySelector(".slv-stage-bg").style.backgroundImage = 'url("' + src.replace(/"/g, "%22") + '")';
+    var count = modal.querySelector(".slv-count");
+    if (count) count.textContent = (photoIndex + 1) + " / " + photos.length;
+    modal.querySelectorAll(".slv-thumbs button").forEach(function (b, n) {
+      b.setAttribute("aria-current", String(n === photoIndex));
+    });
+  }
+
   function openAnimal(id) {
     var a = animals.filter(function (x) { return String(x.id) === String(id); })[0];
     if (!a) return;
-    var facts = [a.type, a.sex, age(a.ageMonths), a.breed, a.color, a.size,
-      a.weightLbs ? a.weightLbs + " lbs" : "",
-      a.altered === "Yes" ? "Spayed/neutered" : "",
-      a.adoptionFee ? "Adoption fee $" + a.adoptionFee : ""].concat(a.attributes || []).filter(Boolean);
+    current = a;
+    var many = a.photos.length > 1;
     var paragraphs = (a.description || "").split(/\n\s*\n/).filter(Boolean)
       .map(function (p) { return "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>"; }).join("");
-    var thumbs = a.photos.length > 1 ? '<div class="slv-thumbs">' + a.photos.map(function (src, i) {
-      return '<button type="button" data-photo="' + esc(src) + '" aria-current="' + (i === 0) + '" aria-label="Photo ' + (i + 1) + '">' +
-        '<img loading="lazy" src="' + esc(src) + '" alt=""></button>';
-    }).join("") + "</div>" : "";
+    var factRows = facts(a).map(function (f) {
+      return "<div><dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd></div>";
+    }).join("");
+    var tags = (a.attributes || []).length
+      ? '<div class="slv-tags">' + a.attributes.map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</div>" : "";
+    var applyHref = APPLY_URL.replace("{id}", encodeURIComponent(a.id));
 
     modal.innerHTML =
       '<button type="button" class="slv-close" aria-label="Close">&times;</button>' +
-      '<div class="slv-modal-inner">' +
-      (a.photos[0] ? '<img class="slv-main-photo" src="' + esc(a.photos[0]) + '" alt="Photo of ' + esc(a.name) + '">' : "") +
-      thumbs +
-      '<h2 id="slv-modal-title">' + esc(a.name) + "</h2>" +
-      '<ul class="slv-facts">' + facts.map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("") + "</ul>" +
-      '<div class="slv-desc">' + paragraphs + "</div>" +
-      '<a class="slv-apply" target="_blank" rel="noopener" href="' + esc(APPLY_URL.replace("{id}", encodeURIComponent(a.id))) + '">Apply to adopt ' + esc(a.name) + "</a>" +
+      '<div class="slv-gallery">' +
+        '<div class="slv-stage"><div class="slv-stage-bg"></div>' +
+          '<img alt="Photo of ' + esc(a.name) + '">' +
+          (many ? '<button type="button" class="slv-nav slv-prev" aria-label="Previous photo">&#8249;</button>' +
+                  '<button type="button" class="slv-nav slv-next" aria-label="Next photo">&#8250;</button>' +
+                  '<span class="slv-count"></span>' : "") +
+        "</div>" +
+        (many ? '<div class="slv-thumbs">' + a.photos.map(function (src, i) {
+          return '<button type="button" data-index="' + i + '" aria-label="Photo ' + (i + 1) + '"><img loading="lazy" src="' + esc(src) + '" alt=""></button>';
+        }).join("") + "</div>" : "") +
+      "</div>" +
+      '<div class="slv-details">' +
+        '<div class="slv-scroll">' +
+          badge(a) +
+          '<h2 id="slv-modal-title">' + esc(a.name) + "</h2>" +
+          '<p class="slv-sub">' + esc(summary(a)) + "</p>" +
+          (factRows ? '<h3 class="slv-section-title">At a glance</h3><dl class="slv-facts">' + factRows + "</dl>" + tags : "") +
+          (paragraphs ? '<h3 class="slv-section-title">About ' + esc(a.name) + '</h3><div class="slv-desc">' + paragraphs + "</div>" : "") +
+        "</div>" +
+        '<div class="slv-cta">' +
+          (a.adoptionFee ? '<div class="slv-fee">Adoption fee<strong>$' + esc(a.adoptionFee) + "</strong></div>" : "<div></div>") +
+          '<a class="slv-apply" target="_blank" rel="noopener" href="' + esc(applyHref) + '">Apply to adopt ' + esc(a.name) + "</a>" +
+        "</div>" +
       "</div>";
-    if (!modal.open) modal.showModal();
+
+    if (a.photos.length) showPhoto(0);
+    else modal.querySelector(".slv-gallery").style.display = "none";
+    if (!modal.open) { modal.showModal(); document.documentElement.classList.add("slv-lock"); }
+    modal.querySelector(".slv-scroll").scrollTop = 0;
+    modal.querySelector(".slv-close").focus();
     if (location.hash !== "#animal-" + a.id) history.replaceState(null, "", "#animal-" + a.id);
   }
 
@@ -160,14 +283,33 @@
 
   modal.addEventListener("click", function (e) {
     if (e.target === modal || e.target.closest(".slv-close")) return closeModal();
-    var t = e.target.closest("button[data-photo]");
-    if (t) {
-      modal.querySelector(".slv-main-photo").src = t.getAttribute("data-photo");
-      modal.querySelectorAll(".slv-thumbs button").forEach(function (b) { b.setAttribute("aria-current", String(b === t)); });
-    }
+    if (e.target.closest(".slv-prev")) return showPhoto(photoIndex - 1);
+    if (e.target.closest(".slv-next")) return showPhoto(photoIndex + 1);
+    var t = e.target.closest("button[data-index]");
+    if (t) showPhoto(Number(t.getAttribute("data-index")));
+  });
+
+  modal.addEventListener("keydown", function (e) {
+    if (!current || current.photos.length < 2) return;
+    if (e.key === "ArrowLeft") showPhoto(photoIndex - 1);
+    if (e.key === "ArrowRight") showPhoto(photoIndex + 1);
+  });
+
+  // Swipe between photos on touch screens.
+  var touchX = null;
+  modal.addEventListener("touchstart", function (e) {
+    touchX = e.target.closest(".slv-stage") ? e.touches[0].clientX : null;
+  }, { passive: true });
+  modal.addEventListener("touchend", function (e) {
+    if (touchX == null || !current) return;
+    var dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) showPhoto(photoIndex + (dx < 0 ? 1 : -1));
+    touchX = null;
   });
 
   modal.addEventListener("close", function () {
+    document.documentElement.classList.remove("slv-lock");
+    current = null;
     if (location.hash.indexOf("#animal-") === 0) history.replaceState(null, "", location.pathname + location.search);
   });
 
@@ -182,7 +324,7 @@
       if (m) openAnimal(decodeURIComponent(m[1]));
     })
     .catch(function () {
-      grid.innerHTML = '<p class="slv-msg">We couldn’t load our animals right now. Please refresh the page or try again later.</p>';
+      grid.innerHTML = '<p class="slv-msg">We couldn\u2019t load our animals right now. Please refresh the page or try again later.</p>';
     });
 })();
 </script>
