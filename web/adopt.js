@@ -5,7 +5,7 @@
 
     <div id="slv-adopt"></div>         adoptable animals (animals.json), with Apply button
     <div id="slv-coming-soon"></div>   intake / assessment animals (coming-soon.json)
-    <script src="https://ericsickels.github.io/Shelterluv/adopt.js" defer></script>
+    <script src="https://animals.redemptionrescueinc.com/adopt.js" defer></script>
 
   Optional overrides as attributes on a div:
     data-apply-url="https://.../{id}"   data-data-url="https://.../animals.json"
@@ -39,7 +39,7 @@
   // The data files and adopt.css are published next to this script.
   var script = document.currentScript ||
     [].slice.call(document.querySelectorAll("script[src]")).filter(function (s) { return /\/adopt\.js(\?|$)/.test(s.src); })[0];
-  var BASE = script ? script.src.replace(/[^\/?#]*([?#].*)?$/, "") : "https://ericsickels.github.io/Shelterluv/";
+  var BASE = script ? script.src.replace(/[^\/?#]*([?#].*)?$/, "") : "https://animals.redemptionrescueinc.com/";
 
   // Short cache window so published changes reach visitors within ~10 minutes.
   var version = Math.floor(Date.now() / 600000);

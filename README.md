@@ -27,7 +27,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 | `web/adopted.js` | Recently Adopted: non-clickable cards (name, sex, age, breed, photo, adoption date) with an "Adopted!" ribbon. |
 | `web/stats.js` | Adoption counts: This Month / Last Month / This Year tiles with dog and cat counts, animated when scrolled into view. |
 | `web/adopt.css` | Styles for all widgets. |
-| `web/index.html` | Preview page: `https://ericsickels.github.io/Shelterluv/` shows the widget outside Squarespace. |
+| `web/index.html` | Preview page: `https://animals.redemptionrescueinc.com/` shows the widget outside Squarespace. |
 | `squarespace/adopt-code-block.html` | Two-line embed for the Adopt page, pasted into Squarespace once. |
 | `squarespace/adopted-code-block.html` | Two-line embed for the Recently Adopted section, pasted once. |
 | `squarespace/coming-soon-code-block.html` | Two-line embed for the Coming Soon section, pasted once. |
@@ -45,34 +45,36 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
    `COMING_SOON_STATUSES` = statuses shown under Coming Soon. Default `Unavailable - Intake / Assessment`.
    `ADOPTED_DAYS` = how far back Recently Adopted looks. Default `60`.
    `SHELTER_TIMEZONE` = time zone for adoption dates. Default `America/New_York`.
-4. **Settings → Pages → Source:** choose **GitHub Actions**.
+4. **Settings → Pages → Source:** choose **GitHub Actions**. **Custom domain:** `animals.redemptionrescueinc.com`
+   (DNS: a `CNAME` record named `animals` pointing to `ericsickels.github.io`, in Squarespace → Domains → DNS),
+   then tick **Enforce HTTPS**. Our own subdomain avoids work networks that block `*.github.io`.
 5. Merge to `main`, then **Actions → Export adoptable animals → Run workflow**.
-   The JSON appears at `https://ericsickels.github.io/Shelterluv/animals.json`.
+   The JSON appears at `https://animals.redemptionrescueinc.com/animals.json`.
 
 ### Squarespace (Core plan or higher — needed for JavaScript in Code Blocks)
 1. Edit your Adopt page → add a **Code Block** → set it to HTML, *Display Source* off.
 2. Paste the contents of `squarespace/adopt-code-block.html` and save. This is a one-time step:
    ```html
-   <div id="slv-adopt"></div>
-   <script src="https://ericsickels.github.io/Shelterluv/adopt.js" defer></script>
+   <div id="slv-adopt"><p>Loading our animals&hellip; (fallback text, see the file)</p></div>
+   <script src="https://animals.redemptionrescueinc.com/adopt.js" defer></script>
    ```
 3. For Recently Adopted, add your own heading, then a Code Block below it with
    `squarespace/adopted-code-block.html`:
    ```html
-   <div id="slv-adopted"></div>
-   <script src="https://ericsickels.github.io/Shelterluv/adopted.js" defer></script>
+   <div id="slv-adopted"><p>Loading our animals&hellip; (fallback text, see the file)</p></div>
+   <script src="https://animals.redemptionrescueinc.com/adopted.js" defer></script>
    ```
 4. For Coming Soon, add your own heading, then a Code Block below it with
    `squarespace/coming-soon-code-block.html`:
    ```html
-   <div id="slv-coming-soon"></div>
-   <script src="https://ericsickels.github.io/Shelterluv/adopt.js" defer></script>
+   <div id="slv-coming-soon"><p>Loading our animals&hellip; (fallback text, see the file)</p></div>
+   <script src="https://animals.redemptionrescueinc.com/adopt.js" defer></script>
    ```
 5. For the adoption counts, add a Code Block above the Recently Adopted heading with
    `squarespace/stats-code-block.html`:
    ```html
    <div id="slv-stats"></div>
-   <script src="https://ericsickels.github.io/Shelterluv/stats.js" defer></script>
+   <script src="https://animals.redemptionrescueinc.com/stats.js" defer></script>
    ```
    Counts are every adoption outcome in the period (in `SHELTER_TIMEZONE`), including any
    animal later returned, so they match Shelterluv's outcome reports.
