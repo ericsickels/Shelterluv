@@ -2,6 +2,7 @@
   "Coming Soon" section: animals in Intake / Assessment. Paste into a Code Block (Display Source
   off) below your own "Coming Soon" heading. It uses the same adopt.js as the Available animals,
   so if both are on one page the script is only loaded once either way.
+  The text inside the div shows only if the script can't load (it replaces it on load).
 -->
-<div id="slv-coming-soon"></div>
-<script src="https://ericsickels.github.io/Shelterluv/adopt.js" defer></script>
+<div id="slv-coming-soon"><p style="opacity:.7">Loading our animals&hellip; If nothing appears after a few seconds, your network may be blocking this part of our site. Please try another device or network.</p></div>
+<script src="https://animals.redemptionrescueinc.com/adopt.js" defer></script>

@@ -3,14 +3,14 @@
   dogs and cats. Numbers count up when the section scrolls into view.
 
     <div id="slv-stats"></div>
-    <script src="https://ericsickels.github.io/Shelterluv/stats.js" defer></script>
+    <script src="https://animals.redemptionrescueinc.com/stats.js" defer></script>
 
   Optional override on the div: data-data-url="https://.../stats.json"
 */
 (function () {
   var script = document.currentScript ||
     [].slice.call(document.querySelectorAll("script[src]")).filter(function (s) { return /\/stats\.js(\?|$)/.test(s.src); })[0];
-  var BASE = script ? script.src.replace(/[^\/?#]*([?#].*)?$/, "") : "https://ericsickels.github.io/Shelterluv/";
+  var BASE = script ? script.src.replace(/[^\/?#]*([?#].*)?$/, "") : "https://animals.redemptionrescueinc.com/";
 
   var root = document.getElementById("slv-stats");
   if (!root || root.getAttribute("data-slv-ready")) return;

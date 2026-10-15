@@ -3,6 +3,7 @@
   The widget's code and styles live in web/ in the GitHub repo and are published with the
   animal data, so changes merged to main reach the site automatically. Nothing else to paste.
   Requires a Squarespace plan that allows JavaScript in Code Blocks (Core or higher).
+  The text inside the div shows only if the script can't load (it replaces it on load).
 -->
-<div id="slv-adopt"></div>
-<script src="https://ericsickels.github.io/Shelterluv/adopt.js" defer></script>
+<div id="slv-adopt"><p style="opacity:.7">Loading our animals&hellip; If nothing appears after a few seconds, your network may be blocking this part of our site. Please try another device or network.</p></div>
+<script src="https://animals.redemptionrescueinc.com/adopt.js" defer></script>

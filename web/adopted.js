@@ -3,7 +3,7 @@
   (from adopted.json) as non-clickable cards with an "Adopted" ribbon.
 
     <div id="slv-adopted"></div>
-    <script src="https://ericsickels.github.io/Shelterluv/adopted.js" defer></script>
+    <script src="https://animals.redemptionrescueinc.com/adopted.js" defer></script>
 
   Optional override on the div: data-data-url="https://.../adopted.json"
 */
@@ -19,7 +19,7 @@
   // adopted.json and adopt.css are published next to this script.
   var script = document.currentScript ||
     [].slice.call(document.querySelectorAll("script[src]")).filter(function (s) { return /\/adopted\.js(\?|$)/.test(s.src); })[0];
-  var BASE = script ? script.src.replace(/[^\/?#]*([?#].*)?$/, "") : "https://ericsickels.github.io/Shelterluv/";
+  var BASE = script ? script.src.replace(/[^\/?#]*([?#].*)?$/, "") : "https://animals.redemptionrescueinc.com/";
 
   var root = document.getElementById("slv-adopted");
   if (!root || root.getAttribute("data-slv-ready")) return;
