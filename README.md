@@ -27,6 +27,8 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 | `web/adopted.js` | Recently Adopted: non-clickable cards (name, sex, age, breed, photo, adoption date) with an "Adopted!" ribbon. |
 | `web/stats.js` | Adoption counts: This Month / Last Month / This Year tiles with dog and cat counts, animated when scrolled into view. |
 | `web/spotlight.js` | Homepage spotlight: "N dogs and N cats are looking for homes" count, then a rotating "Meet [name]" panel. Photo-only, Pending animals left out (still counted), longer stays weighted toward the front, pause button, no auto-motion for reduce-motion visitors. |
+| `web/screen.html` | Full-screen digital sign for partner screens (e.g. a restaurant TV), 16:9 or 9:16. See below. |
+| `web/qrcode.js` | QR code generator used by the sign ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4, MIT). |
 | `web/adopt.css` | Styles for all widgets. |
 | `web/index.html` | Preview page: `https://animals.redemptionrescueinc.com/` shows the widget outside Squarespace. |
 | `squarespace/adopt-code-block.html` | Two-line embed for the Adopt page, pasted into Squarespace once. |
@@ -106,6 +108,23 @@ Button colour is `--slv-accent` at the top of `web/adopt.css`; the Adopted ribbo
 
 Code Blocks don't run scripts in the Squarespace editor preview; view the live page (or
 preview in a logged-out window) to see the animals.
+
+## Digital sign (partner screens)
+
+Open **https://animals.redemptionrescueinc.com/screen.html** full-screen on the screen's browser
+or signage player. It needs no login and nothing on Squarespace.
+
+- Rotates available animals (photo-only, Pending left out, longer stays shown more often), about 15s
+  each, cycling up to 4 of their photos. Shows name, sex/age/breed, one line from the bio, days
+  waiting since their latest intake, and a QR code to that animal on our Adopt page.
+- After every 5 animals: "Who we are" (mission + live counts), "How to adopt", or "Happy tails"
+  (recent adoptions). A strip with our name and website is always on screen.
+- Detects landscape/portrait and scales to the screen. Refreshes data every 30 minutes, keeps the
+  last good data if the internet drops, and reloads itself around 4am.
+- Address options: `?seconds=20` (time per animal), `?only=dogs` / `?only=cats`, `?qr=off`.
+- Check it from a laptop with `?preview=1` (16:9 / 9:16 frame and buttons to jump to the info slides).
+- Wording (mission line, logo, links, timings) is in the Configuration block at the top of the script
+  in `web/screen.html`; the orange is `--brand` at the top of its styles.
 
 ## Day to day
 
