@@ -115,7 +115,7 @@ Open **https://animals.redemptionrescueinc.com/screen.html** full-screen on the 
 or signage player. It needs no login and nothing on Squarespace.
 
 - Rotates available animals (photo-only, Pending left out, longer stays shown more often), about 15s
-  each, cycling up to 4 of their photos. Shows name, sex/age/breed, one line from the bio, days
+  each, showing 3 of their photos at random (each wipes in over the last; no zooming). Shows name, sex/age/breed, one line from the bio, days
   waiting since their latest intake, and a QR code to that animal on our Adopt page.
 - After every 5 animals: "Who we are" (mission + live counts), "How to adopt", or "Happy tails"
   (recent adoptions). A strip with our name and website is always on screen.

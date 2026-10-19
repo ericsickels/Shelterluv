@@ -44,23 +44,28 @@
   .animal { display: grid; grid-template-columns: 58% 42%; }
   .portrait .animal { grid-template-columns: 100%; grid-template-rows: 52% 48%; }
   .photos { position: relative; overflow: hidden; background: #2b2f33; }
-  .photos > img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0;
-    transition: opacity 1.2s ease; transform-origin: center; }
-  .photos > img.on { opacity: 1; animation: kenburns 9s ease-out forwards; }
-  .photos > img.alt.on { animation-name: kenburns2; }
-  @keyframes kenburns { from { transform: scale(1.12) translate(-1.5%, -1%); } to { transform: scale(1) translate(0, 0); } }
-  @keyframes kenburns2 { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.12) translate(1.5%, 1%); } }
-  .photo-dots { position: absolute; left: 0; right: 0; bottom: calc(var(--u) * 2); display: flex; justify-content: center; gap: calc(var(--u) * .8); }
-  .photo-dots span { width: calc(var(--u) * 1); height: calc(var(--u) * 1); border-radius: 50%; background: rgba(255,255,255,.45); }
-  .photo-dots span.on { background: #fff; }
+  /* Photos don't move; each new one wipes in from the right over the previous one. */
+  .photos > img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
+    -webkit-clip-path: inset(0 0 0 100%); clip-path: inset(0 0 0 100%);
+    transition: -webkit-clip-path 1s cubic-bezier(.65, 0, .35, 1), clip-path 1s cubic-bezier(.65, 0, .35, 1); }
+  .photos > img.on { z-index: 2; -webkit-clip-path: inset(0); clip-path: inset(0); }
+  .photos > img.was { z-index: 1; -webkit-clip-path: inset(0); clip-path: inset(0); transition: none; }
+  .photos > img.instant { transition: none; }
+  /* Story-style progress bars: one per photo, the current one fills as it plays. */
+  .photo-bars { position: absolute; z-index: 3; top: calc(var(--u) * 2.2); left: calc(var(--u) * 2.2); right: calc(var(--u) * 2.2);
+    display: flex; gap: calc(var(--u) * .8); }
+  .photo-bars span { flex: 1; height: calc(var(--u) * .55); border-radius: calc(var(--u) * .5); overflow: hidden;
+    background: rgba(255,255,255,.35); box-shadow: 0 0 calc(var(--u) * .4) rgba(0,0,0,.25); }
+  .photo-bars i { display: block; height: 100%; width: 0; background: #fff; }
 
   .panel { display: flex; flex-direction: column; justify-content: center; padding: calc(var(--u) * 5) calc(var(--u) * 5.5); min-width: 0; }
   .portrait .panel { padding: calc(var(--u) * 4) calc(var(--u) * 6) calc(var(--u) * 3); }
-  .logo { height: calc(var(--u) * 9); width: auto; align-self: flex-start; margin-bottom: calc(var(--u) * 3); }
-  .portrait .logo { height: calc(var(--u) * 7.5); margin-bottom: calc(var(--u) * 2); }
+  .logo { height: calc(var(--u) * 14); width: auto; align-self: flex-start; margin-bottom: calc(var(--u) * 3); }
+  .portrait .logo { height: calc(var(--u) * 11); margin-bottom: calc(var(--u) * 2); }
   .eyebrow { font-size: calc(var(--u) * 1.9); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); }
-  .name { margin: calc(var(--u) * .6) 0 calc(var(--u) * .8); font-size: calc(var(--u) * 9.5); line-height: 1; font-weight: 400;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* line-height + bottom padding leave room for descenders (g, j, p, q, y) inside the clipped box. */
+  .name { margin: calc(var(--u) * .4) 0 calc(var(--u) * .4); padding-bottom: .12em; font-size: calc(var(--u) * 9.5); line-height: 1.12;
+    font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .meta { font-size: calc(var(--u) * 2.9); color: var(--muted); }
   .line { margin-top: calc(var(--u) * 2.2); font-size: calc(var(--u) * 2.8); line-height: 1.35;
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -82,7 +87,7 @@
   /* ---- Info slides: who we are / how to adopt / happy tails ---- */
   .info { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
     padding: calc(var(--u) * 5) calc(var(--u) * 8); }
-  .info .logo { align-self: center; height: calc(var(--u) * 14); margin-bottom: calc(var(--u) * 3); }
+  .info .logo { align-self: center; height: calc(var(--u) * 20); margin-bottom: calc(var(--u) * 3); }
   .info h2 { margin: 0 0 calc(var(--u) * 2); font-size: calc(var(--u) * 6.5); font-weight: 400; line-height: 1.1; }
   .info p.lede { margin: 0 auto; max-width: calc(var(--u) * 120); font-size: calc(var(--u) * 3.2); line-height: 1.4; color: var(--muted); }
   .bigstats { display: flex; justify-content: center; gap: calc(var(--u) * 8); margin-top: calc(var(--u) * 5); }
@@ -104,7 +109,7 @@
   .portrait .step i { width: calc(var(--u) * 9); height: calc(var(--u) * 9); font-size: calc(var(--u) * 4.6); }
   .portrait .step b { font-size: calc(var(--u) * 4.6); }
   .portrait .step span { font-size: calc(var(--u) * 3.3); }
-  .portrait .info .logo { height: calc(var(--u) * 18); }
+  .portrait .info .logo { height: calc(var(--u) * 26); }
   .portrait .bigstats b { font-size: calc(var(--u) * 15); }
   .portrait .bigstats span { font-size: calc(var(--u) * 3.4); }
   .portrait .qr-text b { font-size: calc(var(--u) * 3); }
@@ -150,12 +155,12 @@
   var SITE = "redemptionrescueinc.com";
   var ANIMAL_URL = "https://redemptionrescueinc.com/adopt#animal-{id}";   // what each animal's QR code opens
   var ADOPT_URL = "https://redemptionrescueinc.com/adopt";                 // QR on the info slides
-  var LOGO = "https://images.squarespace-cdn.com/content/v1/5a25b56b51a5845bb4efad79/2b8394b7-51a2-4040-9d5f-2ceebdb5059a/2+color.png?format=300w";
+  var LOGO = "https://images.squarespace-cdn.com/content/v1/5a25b56b51a5845bb4efad79/2b8394b7-51a2-4040-9d5f-2ceebdb5059a/2+color.png?format=1000w";
   var MISSION = "Redemption Rescue is a foster-based, all-breed nonprofit helping animals in Indiana shelters find their way home.";
   var ANIMAL_MS = 15000;       // time per animal (?seconds=)
   var INFO_MS = 12000;         // time per info slide
   var INFO_EVERY = 5;          // an info slide after every N animals
-  var MAX_PHOTOS = 4;          // photos cycled per animal
+  var MAX_PHOTOS = 3;          // random photos shown per animal
   var STAY_WEIGHT = 1.5;       // longer stays come up earlier more often (0 = pure random)
   var SKIP_STATUSES = ["Hold - Applications Pending", "Hold - Pending Adoption"];
   var REFRESH_MS = 30 * 60000; // re-check the animal list
@@ -279,7 +284,7 @@
   }
 
   function animalSlide(a) {
-    var photos = [a.photos[0]].concat(shuffle(a.photos.slice(1))).slice(0, MAX_PHOTOS);
+    var photos = shuffle(a.photos.slice()).slice(0, MAX_PHOTOS);
     var d = days(a);
     var waitHtml = d === null ? "" : d === 0
       ? '<div class="wait"><b>New!</b><span>arrived today</span></div>'
@@ -287,8 +292,8 @@
     var el = document.createElement("div");
     el.className = "slide animal";
     el.innerHTML =
-      '<div class="photos">' + photos.map(function (p, i) { return '<img class="' + (i % 2 ? "alt" : "") + '" src="' + esc(p) + '" alt="">'; }).join("") +
-        (photos.length > 1 ? '<div class="photo-dots">' + photos.map(function () { return "<span></span>"; }).join("") + "</div>" : "") +
+      '<div class="photos">' + photos.map(function (p) { return '<img src="' + esc(p) + '" alt="">'; }).join("") +
+        (photos.length > 1 ? '<div class="photo-bars">' + photos.map(function () { return "<span><i></i></span>"; }).join("") + "</div>" : "") +
       "</div>" +
       '<div class="panel">' +
         '<img class="logo" src="' + esc(LOGO) + '" alt="Redemption Rescue">' +
@@ -301,16 +306,27 @@
           '<div class="qr-text"><b>Scan to meet ' + esc(a.name) + "</b><span>" + SITE + "</span></div></div>" +
         "</div>" +
       "</div>";
-    var imgs = el.querySelectorAll(".photos img"), dots = el.querySelectorAll(".photo-dots span"), k = -1;
+    var imgs = el.querySelectorAll(".photos > img"), bars = el.querySelectorAll(".photo-bars i"), k = -1;
+    var each = ANIMAL_MS / imgs.length;
     el.start = function () {
       var step = function () {
-        k = (k + 1) % imgs.length;
-        for (var i = 0; i < imgs.length; i++) { imgs[i].classList.toggle("on", i === k); if (dots[i]) dots[i].classList.toggle("on", i === k); }
-        if (imgs.length > 1) photoTimer = setTimeout(step, ANIMAL_MS / imgs.length);
+        var prev = k;
+        k = k + 1;
+        if (k >= imgs.length) return;
+        for (var i = 0; i < imgs.length; i++) imgs[i].classList.remove("on", "was");
+        if (prev >= 0) imgs[prev].classList.add("was");
+        else imgs[k].classList.add("instant");      // the first photo arrives with the slide itself
+        imgs[k].classList.add("on");
+        for (var b = 0; b < bars.length; b++) {
+          bars[b].style.transition = "none";
+          bars[b].style.width = b < k ? "100%" : "0";
+        }
+        if (bars[k]) { void bars[k].offsetWidth; bars[k].style.transition = "width " + each + "ms linear"; bars[k].style.width = "100%"; }
+        if (k + 1 < imgs.length) photoTimer = setTimeout(step, each);
       };
       step();
     };
-    el.ready = Promise.all(photos.slice(0, 2).map(load));
+    el.ready = Promise.all(photos.map(load));
     return el;
   }
 
