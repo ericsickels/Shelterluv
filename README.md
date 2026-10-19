@@ -8,7 +8,7 @@ Shelterluv API ──(API key, secret)──▶ GitHub Action (every 30 min)
                                         │ keeps only public statuses + public fields
                                         ▼
                          GitHub Pages: animals.json, coming-soon.json, adopted.json, stats.json (public, no private data)
-                                       adopt.js, adopted.js, stats.js, adopt.css (widgets, from web/)
+                                       adopt.js, adopted.js, stats.js, spotlight.js, adopt.css (widgets, from web/)
                                         │
                                         ▼
                          Squarespace Code Blocks just load adopt.js / adopted.js / stats.js
@@ -26,11 +26,13 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 | `web/adopt.js` | Adoptable animals and Coming Soon: cards, filters and the detail pop-up (Coming Soon shows a note instead of the Apply button). Missing or broken photos show a dog/cat "Photo coming soon" placeholder. |
 | `web/adopted.js` | Recently Adopted: non-clickable cards (name, sex, age, breed, photo, adoption date) with an "Adopted!" ribbon. |
 | `web/stats.js` | Adoption counts: This Month / Last Month / This Year tiles with dog and cat counts, animated when scrolled into view. |
+| `web/spotlight.js` | Homepage spotlight: "N dogs and N cats are looking for homes" count, then a rotating "Meet [name]" panel. Photo-only, Pending animals left out (still counted), longer stays weighted toward the front, pause button, no auto-motion for reduce-motion visitors. |
 | `web/adopt.css` | Styles for all widgets. |
 | `web/index.html` | Preview page: `https://animals.redemptionrescueinc.com/` shows the widget outside Squarespace. |
 | `squarespace/adopt-code-block.html` | Two-line embed for the Adopt page, pasted into Squarespace once. |
 | `squarespace/adopted-code-block.html` | Two-line embed for the Recently Adopted section, pasted once. |
 | `squarespace/coming-soon-code-block.html` | Two-line embed for the Coming Soon section, pasted once. |
+| `squarespace/spotlight-code-block.html` | Two-line embed for the homepage spotlight, pasted once below the hero. |
 | `squarespace/stats-code-block.html` | Two-line embed for the adoption counts, pasted once above Recently Adopted. |
 
 ## One-time setup
@@ -78,6 +80,16 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
    ```
    Counts are every adoption outcome in the period (in `SHELTER_TIMEZONE`), including any
    animal later returned, so they match Shelterluv's outcome reports.
+
+6. For the homepage spotlight, add a Code Block in a section below the hero with
+   `squarespace/spotlight-code-block.html`:
+   ```html
+   <div id="slv-spotlight"><p>Loading our animals&hellip; (fallback text, see the file)</p></div>
+   <script src="https://animals.redemptionrescueinc.com/spotlight.js" defer></script>
+   ```
+   Settings at the top of `web/spotlight.js`: `SLIDE_MS` (time per animal), `STAY_WEIGHT` (how strongly
+   longer stays come first; 0 = pure random), `SKIP_STATUSES` (kept out of the rotation), and the
+   `ANIMAL_URL` / `ALL_URL` links.
 
 Settings live at the top of `web/adopt.js`:
 - `APPLY_URL`: where "Apply to adopt" links; `{id}` becomes the Shelterluv animal ID.
