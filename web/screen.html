@@ -28,8 +28,14 @@
   .stage { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
   .screen { --u: 10.8px; position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow: hidden; background: var(--paper); color: var(--ink); }
   .slides { position: absolute; left: 0; right: 0; top: 0; bottom: calc(var(--u) * 6); }
-  .slide { position: absolute; top: 0; right: 0; bottom: 0; left: 0; opacity: 0; transition: opacity 1s ease; }
-  .slide.on { opacity: 1; }
+  /* A new animal/slide pushes up from below and the previous one slides off the top, so a change of
+     animal is unmistakable (photo changes within an animal wipe sideways instead). */
+  .slides { overflow: hidden; }
+  .slide { position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+    -webkit-transform: translateY(100%); transform: translateY(100%);
+    transition: -webkit-transform .65s cubic-bezier(.76, 0, .24, 1), transform .65s cubic-bezier(.76, 0, .24, 1); }
+  .slide.on { -webkit-transform: translateY(0); transform: translateY(0); }
+  .slide.out { -webkit-transform: translateY(-100%); transform: translateY(-100%); }
 
   /* ---- Ticker: always on screen so every glance connects the pets to the rescue ---- */
   .ticker { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--u) * 6); background: var(--ink); color: #fff;
@@ -370,7 +376,7 @@
     el.ready.then(function () {
       var old = current; current = el;
       requestAnimationFrame(function () { el.classList.add("on"); });
-      if (old) { old.classList.remove("on"); setTimeout(function () { if (old.parentNode) old.parentNode.removeChild(old); }, 1100); }
+      if (old) { old.classList.add("out"); old.classList.remove("on"); setTimeout(function () { if (old.parentNode) old.parentNode.removeChild(old); }, 900); }
       el.start();
       bar.style.transition = "none"; bar.style.width = "0"; void bar.offsetWidth;
       bar.style.transition = "width " + ms + "ms linear"; bar.style.width = "100%";
