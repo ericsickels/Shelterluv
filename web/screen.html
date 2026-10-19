@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redemption Rescue - Adoptable Pets</title>
+<!--
+  Full-screen digital sign for partner screens (e.g. a restaurant TV). Open it full-screen:
+    https://animals.redemptionrescueinc.com/screen.html
+  Works in landscape (16:9) and portrait (9:16); everything scales to the screen.
+  Options in the address:  ?seconds=15  ?only=dogs|cats  ?qr=off  ?layout=poster
+  Mockup toolbar (orientation/layout switcher, slide jumps): add ?mock=1
+-->
+<style>
+  :root {
+    --brand: #d9822b;        /* accent (numbers, eyebrow, progress) */
+    --ink: #1f2326;
+    --paper: #fbf7f1;        /* panel background */
+    --muted: #5f646b;
+    --adopted: #2e7d4f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; cursor: none;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  .serif { font-family: Georgia, "Times New Roman", serif; }
+
+  /* The stage is the whole viewport in production, or a scaled 16:9 / 9:16 frame in the mockup. */
+  .stage { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
+  .screen { --u: 10.8px; position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow: hidden; background: var(--paper); color: var(--ink); }
+  .slides { position: absolute; left: 0; right: 0; top: 0; bottom: calc(var(--u) * 6); }
+  .slide { position: absolute; top: 0; right: 0; bottom: 0; left: 0; opacity: 0; transition: opacity 1s ease; }
+  .slide.on { opacity: 1; }
+
+  /* ---- Ticker: always on screen so every glance connects the pets to the rescue ---- */
+  .ticker { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--u) * 6); background: var(--ink); color: #fff;
+    display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 1.6);
+    font-size: calc(var(--u) * 2.1); letter-spacing: .02em; white-space: nowrap; padding: 0 calc(var(--u) * 3); }
+  .ticker b { color: var(--brand); }
+  .ticker i { width: calc(var(--u) * .7); height: calc(var(--u) * .7); border-radius: 50%; background: var(--brand); display: inline-block; }
+  .progress { position: absolute; left: 0; bottom: calc(var(--u) * 6); height: calc(var(--u) * .5); width: 0; background: var(--brand); z-index: 5; }
+  .portrait .ticker .t-long { display: none; }
+
+  /* ---- Animal slide: split layout (default) ---- */
+  .animal { display: grid; grid-template-columns: 58% 42%; }
+  .portrait .animal { grid-template-columns: 100%; grid-template-rows: 52% 48%; }
+  .photos { position: relative; overflow: hidden; background: #2b2f33; }
+  .photos > img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0;
+    transition: opacity 1.2s ease; transform-origin: center; }
+  .photos > img.on { opacity: 1; animation: kenburns 9s ease-out forwards; }
+  .photos > img.alt.on { animation-name: kenburns2; }
+  @keyframes kenburns { from { transform: scale(1.12) translate(-1.5%, -1%); } to { transform: scale(1) translate(0, 0); } }
+  @keyframes kenburns2 { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.12) translate(1.5%, 1%); } }
+  .photo-dots { position: absolute; left: 0; right: 0; bottom: calc(var(--u) * 2); display: flex; justify-content: center; gap: calc(var(--u) * .8); }
+  .photo-dots span { width: calc(var(--u) * 1); height: calc(var(--u) * 1); border-radius: 50%; background: rgba(255,255,255,.45); }
+  .photo-dots span.on { background: #fff; }
+
+  .panel { display: flex; flex-direction: column; justify-content: center; padding: calc(var(--u) * 5) calc(var(--u) * 5.5); min-width: 0; }
+  .portrait .panel { padding: calc(var(--u) * 4) calc(var(--u) * 6) calc(var(--u) * 3); }
+  .logo { height: calc(var(--u) * 9); width: auto; align-self: flex-start; margin-bottom: calc(var(--u) * 3); }
+  .portrait .logo { height: calc(var(--u) * 7.5); margin-bottom: calc(var(--u) * 2); }
+  .eyebrow { font-size: calc(var(--u) * 1.9); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); }
+  .name { margin: calc(var(--u) * .6) 0 calc(var(--u) * .8); font-size: calc(var(--u) * 9.5); line-height: 1; font-weight: 400;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meta { font-size: calc(var(--u) * 2.9); color: var(--muted); }
+  .line { margin-top: calc(var(--u) * 2.2); font-size: calc(var(--u) * 2.8); line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .portrait .line { -webkit-line-clamp: 2; }
+  .facts { display: flex; align-items: center; gap: calc(var(--u) * 3.5); margin-top: calc(var(--u) * 4); }
+  .portrait .facts { justify-content: space-between; }
+  .wait { flex: none; }
+  .wait b { display: block; font-size: calc(var(--u) * 8); line-height: .95; color: var(--brand); font-weight: 800; }
+  .wait span { display: block; font-size: calc(var(--u) * 2.2); color: var(--muted); line-height: 1.25; margin-top: calc(var(--u) * .5); }
+  .qr-card { display: flex; align-items: center; gap: calc(var(--u) * 2); padding: calc(var(--u) * 1.6); border-radius: calc(var(--u) * 1.6);
+    background: #fff; box-shadow: 0 calc(var(--u) * .3) calc(var(--u) * 2) rgba(0,0,0,.08); }
+  .qr { width: calc(var(--u) * 18); height: calc(var(--u) * 18); flex: none; }
+  .portrait .qr { width: calc(var(--u) * 21); height: calc(var(--u) * 21); }
+  .qr svg { width: 100%; height: 100%; display: block; }
+  .qr-text b { display: block; font-size: calc(var(--u) * 2.4); line-height: 1.2; }
+  .qr-text span { display: block; margin-top: calc(var(--u) * .7); font-size: calc(var(--u) * 2); color: var(--muted); }
+  .no-qr .qr { display: none; }
+
+  /* ---- Animal slide: poster layout (?layout=poster) ---- */
+  .poster .animal { display: block; }
+  .poster .photos { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
+  .poster .panel { position: absolute; left: 0; right: 0; bottom: 0; padding: calc(var(--u) * 14) calc(var(--u) * 5) calc(var(--u) * 4);
+    color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.55) 30%, rgba(0,0,0,.8)); display: grid;
+    grid-template-columns: 1fr auto; grid-template-areas: "eyebrow facts" "name facts" "meta facts" "line facts"; column-gap: calc(var(--u) * 4); align-items: end; }
+  .poster.portrait .panel { grid-template-columns: 1fr; grid-template-areas: "eyebrow" "name" "meta" "line" "facts"; padding-top: calc(var(--u) * 22); }
+  .poster .panel .logo { display: none; }
+  .poster .eyebrow { grid-area: eyebrow; } .poster .name { grid-area: name; } .poster .meta { grid-area: meta; color: rgba(255,255,255,.85); }
+  .poster .line { grid-area: line; } .poster .facts { grid-area: facts; margin-top: calc(var(--u) * 2); }
+  .poster .wait span { color: rgba(255,255,255,.85); }
+  .poster .qr-text b { color: var(--ink); }
+  .poster .photo-dots { top: calc(var(--u) * 3); bottom: auto; right: calc(var(--u) * 3); left: auto; }
+  .brand-pill { display: none; }
+  .poster .brand-pill { display: block; position: absolute; top: calc(var(--u) * 3); left: calc(var(--u) * 3); z-index: 2; padding: calc(var(--u) * 1.2) calc(var(--u) * 2);
+    border-radius: calc(var(--u) * 1.4); background: rgba(255,255,255,.94); }
+  .brand-pill img { height: calc(var(--u) * 7); display: block; }
+
+  /* ---- Info slides: who we are / how to adopt / happy tails ---- */
+  .info { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    padding: calc(var(--u) * 5) calc(var(--u) * 8); }
+  .info .logo { align-self: center; height: calc(var(--u) * 14); margin-bottom: calc(var(--u) * 3); }
+  .info h2 { margin: 0 0 calc(var(--u) * 2); font-size: calc(var(--u) * 6.5); font-weight: 400; line-height: 1.1; }
+  .info p.lede { margin: 0 auto; max-width: calc(var(--u) * 120); font-size: calc(var(--u) * 3.2); line-height: 1.4; color: var(--muted); }
+  .bigstats { display: flex; justify-content: center; gap: calc(var(--u) * 8); margin-top: calc(var(--u) * 5); }
+  .portrait .bigstats { flex-direction: column; gap: calc(var(--u) * 4); }
+  .bigstats b { display: block; font-size: calc(var(--u) * 11); line-height: 1; color: var(--brand); font-weight: 800; }
+  .bigstats span { display: block; font-size: calc(var(--u) * 2.6); color: var(--muted); margin-top: calc(var(--u) * .8); }
+  .steps { display: flex; gap: calc(var(--u) * 4); margin: calc(var(--u) * 4) 0; text-align: left; }
+  .portrait .steps { flex-direction: column; gap: calc(var(--u) * 3); }
+  .step { flex: 1; display: flex; gap: calc(var(--u) * 2); align-items: flex-start; max-width: calc(var(--u) * 46); }
+  .step i { flex: none; width: calc(var(--u) * 7); height: calc(var(--u) * 7); border-radius: 50%; background: var(--brand); color: #fff;
+    font-style: normal; font-weight: 800; font-size: calc(var(--u) * 3.6); display: flex; align-items: center; justify-content: center; }
+  .step b { display: block; font-size: calc(var(--u) * 3.2); margin-top: calc(var(--u) * .4); }
+  .step span { display: block; font-size: calc(var(--u) * 2.3); color: var(--muted); margin-top: calc(var(--u) * .6); line-height: 1.35; }
+  .info .qr-card { margin-top: calc(var(--u) * 1); }
+  /* Portrait screens have room to spare vertically, so the info slides get larger type. */
+  .portrait .info h2 { font-size: calc(var(--u) * 8.5); }
+  .portrait .info p.lede { font-size: calc(var(--u) * 3.8); }
+  .portrait .step { max-width: none; }
+  .portrait .step i { width: calc(var(--u) * 9); height: calc(var(--u) * 9); font-size: calc(var(--u) * 4.6); }
+  .portrait .step b { font-size: calc(var(--u) * 4.6); }
+  .portrait .step span { font-size: calc(var(--u) * 3.3); }
+  .portrait .info .logo { height: calc(var(--u) * 18); }
+  .portrait .bigstats b { font-size: calc(var(--u) * 15); }
+  .portrait .bigstats span { font-size: calc(var(--u) * 3.4); }
+  .portrait .qr-text b { font-size: calc(var(--u) * 3); }
+  .portrait .qr-text span { font-size: calc(var(--u) * 2.5); }
+  .tails { display: grid; grid-template-columns: repeat(6, 1fr); gap: calc(var(--u) * 1.6); width: 100%; margin: calc(var(--u) * 4) 0 calc(var(--u) * 3); }
+  .portrait .tails { grid-template-columns: repeat(3, 1fr); }
+  .tail { position: relative; aspect-ratio: 1 / 1; border-radius: calc(var(--u) * 1.6); overflow: hidden; background: #ddd; }
+  .tail img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tail em { position: absolute; top: calc(var(--u) * 2.2); right: calc(var(--u) * -4.2); width: calc(var(--u) * 17); transform: rotate(45deg);
+    background: var(--adopted); color: #fff; font-style: normal; font-weight: 700; font-size: calc(var(--u) * 1.4); letter-spacing: .08em;
+    text-transform: uppercase; text-align: center; padding: calc(var(--u) * .5) 0; }
+  .tail span { position: absolute; left: 0; right: 0; bottom: 0; padding: calc(var(--u) * 3) calc(var(--u) * 1.4) calc(var(--u) * 1.2);
+    color: #fff; font-weight: 700; font-size: calc(var(--u) * 2.2); text-align: left; background: linear-gradient(transparent, rgba(0,0,0,.65)); }
+
+  /* ---- Mockup toolbar (?mock=1 only) ---- */
+  .mockbar { display: none; }
+  body.mock { background: #2a2a2a; cursor: auto; }
+  body.mock .mockbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    padding: 10px 14px; background: #151515; color: #ddd; font-size: 13px; }
+  .mockbar span { opacity: .6; margin: 0 4px 0 10px; }
+  .mockbar button { font: inherit; padding: 6px 12px; border-radius: 999px; border: 1px solid #555; background: transparent; color: #fff; cursor: pointer; }
+  .mockbar button[aria-pressed="true"] { background: #fff; color: #111; }
+  body.mock .stage { top: 60px; bottom: 16px; left: 16px; right: 16px; }
+  body.mock .screen { box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+</style>
+</head>
+<body>
+  <div class="mockbar">
+    <strong>Screen mockup</strong>
+    <span>Screen</span><button data-orient="landscape" aria-pressed="true">16:9 landscape</button><button data-orient="portrait">9:16 portrait</button>
+    <span>Layout</span><button data-layout="split" aria-pressed="true">B &middot; Split</button><button data-layout="poster">A &middot; Poster</button>
+    <span>Jump to</span><button data-jump="animal">Next animal</button><button data-jump="who">Who we are</button><button data-jump="how">How to adopt</button><button data-jump="tails">Happy tails</button>
+  </div>
+  <div class="stage"><div class="screen">
+    <div class="slides"></div>
+    <div class="progress"></div>
+    <div class="ticker"><span><b>Redemption Rescue</b></span><i></i><span class="t-long">Local nonprofit dog &amp; cat rescue</span><i class="t-long"></i><span>Meet more adoptable pets at <b>redemptionrescueinc.com</b></span></div>
+  </div></div>
+
+<script src="qrcode.js"></script>
+<script>
+(function () {
+  // ---- Configuration -------------------------------------------------------
+  var SITE = "redemptionrescueinc.com";
+  var ANIMAL_URL = "https://redemptionrescueinc.com/adopt#animal-{id}";   // what each animal's QR code opens
+  var ADOPT_URL = "https://redemptionrescueinc.com/adopt";                 // QR on the info slides
+  var LOGO = "https://images.squarespace-cdn.com/content/v1/5a25b56b51a5845bb4efad79/2b8394b7-51a2-4040-9d5f-2ceebdb5059a/2+color.png?format=300w";
+  var MISSION = "Redemption Rescue is a local nonprofit finding loving homes for dogs and cats in need.";
+  var ANIMAL_MS = 15000;       // time per animal (?seconds=)
+  var INFO_MS = 12000;         // time per info slide
+  var INFO_EVERY = 5;          // an info slide after every N animals
+  var MAX_PHOTOS = 4;          // photos cycled per animal
+  var STAY_WEIGHT = 1.5;       // longer stays come up earlier more often (0 = pure random)
+  var SKIP_STATUSES = ["Hold - Applications Pending", "Hold - Pending Adoption"];
+  var REFRESH_MS = 30 * 60000; // re-check the animal list
+  // --------------------------------------------------------------------------
+
+  var EMBEDDED = null; /*EMBEDDED_DATA*/
+  var params = {};
+  location.search.replace(/[?&]([^=&]+)=?([^&]*)/g, function (_, k, v) { params[k] = decodeURIComponent(v); });
+  if (params.seconds && +params.seconds >= 5) ANIMAL_MS = +params.seconds * 1000;
+  var mock = params.mock === "1";
+
+  var stage = document.querySelector(".stage"), screen = document.querySelector(".screen");
+  var slidesEl = document.querySelector(".slides"), bar = document.querySelector(".progress");
+  var orient = params.orient || "landscape", layout = params.layout === "poster" ? "poster" : "split";
+  if (params.qr === "off") screen.classList.add("no-qr");
+  if (mock) document.body.classList.add("mock");
+
+  // ---- sizing: --u = 1% of the screen's short side; class says landscape/portrait ----
+  function fit() {
+    var w, h;
+    if (mock) {
+      var aw = stage.clientWidth, ah = stage.clientHeight, r = orient === "portrait" ? 9 / 16 : 16 / 9;
+      w = Math.min(aw, ah * r); h = w / r;
+      screen.style.cssText = "width:" + w + "px;height:" + h + "px;left:" + (aw - w) / 2 + "px;top:" + (ah - h) / 2 + "px;right:auto;bottom:auto";
+    } else { w = stage.clientWidth; h = stage.clientHeight; }
+    screen.style.setProperty("--u", Math.min(w, h) / 100 + "px");
+    screen.classList.toggle("portrait", h > w);
+    screen.classList.toggle("poster", layout === "poster");
+  }
+  window.addEventListener("resize", fit);
+
+  // ---- helpers ----
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function age(m) {
+    if (m == null || m === "") return "";
+    var y = Math.floor(m / 12), r = m % 12;
+    if (!y) return r + (r === 1 ? " month old" : " months old");
+    return y + (y === 1 ? " year old" : " years old");
+  }
+  function days(a) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(a.intakeDate || "");
+    return m ? Math.max(0, Math.floor((Date.now() - Date.UTC(+m[1], +m[2] - 1, +m[3])) / 86400000)) : null;
+  }
+  // One glanceable line from the bio: a short opening headline if there is one
+  // ("Three Names, One Available Lap"), otherwise the opening sentence(s) that fit.
+  function oneLine(a) {
+    var para = ((a.description || "").split(/\n/).filter(function (l) { return l.trim(); })[0] || "").replace(/\s+/g, " ").trim();
+    if (!para) return "";
+    if (para.length <= 70 && !/[.!?]["\u201d']?$/.test(para)) return para;
+    var out = "", parts = para.match(/[^.!?]+[.!?]+["\u201d']?(\s*[^\w\s]+)?/g) || [];
+    for (var i = 0; i < parts.length && (out + parts[i]).length <= 140; i++) out += parts[i];
+    if (!out && parts[0] && parts[0].length <= 180) out = parts[0];
+    return out.trim();
+  }
+  function shuffle(list) {
+    for (var i = list.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = list[i]; list[i] = list[j]; list[j] = t; }
+    return list;
+  }
+  function weightedShuffle(list) {
+    return list.map(function (a) {
+      var w = Math.pow(1 + (days(a) || 0) / 30, STAY_WEIGHT);
+      return { a: a, k: Math.pow(Math.random(), 1 / w) };
+    }).sort(function (x, y) { return y.k - x.k; }).map(function (x) { return x.a; });
+  }
+  // QR code as crisp SVG (qrcode.js = qrcode-generator, MIT).
+  function qrSvg(url) {
+    if (typeof qrcode !== "function") return "";
+    var q = qrcode(0, "M"); q.addData(url); q.make();
+    var n = q.getModuleCount(), pad = 2, d = "";
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) d += "M" + (c + pad) + "," + (r + pad) + "h1v1h-1z";
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + (n + pad * 2) + " " + (n + pad * 2) + '" shape-rendering="crispEdges">' +
+      '<rect width="100%" height="100%" fill="#fff"/><path d="' + d + '" fill="#111"/></svg>';
+  }
+  function load(src) {
+    return new Promise(function (res) {
+      var i = new Image(); var done = function () { res(); };
+      i.onload = done; i.onerror = done; i.src = src; setTimeout(done, 4000);
+    });
+  }
+
+  // ---- data ----
+  var data = { animals: [], adopted: [], stats: null };
+  function getJSON(name) {
+    return fetch(name + "?v=" + Math.floor(Date.now() / 600000)).then(function (r) { if (!r.ok) throw 0; return r.json(); });
+  }
+  function refresh() {
+    return Promise.all([getJSON("animals.json"), getJSON("adopted.json").catch(function () { return null; }), getJSON("stats.json").catch(function () { return null; })])
+      .then(function (res) {
+        data.animals = res[0].animals || [];
+        if (res[1]) data.adopted = res[1].animals || [];
+        if (res[2]) data.stats = res[2];
+      })
+      .catch(function () {
+        // Keep showing the last good list if the network drops; use the snapshot only on first load.
+        if (!data.animals.length && EMBEDDED) { data.animals = EMBEDDED.animals; data.adopted = EMBEDDED.adopted; data.stats = EMBEDDED.stats; }
+      });
+  }
+  function rotation() {
+    return data.animals.filter(function (a) {
+      if (!a.photos || !a.photos.length || SKIP_STATUSES.indexOf(a.status) >= 0) return false;
+      if (params.only === "dogs") return a.type === "Dog";
+      if (params.only === "cats") return a.type === "Cat";
+      return true;
+    });
+  }
+
+  // ---- slides ----
+  var queue = [], infoTurn = 0, current = null, slideTimer = null, photoTimer = null;
+  var INFO = ["who", "how", "tails"];
+  function buildQueue() {
+    var list = weightedShuffle(rotation());
+    queue = [];
+    list.forEach(function (a, i) {
+      queue.push({ kind: "animal", a: a });
+      if ((i + 1) % INFO_EVERY === 0) queue.push({ kind: INFO[infoTurn++ % INFO.length] });
+    });
+    if (list.length % INFO_EVERY !== 0 || !list.length) queue.push({ kind: INFO[infoTurn++ % INFO.length] });
+  }
+
+  function animalSlide(a) {
+    var photos = [a.photos[0]].concat(shuffle(a.photos.slice(1))).slice(0, MAX_PHOTOS);
+    var d = days(a);
+    var waitHtml = d === null ? "" : d === 0
+      ? '<div class="wait"><b>New!</b><span>arrived today</span></div>'
+      : '<div class="wait"><b>' + d + "</b><span>" + (d === 1 ? "day" : "days") + " waiting<br>for a home</span></div>";
+    var el = document.createElement("div");
+    el.className = "slide animal";
+    el.innerHTML =
+      '<div class="photos">' + photos.map(function (p, i) { return '<img class="' + (i % 2 ? "alt" : "") + '" src="' + esc(p) + '" alt="">'; }).join("") +
+        (photos.length > 1 ? '<div class="photo-dots">' + photos.map(function () { return "<span></span>"; }).join("") + "</div>" : "") +
+        '<div class="brand-pill"><img src="' + esc(LOGO) + '" alt="Redemption Rescue"></div>' +
+      "</div>" +
+      '<div class="panel">' +
+        '<img class="logo" src="' + esc(LOGO) + '" alt="Redemption Rescue">' +
+        '<div class="eyebrow">Adoptable from Redemption Rescue</div>' +
+        '<div class="name serif">' + esc(a.name) + "</div>" +
+        '<div class="meta">' + esc([a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" \u00b7 ")) + "</div>" +
+        (oneLine(a) ? '<div class="line">' + esc(oneLine(a)) + "</div>" : "") +
+        '<div class="facts">' + waitHtml +
+          '<div class="qr-card"><div class="qr">' + qrSvg(ANIMAL_URL.replace("{id}", encodeURIComponent(a.id))) + "</div>" +
+          '<div class="qr-text"><b>Scan to meet ' + esc(a.name) + "</b><span>" + SITE + "</span></div></div>" +
+        "</div>" +
+      "</div>";
+    var imgs = el.querySelectorAll(".photos img"), dots = el.querySelectorAll(".photo-dots span"), k = -1;
+    el.start = function () {
+      var step = function () {
+        k = (k + 1) % imgs.length;
+        for (var i = 0; i < imgs.length; i++) { imgs[i].classList.toggle("on", i === k); if (dots[i]) dots[i].classList.toggle("on", i === k); }
+        if (imgs.length > 1) photoTimer = setTimeout(step, ANIMAL_MS / imgs.length);
+      };
+      step();
+    };
+    el.ready = Promise.all(photos.slice(0, 2).map(load));
+    return el;
+  }
+
+  function infoSlide(kind) {
+    var el = document.createElement("div");
+    el.className = "slide info";
+    var avail = data.animals.length, year = data.stats && data.stats.thisYear;
+    var qr = '<div class="qr-card"><div class="qr">' + qrSvg(ADOPT_URL) + '</div><div class="qr-text"><b>Scan to meet them all</b><span>' + SITE + "/adopt</span></div></div>";
+    if (kind === "who") {
+      el.innerHTML = '<img class="logo" src="' + esc(LOGO) + '" alt="Redemption Rescue">' +
+        '<h2 class="serif">Every pet deserves a second chance</h2><p class="lede">' + esc(MISSION) + "</p>" +
+        '<div class="bigstats">' +
+          (year ? "<div><b>" + year.count + "</b><span>pets adopted in " + esc(year.label) + "</span></div>" : "") +
+          (avail ? "<div><b>" + avail + "</b><span>waiting for a home right now</span></div>" : "") +
+        "</div>";
+    } else if (kind === "how") {
+      el.innerHTML = '<h2 class="serif">How to adopt</h2>' +
+        '<div class="steps">' +
+          '<div class="step"><i>1</i><div><b>Browse</b><span>See every adoptable dog and cat at ' + SITE + "</span></div></div>" +
+          '<div class="step"><i>2</i><div><b>Apply online</b><span>Tell us about your home. It only takes a few minutes.</span></div></div>' +
+          '<div class="step"><i>3</i><div><b>Meet your match</b><span>We\u2019ll help you find the right fit for your family.</span></div></div>' +
+        "</div>" + qr;
+    } else {
+      var tails = data.adopted.filter(function (t) { return t.photo; }).slice(0, 6);
+      el.innerHTML = '<h2 class="serif">Happy tails</h2>' +
+        '<p class="lede">' + data.adopted.length + " pets from Redemption Rescue found their families in the last 60 days. Yours could be next!</p>" +
+        '<div class="tails">' + tails.map(function (t) {
+          return '<div class="tail"><img src="' + esc(t.photo) + '" alt=""><em>Adopted!</em><span>' + esc(t.name) + "</span></div>";
+        }).join("") + "</div>" + qr.replace("Scan to meet them all", "Scan to find your new best friend");
+    }
+    el.start = function () {};
+    el.ready = Promise.resolve();
+    return el;
+  }
+
+  function show(item) {
+    clearTimeout(slideTimer); clearTimeout(photoTimer);
+    var el = item.kind === "animal" ? animalSlide(item.a) : infoSlide(item.kind);
+    var ms = item.kind === "animal" ? ANIMAL_MS : INFO_MS;
+    slidesEl.appendChild(el);
+    el.ready.then(function () {
+      var old = current; current = el;
+      requestAnimationFrame(function () { el.classList.add("on"); });
+      if (old) { old.classList.remove("on"); setTimeout(function () { if (old.parentNode) old.parentNode.removeChild(old); }, 1100); }
+      el.start();
+      bar.style.transition = "none"; bar.style.width = "0"; void bar.offsetWidth;
+      bar.style.transition = "width " + ms + "ms linear"; bar.style.width = "100%";
+      slideTimer = setTimeout(next, ms);
+      // Warm up the next animal's first photo.
+      var up = queue[0]; if (up && up.kind === "animal") new Image().src = up.a.photos[0];
+    });
+  }
+  function next() {
+    if (!queue.length) buildQueue();
+    show(queue.shift());
+  }
+
+  // ---- mockup controls ----
+  document.querySelectorAll(".mockbar button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var o = b.getAttribute("data-orient"), l = b.getAttribute("data-layout"), j = b.getAttribute("data-jump");
+      if (o) orient = o;
+      if (l) layout = l;
+      if (o || l) {
+        document.querySelectorAll(o ? "[data-orient]" : "[data-layout]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+        fit();
+      }
+      if (j === "animal") { var a = queue.filter(function (q) { return q.kind === "animal"; })[0]; if (!a) buildQueue(); next(); }
+      else if (j) show({ kind: j });
+    });
+  });
+
+  // ---- run ----
+  fit();
+  refresh().then(function () { buildQueue(); next(); });
+  setInterval(refresh, REFRESH_MS);
+  // Reload once a night (around 4am) so long-running TV browsers stay fresh.
+  var loadedAt = Date.now();
+  setInterval(function () {
+    if (!mock && new Date().getHours() === 4 && Date.now() - loadedAt > 3 * 3600000) location.reload();
+  }, 10 * 60000);
+})();
+</script>
+</body>
+</html>
