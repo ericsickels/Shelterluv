@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homepage mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* Clickable mockups of homepage "available animals" features. Not used on the live site. */
+  :root { --ink: #222; --muted: #666; --accent: #2e7d4f; --pending: #b26a00; --soft: #f6f4ef; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--ink); background: #e9e6e0; }
+  a { color: inherit; }
+
+  .bar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 12px 16px; background: #1d1d1d; color: #fff; }
+  .bar strong { margin-right: 8px; font-size: 13px; opacity: .7; font-weight: 600; }
+  .bar button { font: inherit; font-size: 14px; padding: 8px 16px; border-radius: 999px; cursor: pointer;
+    border: 1px solid #555; background: transparent; color: #fff; }
+  .bar button[aria-pressed="true"] { background: #fff; border-color: #fff; color: #111; }
+
+  .fake-hero { height: 150px; display: flex; align-items: center; justify-content: center; color: #fff;
+    background: linear-gradient(135deg, #b9a58d, #7d6a55); font-family: Georgia, serif; letter-spacing: .2em;
+    text-transform: uppercase; font-size: 14px; }
+  .section { background: #fff; padding: 64px 16px 72px; }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  .h2 { margin: 0 0 10px; text-align: center; font-family: Georgia, serif; font-weight: 400; text-transform: uppercase;
+    letter-spacing: .08em; font-size: clamp(24px, 3.4vw, 34px); }
+  .lead { margin: 0 0 36px; text-align: center; color: var(--muted); font-size: 17px; }
+  .lead b, .count b { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .mock { display: none; } .mock.on { display: block; }
+  .after { height: 120px; background: var(--soft); display: flex; align-items: center; justify-content: center;
+    color: #aaa; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+
+  .btn { display: inline-block; padding: 13px 26px; border-radius: 999px; background: var(--ink); color: #fff;
+    text-decoration: none; font-weight: 600; border: 1px solid var(--ink); font-size: 15px; cursor: pointer; font-family: inherit; }
+  .btn.ghost { background: transparent; color: var(--ink); }
+  .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tag { display: inline-block; margin-left: 8px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; background: var(--pending); color: #fff; vertical-align: middle; }
+  img.broken { visibility: hidden; }
+
+  /* ---- 1/5: Spotlight + waiting count ---- */
+  .count { margin: 0 0 32px; text-align: center; font-family: Georgia, serif; font-size: clamp(22px, 3vw, 30px); line-height: 1.3; }
+  .count b { font-size: 1.35em; }
+  .spot { position: relative; display: grid; grid-template-columns: 1.15fr 1fr; min-height: 440px;
+    border-radius: 20px; overflow: hidden; background: var(--soft); box-shadow: 0 14px 44px rgba(0,0,0,.09); }
+  .spot-photo { position: relative; background: #e3e8e3; min-height: 320px; overflow: hidden; }
+  .spot-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    opacity: 0; transform: scale(1.06); transition: opacity .9s ease, transform 8s linear; }
+  .spot-photo img.on { opacity: 1; transform: scale(1); }
+  .spot-nav { position: absolute; top: 50%; z-index: 2; transform: translateY(-50%); width: 42px; height: 42px;
+    border-radius: 50%; border: none; cursor: pointer; font-size: 24px; line-height: 1; background: rgba(255,255,255,.9);
+    box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+  .spot-prev { left: 14px; } .spot-next { right: 14px; }
+  .spot-body { display: flex; flex-direction: column; justify-content: center; padding: 44px 44px 52px; }
+  .spot-body > * { transition: opacity .35s ease, transform .35s ease; }
+  .spot.swap .spot-body > * { opacity: 0; transform: translateY(8px); }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+  .spot-name { margin: 6px 0; font-family: Georgia, serif; font-weight: 400; font-size: clamp(36px, 4.6vw, 54px); line-height: 1; }
+  .spot-meta { margin: 0 0 16px; color: var(--muted); }
+  .spot-text { margin: 0 0 26px; line-height: 1.65; }
+  .progress { position: absolute; left: 0; bottom: 0; height: 4px; width: 0; background: var(--accent); }
+  .rail { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 24px; }
+  .rail button { width: 54px; height: 54px; padding: 0; border-radius: 50%; overflow: hidden; cursor: pointer;
+    border: 3px solid transparent; background: #e3e8e3; opacity: .55; transition: opacity .2s, transform .2s, border-color .2s; }
+  .rail button:hover { opacity: .9; }
+  .rail button[aria-current="true"] { opacity: 1; border-color: var(--accent); transform: scale(1.08); }
+  .rail img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* ---- 3: Photo stack ---- */
+  .stack-wrap { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 48px; }
+  .stack { position: relative; width: min(340px, 78vw); aspect-ratio: .8; margin: 0 auto; touch-action: pan-y; }
+  .polaroid { position: absolute; inset: 0; padding: 14px 14px 0; border-radius: 6px; background: #fff;
+    box-shadow: 0 14px 34px rgba(0,0,0,.2); user-select: none; -webkit-user-select: none; cursor: grab;
+    transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .55s ease; }
+  .polaroid.dragging { transition: none; cursor: grabbing; }
+  .polaroid .pic { width: 100%; aspect-ratio: 1; background: #e3e8e3; overflow: hidden; }
+  .polaroid img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+  .polaroid .cap { padding: 10px 0 0; text-align: center; font-family: Caveat, "Comic Sans MS", cursive; font-size: 34px; line-height: 1; }
+  .polaroid .sub { text-align: center; font-size: 13px; color: #888; margin-top: 4px; }
+  .stack-copy .h2, .stack-copy .lead { text-align: left; }
+  .stack-current { margin: 0 0 22px; padding: 18px 20px; border-radius: 14px; background: var(--soft); }
+  .stack-current strong { display: block; font-family: Georgia, serif; font-weight: 400; font-size: 26px; }
+  .stack-current .stack-meta { color: var(--muted); }
+  .hint { margin-top: 18px; font-size: 13px; color: #999; }
+
+  /* ---- 4: Living wall ---- */
+  .wall { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .tile { position: relative; display: block; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #e3e8e3; text-decoration: none; }
+  .tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 1.2s ease, transform .4s ease; }
+  .tile:hover img { transform: scale(1.04); }
+  .tile .lbl { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: 30px 14px 12px; color: #fff; font-weight: 600;
+    background: linear-gradient(transparent, rgba(0,0,0,.6)); transition: opacity .6s ease; }
+  .tile .lbl small { display: block; font-weight: 400; opacity: .85; font-size: 12px; }
+  .wall-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 18px; margin-top: 32px; text-align: center; }
+  .wall-cta p { margin: 0; font-family: Georgia, serif; font-size: clamp(20px, 2.6vw, 26px); }
+
+  @media (max-width: 760px) {
+    .spot { grid-template-columns: 1fr; }
+    .spot-photo { aspect-ratio: 1; min-height: 0; }
+    .spot-body { padding: 26px 22px 34px; }
+    .spot-nav { display: none; }
+    .rail button { width: 44px; height: 44px; }
+    .stack-wrap { grid-template-columns: 1fr; gap: 28px; }
+    .stack-copy .h2, .stack-copy .lead { text-align: center; }
+    .wall { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .wall .tile:nth-child(n+7) { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="bar" role="group" aria-label="Choose a mockup">
+    <strong>Homepage mockups</strong>
+    <button type="button" data-show="spot" aria-pressed="true">1/5 &middot; Spotlight + count</button>
+    <button type="button" data-show="stack" aria-pressed="false">3 &middot; Photo stack</button>
+    <button type="button" data-show="wall" aria-pressed="false">4 &middot; Living wall</button>
+  </div>
+  <div class="fake-hero">Your existing hero section</div>
+
+  <section class="section mock on" id="spot">
+    <div class="wrap">
+      <p class="count"><b data-count="dogs">0</b> dogs and <b data-count="cats">0</b> cats are looking for homes right now</p>
+      <div class="spot" id="spot-panel">
+        <div class="spot-photo">
+          <button type="button" class="spot-nav spot-prev" aria-label="Previous animal">&#8249;</button>
+          <button type="button" class="spot-nav spot-next" aria-label="Next animal">&#8250;</button>
+        </div>
+        <div class="spot-body">
+          <div class="eyebrow">Meet</div>
+          <h3 class="spot-name"></h3>
+          <p class="spot-meta"></p>
+          <p class="spot-text"></p>
+          <div class="btns"><a class="btn spot-cta" target="_blank" rel="noopener"></a>
+            <a class="btn ghost" href="https://redemptionrescueinc.com/adopt" target="_blank" rel="noopener">See all animals</a></div>
+        </div>
+        <div class="progress"></div>
+      </div>
+      <div class="rail" role="group" aria-label="Choose an animal"></div>
+    </div>
+  </section>
+
+  <section class="section mock" id="stack">
+    <div class="wrap stack-wrap">
+      <div class="stack-copy">
+        <h2 class="h2">Who will you meet today?</h2>
+        <p class="lead"><b class="total">0</b> sweet animals are waiting for a family. Swipe or tap through to say hi.</p>
+        <div class="stack-current"><strong></strong><span class="stack-meta"></span></div>
+        <div class="btns"><a class="btn stack-cta" target="_blank" rel="noopener"></a>
+          <button type="button" class="btn ghost stack-next">Next &rarr;</button></div>
+        <p class="hint">Drag a photo left or right, or tap it to meet them.</p>
+      </div>
+      <div class="stack"></div>
+    </div>
+  </section>
+
+  <section class="section mock" id="wall">
+    <div class="wrap">
+      <h2 class="h2">Waiting for a home</h2>
+      <p class="lead">Every face here is looking for their person.</p>
+      <div class="wall"></div>
+      <div class="wall-cta"><p><b class="total">0</b> animals are waiting for a home</p>
+        <a class="btn" href="https://redemptionrescueinc.com/adopt" target="_blank" rel="noopener">Meet them all &rarr;</a></div>
+    </div>
+  </section>
+
+  <div class="after">Rest of your homepage</div>
+
+<script>
+(function () {
+  var EMBEDDED = null; /*EMBEDDED_DATA*/
+  var ANIMAL_URL = "https://redemptionrescueinc.com/adopt#animal-";
+  var PENDING = ["Hold - Applications Pending", "Hold - Pending Adoption"];
+  var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function age(m) {
+    if (m == null || m === "") return "";
+    var y = Math.floor(m / 12), r = m % 12;
+    if (!y) return r + (r === 1 ? " month" : " months");
+    return y + (y === 1 ? " year" : " years");
+  }
+  function meta(a) { return [a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" · "); }
+  function excerpt(a) {
+    var text = (a.description || "").replace(/\s+/g, " ").trim();
+    if (!text) return a.name + " is waiting to meet you!";
+    var out = "", parts = text.match(/[^.!?]+[.!?]+/g) || [text];
+    for (var i = 0; i < parts.length && (out + parts[i]).length < 230; i++) out += parts[i];
+    return (out || text.slice(0, 220) + "…").trim();
+  }
+  function shuffle(list) {
+    for (var i = list.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = list[i]; list[i] = list[j]; list[j] = t; }
+    return list;
+  }
+  function img(src, alt) {
+    return '<img src="' + esc(src) + '" alt="' + esc(alt || "") + '" onerror="this.classList.add(\'broken\')">';
+  }
+  function pending(a) { return PENDING.indexOf(a.status) >= 0; }
+  function countUp(el, target) {
+    if (reduceMotion) { el.textContent = target; return; }
+    var start = null;
+    requestAnimationFrame(function step(t) {
+      if (start === null) start = t;
+      var p = Math.min(1, (t - start) / 1400);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - p, 4)));
+      if (p < 1) requestAnimationFrame(step);
+    });
+  }
+  function whenVisible(el, fn) {
+    if (!("IntersectionObserver" in window)) return fn();
+    var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { io.disconnect(); fn(); } }, { threshold: .4 });
+    io.observe(el);
+  }
+
+  // ---- tabs ----
+  var started = {};
+  document.querySelectorAll(".bar button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll(".bar button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      document.querySelectorAll(".mock").forEach(function (m) { m.classList.toggle("on", m.id === b.getAttribute("data-show")); });
+      start(b.getAttribute("data-show"));
+    });
+  });
+
+  var animals = [];
+  function start(which) {
+    if (started[which] || !animals.length) return;
+    started[which] = true;
+    ({ spot: spotlight, stack: stack, wall: wall })[which]();
+  }
+
+  // ---- 1/5: Spotlight + count ----
+  function spotlight() {
+    var DURATION = 7000;
+    var list = shuffle(animals.slice());
+    var panel = document.getElementById("spot-panel"), photo = panel.querySelector(".spot-photo");
+    var bar = panel.querySelector(".progress"), rail = document.querySelector("#spot .rail");
+    var index = -1, timer = null, remaining = DURATION, startedAt = 0, paused = false;
+
+    var dogs = animals.filter(function (a) { return a.type === "Dog"; }).length;
+    var cats = animals.filter(function (a) { return a.type === "Cat"; }).length;
+    whenVisible(document.querySelector("#spot .count"), function () {
+      countUp(document.querySelector('[data-count="dogs"]'), dogs);
+      countUp(document.querySelector('[data-count="cats"]'), cats);
+    });
+
+    rail.innerHTML = list.map(function (a, i) {
+      return '<button type="button" data-i="' + i + '" aria-label="' + esc(a.name) + '">' + img(a.photos[0], "") + "</button>";
+    }).join("");
+
+    function show(i) {
+      index = (i + list.length) % list.length;
+      var a = list[index];
+      var old = photo.querySelector("img.on");
+      photo.insertAdjacentHTML("beforeend", img(a.photos[0], a.name));
+      var fresh = photo.lastElementChild;
+      requestAnimationFrame(function () { requestAnimationFrame(function () { fresh.classList.add("on"); }); });
+      if (old) { old.classList.remove("on"); setTimeout(function () { old.remove(); }, 1000); }
+
+      panel.classList.add("swap");
+      setTimeout(function () {
+        panel.querySelector(".spot-name").innerHTML = esc(a.name) + (pending(a) ? '<span class="tag">Pending</span>' : "");
+        panel.querySelector(".spot-meta").textContent = meta(a);
+        panel.querySelector(".spot-text").textContent = excerpt(a);
+        var cta = panel.querySelector(".spot-cta");
+        cta.textContent = "Meet " + a.name;
+        cta.href = ANIMAL_URL + encodeURIComponent(a.id);
+        panel.classList.remove("swap");
+      }, old ? 350 : 0);
+
+      rail.querySelectorAll("button").forEach(function (b, n) { b.setAttribute("aria-current", String(n === index)); });
+      // Preload the next photo so the crossfade is instant.
+      new Image().src = list[(index + 1) % list.length].photos[0];
+      restart(DURATION);
+    }
+    function restart(ms) {
+      clearTimeout(timer);
+      remaining = ms; startedAt = performance.now();
+      bar.style.transition = "none";
+      bar.style.width = ((1 - ms / DURATION) * 100) + "%";
+      if (reduceMotion || paused) return;
+      void bar.offsetWidth;
+      bar.style.transition = "width " + ms + "ms linear";
+      bar.style.width = "100%";
+      timer = setTimeout(function () { show(index + 1); }, ms);
+    }
+    function pause() {
+      if (paused) return; paused = true; clearTimeout(timer);
+      remaining = Math.max(0, remaining - (performance.now() - startedAt));
+      bar.style.transition = "none";
+      bar.style.width = ((1 - remaining / DURATION) * 100) + "%";
+    }
+    function resume() { if (!paused) return; paused = false; restart(remaining); }
+
+    panel.addEventListener("mouseenter", pause);
+    panel.addEventListener("mouseleave", resume);
+    panel.querySelector(".spot-prev").addEventListener("click", function () { show(index - 1); });
+    panel.querySelector(".spot-next").addEventListener("click", function () { show(index + 1); });
+    rail.addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-i]"); if (b) show(Number(b.getAttribute("data-i")));
+    });
+    // Swipe on the photo for phones.
+    var sx = null;
+    photo.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    photo.addEventListener("touchend", function (e) {
+      if (sx === null) return; var dx = e.changedTouches[0].clientX - sx; sx = null;
+      if (Math.abs(dx) > 40) show(index + (dx < 0 ? 1 : -1));
+    });
+    show(0);
+  }
+
+  // ---- 3: Photo stack ----
+  function stack() {
+    var AUTO = 4500;
+    var list = shuffle(animals.slice());
+    var box = document.querySelector("#stack .stack");
+    var copy = document.querySelector("#stack .stack-copy");
+    var order = list.map(function (_, i) { return i; });
+    var lastTouch = 0, busy = false;
+    var POSES = ["rotate(-2deg)", "translate(10px,8px) rotate(4deg)", "translate(-10px,14px) rotate(-6deg)"];
+
+    box.innerHTML = list.map(function (a, i) {
+      return '<div class="polaroid" data-i="' + i + '"><div class="pic">' + img(a.photos[0], a.name) + "</div>" +
+        '<div class="cap">' + esc(a.name) + '</div><div class="sub">' + esc([a.sex, age(a.ageMonths)].filter(Boolean).join(" · ")) + "</div></div>";
+    }).join("");
+    var cards = box.querySelectorAll(".polaroid");
+
+    function layout() {
+      order.forEach(function (i, depth) {
+        var c = cards[i];
+        c.style.zIndex = String(100 - depth);
+        c.style.opacity = depth < POSES.length ? "1" : "0";
+        c.style.transform = POSES[Math.min(depth, POSES.length - 1)];
+        c.style.pointerEvents = depth === 0 ? "auto" : "none";
+      });
+      var a = list[order[0]];
+      copy.querySelector(".stack-current strong").innerHTML = esc(a.name) + (pending(a) ? '<span class="tag">Pending</span>' : "");
+      copy.querySelector(".stack-meta").textContent = meta(a);
+      var cta = copy.querySelector(".stack-cta");
+      cta.textContent = "Meet " + a.name; cta.href = ANIMAL_URL + encodeURIComponent(a.id);
+      new Image().src = list[order[Math.min(POSES.length, order.length - 1)]].photos[0];
+    }
+    function flyOut(dir) {
+      if (busy) return; busy = true;
+      var c = cards[order[0]];
+      c.classList.remove("dragging");
+      c.style.transform = "translate(" + (dir * 130) + "%, -6%) rotate(" + (dir * 22) + "deg)";
+      c.style.opacity = "0";
+      setTimeout(function () {
+        order.push(order.shift());
+        c.style.transition = "none"; layout(); void c.offsetWidth; c.style.transition = "";
+        busy = false;
+      }, 450);
+    }
+
+    // Drag / swipe the top card.
+    var startX = null, dx = 0;
+    box.addEventListener("pointerdown", function (e) {
+      var c = e.target.closest(".polaroid"); if (!c || busy) return;
+      startX = e.clientX; dx = 0; c.classList.add("dragging"); c.setPointerCapture(e.pointerId); lastTouch = Date.now();
+    });
+    box.addEventListener("pointermove", function (e) {
+      if (startX === null) return; dx = e.clientX - startX;
+      cards[order[0]].style.transform = "translate(" + dx + "px," + (Math.abs(dx) * -.05) + "px) rotate(" + (dx / 18) + "deg)";
+    });
+    box.addEventListener("pointerup", function () {
+      if (startX === null) return; startX = null; lastTouch = Date.now();
+      var c = cards[order[0]];
+      if (Math.abs(dx) > 90) return flyOut(dx > 0 ? 1 : -1);
+      c.classList.remove("dragging"); c.style.transform = POSES[0];
+      if (Math.abs(dx) < 6) window.open(ANIMAL_URL + encodeURIComponent(list[order[0]].id), "_blank", "noopener");
+    });
+    copy.querySelector(".stack-next").addEventListener("click", function () { lastTouch = Date.now(); flyOut(-1); });
+    box.addEventListener("mouseenter", function () { lastTouch = Date.now() + 60000; });
+    box.addEventListener("mouseleave", function () { lastTouch = Date.now(); });
+
+    layout();
+    var total = document.querySelector("#stack .total");
+    whenVisible(box, function () { countUp(total, animals.length); });
+    if (!reduceMotion) setInterval(function () {
+      if (Date.now() - lastTouch > 8000 && document.getElementById("stack").classList.contains("on")) flyOut(Math.random() < .5 ? -1 : 1);
+    }, AUTO);
+  }
+
+  // ---- 4: Living wall ----
+  function wall() {
+    var SWAP = 2600;
+    var grid = document.querySelector("#wall .wall");
+    var pool = shuffle(animals.slice());
+    var tiles = Math.min(8, pool.length);
+    var shown = pool.slice(0, tiles), waiting = pool.slice(tiles), lastTile = -1;
+
+    function tile(a) {
+      return img(a.photos[0], a.name) + '<span class="lbl">' + esc(a.name) + (pending(a) ? '<span class="tag">Pending</span>' : "") +
+        "<small>" + esc([a.sex, age(a.ageMonths)].filter(Boolean).join(" · ")) + "</small></span>";
+    }
+    grid.innerHTML = shown.map(function (a) {
+      return '<a class="tile" target="_blank" rel="noopener" href="' + ANIMAL_URL + encodeURIComponent(a.id) + '">' + tile(a) + "</a>";
+    }).join("");
+    whenVisible(grid, function () { countUp(document.querySelector("#wall .total"), animals.length); });
+    if (reduceMotion || !waiting.length) return;
+
+    setInterval(function () {
+      if (!document.getElementById("wall").classList.contains("on")) return;
+      var visible = [].slice.call(grid.children).filter(function (t) { return t.offsetParent !== null; });
+      var t, n;
+      do { n = Math.floor(Math.random() * visible.length); } while (visible.length > 1 && n === lastTile);
+      lastTile = n; t = visible[n];
+      var i = [].indexOf.call(grid.children, t);
+      var incoming = waiting.shift(); waiting.push(shown[i]); shown[i] = incoming;
+      var oldImg = t.querySelector("img"), oldLbl = t.querySelector(".lbl");
+      t.insertAdjacentHTML("afterbegin", tile(incoming));
+      var newImg = t.firstElementChild, newLbl = newImg.nextElementSibling;
+      newImg.style.opacity = "0"; newLbl.style.opacity = "0";
+      requestAnimationFrame(function () { requestAnimationFrame(function () {
+        newImg.style.opacity = "1"; newLbl.style.opacity = "1"; oldImg.style.opacity = "0"; oldLbl.style.opacity = "0";
+      }); });
+      t.href = ANIMAL_URL + encodeURIComponent(incoming.id);
+      setTimeout(function () { oldImg.remove(); oldLbl.remove(); }, 1300);
+    }, SWAP);
+  }
+
+  function ready(data) {
+    animals = (data.animals || []).filter(function (a) { return a.photos && a.photos.length; });
+    start("spot");
+  }
+  // Use live data when hosted next to animals.json; otherwise fall back to the embedded snapshot.
+  fetch("animals.json?v=" + Math.floor(Date.now() / 600000))
+    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+    .then(ready)
+    .catch(function () { ready(EMBEDDED || { animals: [] }); });
+})();
+</script>
+</body>
+</html>
