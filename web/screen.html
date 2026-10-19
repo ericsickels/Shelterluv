@@ -8,12 +8,12 @@
   Full-screen digital sign for partner screens (e.g. a restaurant TV). Open it full-screen:
     https://animals.redemptionrescueinc.com/screen.html
   Works in landscape (16:9) and portrait (9:16); everything scales to the screen.
-  Options in the address:  ?seconds=15  ?only=dogs|cats  ?qr=off  ?layout=poster
-  Mockup toolbar (orientation/layout switcher, slide jumps): add ?mock=1
+  Options in the address:  ?seconds=15  ?only=dogs|cats  ?qr=off
+  Preview toolbar for checking it from a laptop (16:9 / 9:16 frame, jump to info slides): ?preview=1
 -->
 <style>
   :root {
-    --brand: #d9822b;        /* accent (numbers, eyebrow, progress) */
+    --brand: rgb(221, 115, 8); /* Redemption Rescue orange: numbers, eyebrow, progress, ticker */
     --ink: #1f2326;
     --paper: #fbf7f1;        /* panel background */
     --muted: #5f646b;
@@ -24,7 +24,7 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
   .serif { font-family: Georgia, "Times New Roman", serif; }
 
-  /* The stage is the whole viewport in production, or a scaled 16:9 / 9:16 frame in the mockup. */
+  /* The stage is the whole viewport in production, or a scaled 16:9 / 9:16 frame in ?preview=1. */
   .stage { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
   .screen { --u: 10.8px; position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow: hidden; background: var(--paper); color: var(--ink); }
   .slides { position: absolute; left: 0; right: 0; top: 0; bottom: calc(var(--u) * 6); }
@@ -40,7 +40,7 @@
   .progress { position: absolute; left: 0; bottom: calc(var(--u) * 6); height: calc(var(--u) * .5); width: 0; background: var(--brand); z-index: 5; }
   .portrait .ticker .t-long { display: none; }
 
-  /* ---- Animal slide: split layout (default) ---- */
+  /* ---- Animal slide: photos on one side (top in portrait), details panel on the other ---- */
   .animal { display: grid; grid-template-columns: 58% 42%; }
   .portrait .animal { grid-template-columns: 100%; grid-template-rows: 52% 48%; }
   .photos { position: relative; overflow: hidden; background: #2b2f33; }
@@ -78,24 +78,6 @@
   .qr-text b { display: block; font-size: calc(var(--u) * 2.4); line-height: 1.2; }
   .qr-text span { display: block; margin-top: calc(var(--u) * .7); font-size: calc(var(--u) * 2); color: var(--muted); }
   .no-qr .qr { display: none; }
-
-  /* ---- Animal slide: poster layout (?layout=poster) ---- */
-  .poster .animal { display: block; }
-  .poster .photos { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
-  .poster .panel { position: absolute; left: 0; right: 0; bottom: 0; padding: calc(var(--u) * 14) calc(var(--u) * 5) calc(var(--u) * 4);
-    color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.55) 30%, rgba(0,0,0,.8)); display: grid;
-    grid-template-columns: 1fr auto; grid-template-areas: "eyebrow facts" "name facts" "meta facts" "line facts"; column-gap: calc(var(--u) * 4); align-items: end; }
-  .poster.portrait .panel { grid-template-columns: 1fr; grid-template-areas: "eyebrow" "name" "meta" "line" "facts"; padding-top: calc(var(--u) * 22); }
-  .poster .panel .logo { display: none; }
-  .poster .eyebrow { grid-area: eyebrow; } .poster .name { grid-area: name; } .poster .meta { grid-area: meta; color: rgba(255,255,255,.85); }
-  .poster .line { grid-area: line; } .poster .facts { grid-area: facts; margin-top: calc(var(--u) * 2); }
-  .poster .wait span { color: rgba(255,255,255,.85); }
-  .poster .qr-text b { color: var(--ink); }
-  .poster .photo-dots { top: calc(var(--u) * 3); bottom: auto; right: calc(var(--u) * 3); left: auto; }
-  .brand-pill { display: none; }
-  .poster .brand-pill { display: block; position: absolute; top: calc(var(--u) * 3); left: calc(var(--u) * 3); z-index: 2; padding: calc(var(--u) * 1.2) calc(var(--u) * 2);
-    border-radius: calc(var(--u) * 1.4); background: rgba(255,255,255,.94); }
-  .brand-pill img { height: calc(var(--u) * 7); display: block; }
 
   /* ---- Info slides: who we are / how to adopt / happy tails ---- */
   .info { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
@@ -137,29 +119,28 @@
   .tail span { position: absolute; left: 0; right: 0; bottom: 0; padding: calc(var(--u) * 3) calc(var(--u) * 1.4) calc(var(--u) * 1.2);
     color: #fff; font-weight: 700; font-size: calc(var(--u) * 2.2); text-align: left; background: linear-gradient(transparent, rgba(0,0,0,.65)); }
 
-  /* ---- Mockup toolbar (?mock=1 only) ---- */
-  .mockbar { display: none; }
-  body.mock { background: #2a2a2a; cursor: auto; }
-  body.mock .mockbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  /* ---- Preview toolbar (?preview=1 only) ---- */
+  .previewbar { display: none; }
+  body.preview { background: #2a2a2a; cursor: auto; }
+  body.preview .previewbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 50;
     padding: 10px 14px; background: #151515; color: #ddd; font-size: 13px; }
-  .mockbar span { opacity: .6; margin: 0 4px 0 10px; }
-  .mockbar button { font: inherit; padding: 6px 12px; border-radius: 999px; border: 1px solid #555; background: transparent; color: #fff; cursor: pointer; }
-  .mockbar button[aria-pressed="true"] { background: #fff; color: #111; }
-  body.mock .stage { top: 60px; bottom: 16px; left: 16px; right: 16px; }
-  body.mock .screen { box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+  .previewbar span { opacity: .6; margin: 0 4px 0 10px; }
+  .previewbar button { font: inherit; padding: 6px 12px; border-radius: 999px; border: 1px solid #555; background: transparent; color: #fff; cursor: pointer; }
+  .previewbar button[aria-pressed="true"] { background: #fff; color: #111; }
+  body.preview .stage { top: 60px; bottom: 16px; left: 16px; right: 16px; }
+  body.preview .screen { box-shadow: 0 10px 40px rgba(0,0,0,.6); }
 </style>
 </head>
 <body>
-  <div class="mockbar">
-    <strong>Screen mockup</strong>
+  <div class="previewbar">
+    <strong>Screen preview</strong>
     <span>Screen</span><button data-orient="landscape" aria-pressed="true">16:9 landscape</button><button data-orient="portrait">9:16 portrait</button>
-    <span>Layout</span><button data-layout="split" aria-pressed="true">B &middot; Split</button><button data-layout="poster">A &middot; Poster</button>
     <span>Jump to</span><button data-jump="animal">Next animal</button><button data-jump="who">Who we are</button><button data-jump="how">How to adopt</button><button data-jump="tails">Happy tails</button>
   </div>
   <div class="stage"><div class="screen">
     <div class="slides"></div>
     <div class="progress"></div>
-    <div class="ticker"><span><b>Redemption Rescue</b></span><i></i><span class="t-long">Local nonprofit dog &amp; cat rescue</span><i class="t-long"></i><span>Meet more adoptable pets at <b>redemptionrescueinc.com</b></span></div>
+    <div class="ticker"><span><b>Redemption Rescue</b></span><i></i><span class="t-long">Foster-based nonprofit rescue in Indiana</span><i class="t-long"></i><span>Meet more adoptable pets at <b>redemptionrescueinc.com</b></span></div>
   </div></div>
 
 <script src="qrcode.js"></script>
@@ -170,7 +151,7 @@
   var ANIMAL_URL = "https://redemptionrescueinc.com/adopt#animal-{id}";   // what each animal's QR code opens
   var ADOPT_URL = "https://redemptionrescueinc.com/adopt";                 // QR on the info slides
   var LOGO = "https://images.squarespace-cdn.com/content/v1/5a25b56b51a5845bb4efad79/2b8394b7-51a2-4040-9d5f-2ceebdb5059a/2+color.png?format=300w";
-  var MISSION = "Redemption Rescue is a local nonprofit finding loving homes for dogs and cats in need.";
+  var MISSION = "Redemption Rescue is a foster-based, all-breed nonprofit helping animals in Indiana shelters find their way home.";
   var ANIMAL_MS = 15000;       // time per animal (?seconds=)
   var INFO_MS = 12000;         // time per info slide
   var INFO_EVERY = 5;          // an info slide after every N animals
@@ -184,25 +165,24 @@
   var params = {};
   location.search.replace(/[?&]([^=&]+)=?([^&]*)/g, function (_, k, v) { params[k] = decodeURIComponent(v); });
   if (params.seconds && +params.seconds >= 5) ANIMAL_MS = +params.seconds * 1000;
-  var mock = params.mock === "1";
+  var preview = params.preview === "1";
 
   var stage = document.querySelector(".stage"), screen = document.querySelector(".screen");
   var slidesEl = document.querySelector(".slides"), bar = document.querySelector(".progress");
-  var orient = params.orient || "landscape", layout = params.layout === "poster" ? "poster" : "split";
+  var orient = params.orient || "landscape";
   if (params.qr === "off") screen.classList.add("no-qr");
-  if (mock) document.body.classList.add("mock");
+  if (preview) document.body.classList.add("preview");
 
   // ---- sizing: --u = 1% of the screen's short side; class says landscape/portrait ----
   function fit() {
     var w, h;
-    if (mock) {
+    if (preview) {
       var aw = stage.clientWidth, ah = stage.clientHeight, r = orient === "portrait" ? 9 / 16 : 16 / 9;
       w = Math.min(aw, ah * r); h = w / r;
       screen.style.cssText = "width:" + w + "px;height:" + h + "px;left:" + (aw - w) / 2 + "px;top:" + (ah - h) / 2 + "px;right:auto;bottom:auto";
     } else { w = stage.clientWidth; h = stage.clientHeight; }
     screen.style.setProperty("--u", Math.min(w, h) / 100 + "px");
     screen.classList.toggle("portrait", h > w);
-    screen.classList.toggle("poster", layout === "poster");
   }
   window.addEventListener("resize", fit);
 
@@ -309,7 +289,6 @@
     el.innerHTML =
       '<div class="photos">' + photos.map(function (p, i) { return '<img class="' + (i % 2 ? "alt" : "") + '" src="' + esc(p) + '" alt="">'; }).join("") +
         (photos.length > 1 ? '<div class="photo-dots">' + photos.map(function () { return "<span></span>"; }).join("") + "</div>" : "") +
-        '<div class="brand-pill"><img src="' + esc(LOGO) + '" alt="Redemption Rescue"></div>' +
       "</div>" +
       '<div class="panel">' +
         '<img class="logo" src="' + esc(LOGO) + '" alt="Redemption Rescue">' +
@@ -389,14 +368,13 @@
     show(queue.shift());
   }
 
-  // ---- mockup controls ----
-  document.querySelectorAll(".mockbar button").forEach(function (b) {
+  // ---- preview controls ----
+  document.querySelectorAll(".previewbar button").forEach(function (b) {
     b.addEventListener("click", function () {
-      var o = b.getAttribute("data-orient"), l = b.getAttribute("data-layout"), j = b.getAttribute("data-jump");
-      if (o) orient = o;
-      if (l) layout = l;
-      if (o || l) {
-        document.querySelectorAll(o ? "[data-orient]" : "[data-layout]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      var o = b.getAttribute("data-orient"), j = b.getAttribute("data-jump");
+      if (o) {
+        orient = o;
+        document.querySelectorAll("[data-orient]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
         fit();
       }
       if (j === "animal") { var a = queue.filter(function (q) { return q.kind === "animal"; })[0]; if (!a) buildQueue(); next(); }
@@ -411,7 +389,7 @@
   // Reload once a night (around 4am) so long-running TV browsers stay fresh.
   var loadedAt = Date.now();
   setInterval(function () {
-    if (!mock && new Date().getHours() === 4 && Date.now() - loadedAt > 3 * 3600000) location.reload();
+    if (!preview && new Date().getHours() === 4 && Date.now() - loadedAt > 3 * 3600000) location.reload();
   }, 10 * 60000);
 })();
 </script>
