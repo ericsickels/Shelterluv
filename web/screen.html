@@ -81,14 +81,26 @@
   .wait { flex: none; }
   .wait b { display: block; font-size: calc(var(--u) * 8); line-height: .95; color: var(--brand); font-weight: 800; }
   .wait span { display: block; font-size: calc(var(--u) * 2.2); color: var(--muted); line-height: 1.25; margin-top: calc(var(--u) * .5); }
-  .qr-card { display: flex; align-items: center; gap: calc(var(--u) * 2); padding: calc(var(--u) * 1.6); border-radius: calc(var(--u) * 1.6);
-    background: #fff; box-shadow: 0 calc(var(--u) * .3) calc(var(--u) * 2) rgba(0,0,0,.08); }
-  .qr { width: calc(var(--u) * 18); height: calc(var(--u) * 18); flex: none; }
-  .portrait .qr { width: calc(var(--u) * 21); height: calc(var(--u) * 21); }
-  .qr svg { width: 100%; height: 100%; display: block; }
-  .qr-text b { display: block; font-size: calc(var(--u) * 2.4); line-height: 1.2; }
-  .qr-text span { display: block; margin-top: calc(var(--u) * .7); font-size: calc(var(--u) * 2); color: var(--muted); }
-  .no-qr .qr { display: none; }
+  /* QR "ticket": the code on white with an orange action band underneath. */
+  .qr-card { flex: none; display: flex; flex-direction: column; width: calc(var(--u) * 21); overflow: hidden;
+    border-radius: calc(var(--u) * 1.8); background: #fff; box-shadow: 0 calc(var(--u) * .4) calc(var(--u) * 2.4) rgba(0,0,0,.12); }
+  .qr { padding: calc(var(--u) * 1.5) calc(var(--u) * 1.5) calc(var(--u) * 1.1); }
+  .qr svg { width: calc(var(--u) * 18); height: calc(var(--u) * 18); display: block; }
+  .qr-cta { display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * .8);
+    padding: calc(var(--u) * 1.1) calc(var(--u) * 1.2); background: var(--brand); color: #fff;
+    font-weight: 800; font-size: calc(var(--u) * 2.4); line-height: 1.15; text-align: center; }
+  .qr-cta svg { flex: none; width: calc(var(--u) * 2.5); height: calc(var(--u) * 2.5); fill: none; stroke: currentColor; stroke-width: 2.2;
+    stroke-linecap: round; stroke-linejoin: round; }
+  .portrait .qr-card { width: calc(var(--u) * 24); }
+  .portrait .qr svg { width: calc(var(--u) * 21); height: calc(var(--u) * 21); }
+  .portrait .qr-cta { font-size: calc(var(--u) * 2.8); }
+  .qr-card.big { width: calc(var(--u) * 25); }
+  .qr-card.big .qr svg { width: calc(var(--u) * 22); height: calc(var(--u) * 22); }
+  .qr-card.big .qr-cta { font-size: calc(var(--u) * 2.7); }
+  .portrait .qr-card.big { width: calc(var(--u) * 31); }
+  .portrait .qr-card.big .qr svg { width: calc(var(--u) * 28); height: calc(var(--u) * 28); }
+  .portrait .qr-card.big .qr-cta { font-size: calc(var(--u) * 3.4); }
+  .no-qr .qr-card { display: none; }
 
   /* ---- Info slides: who we are / how to adopt / happy tails ---- */
   .info { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
@@ -108,6 +120,17 @@
   .step b { display: block; font-size: calc(var(--u) * 3.2); margin-top: calc(var(--u) * .4); }
   .step span { display: block; font-size: calc(var(--u) * 2.3); color: var(--muted); margin-top: calc(var(--u) * .6); line-height: 1.35; }
   .info .qr-card { margin-top: calc(var(--u) * 1); }
+  .info .logo.small { height: calc(var(--u) * 12); margin-bottom: calc(var(--u) * 2.5); }
+  .portrait .info .logo.small { height: calc(var(--u) * 17); }
+  /* Happy tails: words + QR beside the photo grid in landscape, stacked in portrait. */
+  .tails-wrap { display: grid; grid-template-columns: 40% 1fr; grid-template-areas: "copy grid" "qr grid";
+    column-gap: calc(var(--u) * 6); align-items: center; width: 100%; text-align: left; }
+  .tails-copy { grid-area: copy; align-self: end; }
+  .tails-copy .logo { align-self: flex-start; display: block; }
+  .tails-wrap .qr-card { grid-area: qr; align-self: start; margin-top: calc(var(--u) * 3); }
+  .tails-wrap .tails { grid-area: grid; }
+  .portrait .tails-wrap { grid-template-columns: 100%; grid-template-areas: "copy" "grid" "qr"; text-align: center; justify-items: center; }
+  .portrait .tails-copy .logo { margin-left: auto; margin-right: auto; }
   /* Portrait screens have room to spare vertically, so the info slides get larger type. */
   .portrait .info h2 { font-size: calc(var(--u) * 8.5); }
   .portrait .info p.lede { font-size: calc(var(--u) * 3.8); }
@@ -118,10 +141,8 @@
   .portrait .info .logo { height: calc(var(--u) * 26); }
   .portrait .bigstats b { font-size: calc(var(--u) * 15); }
   .portrait .bigstats span { font-size: calc(var(--u) * 3.4); }
-  .portrait .qr-text b { font-size: calc(var(--u) * 3); }
-  .portrait .qr-text span { font-size: calc(var(--u) * 2.5); }
-  .tails { display: grid; grid-template-columns: repeat(6, 1fr); gap: calc(var(--u) * 1.6); width: 100%; margin: calc(var(--u) * 4) 0 calc(var(--u) * 3); }
-  .portrait .tails { grid-template-columns: repeat(3, 1fr); }
+  .tails { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--u) * 1.6); width: 100%; }
+  .portrait .tails { margin: calc(var(--u) * 4) 0 calc(var(--u) * 2); }
   .tail { position: relative; aspect-ratio: 1 / 1; border-radius: calc(var(--u) * 1.6); overflow: hidden; background: #ddd; }
   .tail img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .tail em { position: absolute; top: calc(var(--u) * 2.2); right: calc(var(--u) * -4.2); width: calc(var(--u) * 17); transform: rotate(45deg);
@@ -234,6 +255,12 @@
       return { a: a, k: Math.pow(Math.random(), 1 / w) };
     }).sort(function (x, y) { return y.k - x.k; }).map(function (x) { return x.a; });
   }
+  // QR "ticket": the code plus an action label ("Meet Ramona") with a small scan icon.
+  var SCAN_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M7 12h10"/></svg>';
+  function qrCard(url, label, big) {
+    return '<div class="qr-card' + (big ? " big" : "") + '"><div class="qr">' + qrSvg(url) + "</div>" +
+      '<div class="qr-cta">' + SCAN_ICON + "<span>" + esc(label) + "</span></div></div>";
+  }
   // QR code as crisp SVG (qrcode.js = qrcode-generator, MIT).
   function qrSvg(url) {
     if (typeof qrcode !== "function") return "";
@@ -308,8 +335,7 @@
         '<div class="meta">' + esc([a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" \u00b7 ")) + "</div>" +
         (oneLine(a) ? '<div class="line">' + esc(oneLine(a)) + "</div>" : "") +
         '<div class="facts">' + waitHtml +
-          '<div class="qr-card"><div class="qr">' + qrSvg(ANIMAL_URL.replace("{id}", encodeURIComponent(a.id))) + "</div>" +
-          '<div class="qr-text"><b>Scan to meet ' + esc(a.name) + "</b><span>" + SITE + "</span></div></div>" +
+          qrCard(ANIMAL_URL.replace("{id}", encodeURIComponent(a.id)), "Meet " + a.name) +
         "</div>" +
       "</div>";
     var imgs = el.querySelectorAll(".photos > img"), bars = el.querySelectorAll(".photo-bars i"), k = -1;
@@ -340,7 +366,7 @@
     var el = document.createElement("div");
     el.className = "slide info";
     var avail = data.animals.length, year = data.stats && data.stats.thisYear;
-    var qr = '<div class="qr-card"><div class="qr">' + qrSvg(ADOPT_URL) + '</div><div class="qr-text"><b>Scan to meet them all</b><span>' + SITE + "/adopt</span></div></div>";
+    var logo = '<img class="logo small" src="' + esc(LOGO) + '" alt="Redemption Rescue">';
     if (kind === "who") {
       el.innerHTML = '<img class="logo" src="' + esc(LOGO) + '" alt="Redemption Rescue">' +
         '<h2 class="serif">Every pet deserves a second chance</h2><p class="lede">' + esc(MISSION) + "</p>" +
@@ -349,19 +375,23 @@
           (avail ? "<div><b>" + avail + "</b><span>waiting for a home right now</span></div>" : "") +
         "</div>";
     } else if (kind === "how") {
-      el.innerHTML = '<h2 class="serif">How to adopt</h2>' +
+      el.innerHTML = logo + '<h2 class="serif">How to adopt</h2>' +
         '<div class="steps">' +
           '<div class="step"><i>1</i><div><b>Browse</b><span>See every adoptable dog and cat at ' + SITE + "</span></div></div>" +
           '<div class="step"><i>2</i><div><b>Apply online</b><span>Tell us about your home. It only takes a few minutes.</span></div></div>' +
           '<div class="step"><i>3</i><div><b>Meet your match</b><span>We\u2019ll help you find the right fit for your family.</span></div></div>' +
-        "</div>" + qr;
+        "</div>" + qrCard(ADOPT_URL, "Meet them all", true);
     } else {
       var tails = data.adopted.filter(function (t) { return t.photo; }).slice(0, 6);
-      el.innerHTML = '<h2 class="serif">Happy tails</h2>' +
-        '<p class="lede">' + data.adopted.length + " pets from Redemption Rescue found their families in the last 60 days. Yours could be next!</p>" +
+      el.innerHTML = '<div class="tails-wrap">' +
+        '<div class="tails-copy">' + logo + '<h2 class="serif">Happy tails</h2>' +
+          '<p class="lede">' + data.adopted.length + " pets from Redemption Rescue found their families in the last 60 days. " +
+          "Your new best friend could be waiting.</p></div>" +
         '<div class="tails">' + tails.map(function (t) {
           return '<div class="tail"><img src="' + esc(t.photo) + '" alt=""><em>Adopted!</em><span>' + esc(t.name) + "</span></div>";
-        }).join("") + "</div>" + qr.replace("Scan to meet them all", "Scan to find your new best friend");
+        }).join("") + "</div>" +
+        qrCard(ADOPT_URL, "Find your new best friend", true) +
+      "</div>";
     }
     el.start = function () {};
     el.ready = Promise.resolve();
