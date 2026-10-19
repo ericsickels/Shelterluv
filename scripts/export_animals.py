@@ -158,6 +158,11 @@ def to_public(animal):
         "photos": photos,
         "videos": animal.get("Videos") or [],
         "description": animal.get("Description") or "",
+        # Start of the current stay, used to give longer-staying animals more homepage exposure.
+        "intakeDate": (
+            datetime.fromtimestamp(int(animal["LastIntakeUnixTime"]), timezone.utc).date().isoformat()
+            if animal.get("LastIntakeUnixTime") else None
+        ),
         "attributes": [
             a["AttributeName"]
             for a in animal.get("Attributes") or []
