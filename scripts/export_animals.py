@@ -26,7 +26,7 @@ from zoneinfo import ZoneInfo
 
 API_URL = "https://new.shelterluv.com/api/v1/"
 PAGE_SIZE = 100
-DEFAULT_STATUSES = "Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending"
+DEFAULT_STATUSES = "Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending,Hold - Pending Adoption"
 DEFAULT_COMING_SOON_STATUSES = "Unavailable - Intake / Assessment"
 DEFAULT_ADOPTED_DAYS = 60
 ADOPTED_STATUS = "Healthy In Home"

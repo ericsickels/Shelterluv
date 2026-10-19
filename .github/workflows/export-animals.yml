@@ -28,7 +28,7 @@ jobs:
       - name: Export animals from Shelterluv
         env:
           SHELTERLUV_API_KEY: ${{ secrets.SHELTERLUV_API_KEY }}
-          PUBLISH_STATUSES: ${{ vars.PUBLISH_STATUSES || 'Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending' }}
+          PUBLISH_STATUSES: ${{ vars.PUBLISH_STATUSES || 'Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending,Hold - Pending Adoption' }}
           COMING_SOON_STATUSES: ${{ vars.COMING_SOON_STATUSES || 'Unavailable - Intake / Assessment' }}
           ADOPTED_DAYS: ${{ vars.ADOPTED_DAYS || '60' }}
           SHELTER_TIMEZONE: ${{ vars.SHELTER_TIMEZONE || 'America/New_York' }}

@@ -15,7 +15,14 @@
   // Link for the "Apply to adopt" button. {id} is replaced with the Shelterluv animal ID.
   var APPLY_URL = "https://new.shelterluv.com/matchme/adopt/RES-A-{id}";
   // Shelterluv statuses that get a badge on the card and in the pop-up.
-  var STATUS_BADGES = { "Hold - Applications Pending": "Applications pending" };
+  var STATUS_BADGES = {};
+  // Statuses shown with a "Pending" ribbon on the card and a note in the pop-up. These animals
+  // stay listed and people can still apply.
+  var PENDING_STATUSES = ["Hold - Applications Pending", "Hold - Pending Adoption"];
+  var PENDING_RIBBON = "Pending";
+  var PENDING_NOTICE = "This pet has applications under review or an adoption pending. You\u2019re welcome to apply, " +
+    "but they may find their home before we review your application. If that happens, we\u2019d love to help you " +
+    "find another great match!";
   // Each widget: the div it fills, its data file and its wording.
   var WIDGETS = [
     {
@@ -98,6 +105,10 @@
         (a.breed ? '<p class="slv-breed" title="' + esc(a.breed) + '">' + esc(a.breed) + "</p>" : "");
     }
 
+    function isPending(a) {
+      return PENDING_STATUSES.indexOf(a.status) >= 0;
+    }
+
     function badge(a) {
       var label = w.badge || STATUS_BADGES[a.status];
       return label ? '<span class="slv-badge">' + esc(label) + "</span>" : "";
@@ -141,7 +152,9 @@
         return;
       }
       grid.innerHTML = list.map(function (a) {
-        return '<button type="button" class="slv-card" data-id="' + esc(a.id) + '" data-type="' + esc(a.type) + '">' + badge(a) +
+        return '<button type="button" class="slv-card' + (isPending(a) ? " slv-card-pending" : "") + '" data-id="' + esc(a.id) +
+          '" data-type="' + esc(a.type) + '">' + badge(a) +
+          (isPending(a) ? '<span class="slv-ribbon slv-ribbon-pending">' + esc(PENDING_RIBBON) + "</span>" : "") +
           (a.photos[0] ? '<img loading="lazy" src="' + esc(a.photos[0]) + '" alt="Photo of ' + esc(a.name) + '">' : placeholder(a.type)) +
           '<div class="slv-card-body">' + cardText(a) + "</div></button>";
       }).join("");
@@ -224,6 +237,8 @@
             badge(a) +
             '<h2 id="' + titleId + '">' + esc(a.name) + "</h2>" +
             '<p class="slv-sub">' + esc(summary(a)) + "</p>" +
+            (isPending(a) ? '<div class="slv-pending-note" role="note"><strong>' + esc(PENDING_RIBBON) + "</strong>" +
+              "<p>" + esc(PENDING_NOTICE) + "</p></div>" : "") +
             (factRows ? '<h3 class="slv-section-title">At a glance</h3><dl class="slv-facts">' + factRows + "</dl>" + tags : "") +
             (paragraphs ? '<h3 class="slv-section-title">About ' + esc(a.name) + '</h3><div class="slv-desc">' + paragraphs + "</div>" : "") +
           "</div>" +

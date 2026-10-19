@@ -41,7 +41,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 2. **Settings → Secrets and variables → Actions → New repository secret:**
    `SHELTERLUV_API_KEY` = your Shelterluv API key.
 3. *(Optional)* **Variables** tab: `PUBLISH_STATUSES` = comma-separated Shelterluv statuses to
-   show. Default: `Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending`.
+   show. Default: `Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending,Hold - Pending Adoption`.
    `COMING_SOON_STATUSES` = statuses shown under Coming Soon. Default `Unavailable - Intake / Assessment`.
    `ADOPTED_DAYS` = how far back Recently Adopted looks. Default `60`.
    `SHELTER_TIMEZONE` = time zone for adoption dates. Default `America/New_York`.
@@ -83,6 +83,8 @@ Settings live at the top of `web/adopt.js`:
 - `APPLY_URL`: where "Apply to adopt" links; `{id}` becomes the Shelterluv animal ID.
   Currently `https://new.shelterluv.com/matchme/adopt/RES-A-{id}` (Shelterluv's hosted adoption application, opens in a new tab).
 - `STATUS_BADGES`: which statuses get a badge, and its wording.
+- `PENDING_STATUSES`, `PENDING_RIBBON`, `PENDING_NOTICE`: Hold statuses that stay listed with an amber
+  "Pending" ribbon and a note in the pop-up (ribbon colour: `--slv-pending` in `web/adopt.css`).
 - `WIDGETS`: per-section wording, e.g. the Coming Soon badge, the note shown in its pop-up, and
   the title/text shown when a section has no animals (`emptyTitle`, `emptyText`).
   Recently Adopted's empty message is `EMPTY_TITLE` / `EMPTY_TEXT` at the top of `web/adopted.js`.

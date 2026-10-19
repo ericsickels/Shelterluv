@@ -111,6 +111,7 @@ html.slv-lock { overflow: hidden; }
 }
 .slv-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 0; background: #e7e7e7; border: 1px solid #e7e7e7; border-radius: 10px; overflow: hidden; }
 .slv-facts div { background: #fafafa; padding: 10px 14px; }
+.slv-facts div:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .slv-facts dt { margin: 0; font-size: 12px; color: #777; }
 .slv-facts dd { margin: 2px 0 0; font-weight: 600; }
 .slv-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
@@ -213,3 +214,15 @@ html.slv-lock { overflow: hidden; }
   margin-top: 18px; font: inherit; font-weight: 600; padding: 10px 22px; border-radius: 999px; cursor: pointer;
   border: 1px solid currentColor; background: transparent; color: inherit;
 }
+
+/* ---- Pending (Hold) animals: amber ribbon on the card, note in the pop-up ---- */
+.slv { --slv-pending: #b26a00; --slv-pending-text: #fff; }
+.slv-ribbon-pending { z-index: 1; background: var(--slv-pending); color: var(--slv-pending-text); }
+.slv-pending-note {
+  margin: 16px 0 4px; padding: 14px 16px; border-radius: 10px;
+  background: #fff6e5; border: 1px solid #f3d9a4; border-left: 4px solid var(--slv-pending); color: #4a3200;
+}
+.slv-pending-note strong {
+  display: block; margin-bottom: 4px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--slv-pending);
+}
+.slv-pending-note p { margin: 0; font-size: .95em; line-height: 1.55; }
