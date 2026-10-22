@@ -4,6 +4,7 @@
 Writes two files into the output directory:
   animals.json  - animals in custody whose status is in PUBLISH_STATUSES
   coming-soon.json - animals in custody whose status is in COMING_SOON_STATUSES
+  unavailable.json - animals in custody whose status is in UNAVAILABLE_STATUSES (volunteer field guide)
   adopted.json  - animals with an adoption outcome in the last ADOPTED_DAYS days
                   that are still "Healthy In Home" (i.e. not returned)
   stats.json    - number of adoptions this month, last month and this year, by dogs/cats
@@ -28,6 +29,7 @@ API_URL = "https://new.shelterluv.com/api/v1/"
 PAGE_SIZE = 100
 DEFAULT_STATUSES = "Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending,Hold - Pending Adoption"
 DEFAULT_COMING_SOON_STATUSES = "Unavailable - Intake / Assessment"
+DEFAULT_UNAVAILABLE_STATUSES = "Unavailable - Medical Recovery,Unavailable - Routine Vetting"
 DEFAULT_ADOPTED_DAYS = 60
 ADOPTED_STATUS = "Healthy In Home"
 # Adoption dates are shown in the shelter's local time zone, not UTC.
@@ -207,6 +209,7 @@ def main():
 
     statuses = status_set("PUBLISH_STATUSES", DEFAULT_STATUSES)
     coming_statuses = status_set("COMING_SOON_STATUSES", DEFAULT_COMING_SOON_STATUSES)
+    unavailable_statuses = status_set("UNAVAILABLE_STATUSES", DEFAULT_UNAVAILABLE_STATUSES)
 
     in_custody = fetch_in_custody(api_key)
 
@@ -216,6 +219,7 @@ def main():
 
     animals = listing(statuses)
     coming_soon = listing(coming_statuses)
+    unavailable = listing(unavailable_statuses)
 
     days = int(os.environ.get("ADOPTED_DAYS") or DEFAULT_ADOPTED_DAYS)
     tz = ZoneInfo(os.environ.get("SHELTER_TIMEZONE") or DEFAULT_TIMEZONE)
@@ -235,11 +239,13 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
     write_json(os.path.join(out_dir, "animals.json"), animals)
     write_json(os.path.join(out_dir, "coming-soon.json"), coming_soon)
+    write_json(os.path.join(out_dir, "unavailable.json"), unavailable)
     write_json(os.path.join(out_dir, "adopted.json"), adopted)
     with open(os.path.join(out_dir, "stats.json"), "w", encoding="utf-8") as f:
         json.dump(stats, f, indent=1)
     print(f"Wrote {len(animals)} animals ({', '.join(sorted(statuses))}) to animals.json")
     print(f"Wrote {len(coming_soon)} animals ({', '.join(sorted(coming_statuses))}) to coming-soon.json")
+    print(f"Wrote {len(unavailable)} animals ({', '.join(sorted(unavailable_statuses))}) to unavailable.json")
     print(f"Wrote {len(adopted)} animals adopted in the last {days} days to adopted.json")
     print(
         "Wrote adoption counts to stats.json: "
