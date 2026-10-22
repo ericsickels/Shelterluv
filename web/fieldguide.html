@@ -152,6 +152,36 @@
   .qr-view .code svg { width: 100%; height: 100%; display: block; }
   .qr-view .url { margin-top: 12px; font-size: min(3.7vw, 15px); color: #555; word-break: break-all; }
 
+  /* ---- Today banner + Events tab ---- */
+  .today:empty { display: none; }
+  .today-card { display: flex; align-items: center; gap: 12px; width: 100%; margin: 0 0 14px; padding: 12px 14px; border: none; border-radius: 14px;
+    background: var(--brand); color: #fff; text-align: left; cursor: pointer; box-shadow: 0 4px 14px rgba(221,115,8,.25); }
+  .today-card .when { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; opacity: .92; }
+  .today-card .title { margin: 2px 0; font-size: 20px; line-height: 1.15; }
+  .today-card .where { font-size: 14px; opacity: .92; }
+  .today-card .go { margin-left: auto; font-size: 28px; line-height: 1; opacity: .9; }
+  .ev { margin-bottom: 16px; border-radius: 16px; overflow: hidden; background: var(--card); box-shadow: var(--shadow); transition: box-shadow .3s; }
+  .ev.flash { box-shadow: 0 0 0 3px var(--brand), var(--shadow); }
+  .ev .img { aspect-ratio: 16 / 9; background: #efe9e1; }
+  .ev .img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ev .body { display: flex; gap: 14px; padding: 14px; }
+  .ev .date { flex: none; align-self: flex-start; width: 58px; padding: 6px 0 7px; border-radius: 12px; background: var(--brand-soft); color: var(--brand-ink); text-align: center; }
+  .ev .date .m { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .ev .date .d { font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 500; font-size: 28px; line-height: 1.05; color: var(--text); }
+  .ev .date .w { font-size: 12px; }
+  .ev .info { min-width: 0; }
+  .ev h3 { margin: 0 0 4px; font-size: 20px; line-height: 1.15; }
+  .ev .line { margin-top: 2px; font-size: 14px; color: var(--text-2); }
+  .ev .line b { font-weight: 600; }
+  .ev .pill { margin: 0 0 6px; }
+  .ev .excerpt { margin: 8px 0 0; font-size: 14px; line-height: 1.5; color: var(--muted);
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .ev .actions { display: flex; gap: 10px; padding: 0 14px 14px; }
+  .ev .actions a { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; border-radius: 12px;
+    border: 1.5px solid var(--brand); color: var(--brand-ink); font-size: 15px; font-weight: 600; text-decoration: none; }
+  .ev .actions a.primary { background: var(--brand); color: #fff; }
+  .ev .actions svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
   .loading { padding: 40px 0; text-align: center; color: var(--muted); }
 </style>
 </head>
@@ -167,6 +197,7 @@
 
   <main>
     <section class="tab on" id="tab-animals" aria-label="Animals">
+      <div class="today"></div>
       <div class="tools"><input class="search" type="search" placeholder="Search by name or breed" aria-label="Search animals" autocomplete="off"></div>
       <div class="chips" role="group" aria-label="Filter">
         <button type="button" data-type="All" aria-pressed="true">All</button>
@@ -174,6 +205,10 @@
         <button type="button" data-type="Cat" aria-pressed="false">Cats</button>
       </div>
       <div class="sections"><p class="loading">Loading our animals&hellip;</p></div>
+    </section>
+
+    <section class="tab" id="tab-events" aria-label="Events">
+      <div class="events"><p class="loading">Loading events&hellip;</p></div>
     </section>
 
     <section class="tab" id="tab-qr" aria-label="QR codes">
@@ -190,6 +225,8 @@
   <nav class="tabbar" role="tablist">
     <button type="button" role="tab" data-tab="animals" aria-selected="true">
       <svg viewBox="0 0 24 24"><circle cx="6" cy="9" r="2"/><circle cx="10" cy="5" r="2"/><circle cx="14" cy="5" r="2"/><circle cx="18" cy="9" r="2"/><path d="M12 11c-3 0-6 4-6 7 0 2 2 3 3.5 2.4 1.6-.6 3.4-.6 5 0C16 21 18 20 18 18c0-3-3-7-6-7z"/></svg>Animals</button>
+    <button type="button" role="tab" data-tab="events" aria-selected="false">
+      <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/></svg>Events</button>
     <button type="button" role="tab" data-tab="qr" aria-selected="false">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3"/></svg>QR codes</button>
   </nav>
@@ -223,6 +260,7 @@
     { key: "instagram", label: "Follow on Instagram", qrLabel: "Follow us on Instagram", url: "https://www.instagram.com/redemptionrescue", style: "ig" }
   ];
   var PENDING_STATUSES = ["Hold - Applications Pending", "Hold - Pending Adoption"];
+  var TIMEZONE = "America/New_York";   // event dates and "today" are shown in this time zone
   var REFRESH_MS = 10 * 60000;
   // --------------------------------------------------------------------------
 
@@ -240,7 +278,7 @@
   var ICON_IG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff"/></svg>';
 
   var $ = function (s, r) { return (r || document).querySelector(s); };
-  var data = { available: [], soon: [], unavailable: [], updated: null };
+  var data = { available: [], soon: [], unavailable: [], events: [], updated: null };
   var filterType = "All", query = "";
 
   function esc(s) {
@@ -282,13 +320,17 @@
     data.soon = tag(raw.soon, "soon").sort(byName);
     data.unavailable = tag(raw.unavailable, "unavailable").sort(byName);
     data.updated = raw.updated;
+    data.events = (raw.events || []).slice().sort(function (x, y) { return x.start - y.start; });
     renderAnimals();
+    renderEvents();
     showUpdated(raw.offline);
   }
   function load() {
-    return Promise.all([getJSON("animals.json"), getJSON("coming-soon.json"), getJSON("unavailable.json").catch(function () { return { animals: [] }; })])
+    return Promise.all([getJSON("animals.json"), getJSON("coming-soon.json"), getJSON("unavailable.json").catch(function () { return { animals: [] }; }),
+        getJSON("events.json").catch(function () { return null; })])
       .then(function (r) {
-        var raw = { available: r[0].animals, soon: r[1].animals, unavailable: r[2].animals, updated: r[0].updated || new Date().toISOString() };
+        var raw = { available: r[0].animals, soon: r[1].animals, unavailable: r[2].animals, updated: r[0].updated || new Date().toISOString(),
+          events: r[3] ? r[3].events : data.events };
         try { localStorage.setItem("slv-fieldguide", JSON.stringify(raw)); } catch (e) {}
         apply(raw);
       })
@@ -302,7 +344,7 @@
   }
   function showUpdated(offline) {
     var t = data.updated ? new Date(data.updated) : null, mins = t ? Math.round((Date.now() - t) / 60000) : null;
-    $(".updated").innerHTML = (offline ? "Offline<br>" : "") + (mins === null ? "" : mins < 2 ? "Updated just now" : "Updated<br>" + (mins < 90 ? mins + " min" : Math.round(mins / 60) + " hr") + " ago");
+    $(".updated").innerHTML = (mins === null ? (offline ? "Offline" : "") : mins < 2 ? "Updated<br>just now" : (offline ? "Offline<br>" : "Updated<br>") + (mins < 90 ? mins + " min" : Math.round(mins / 60) + " hr") + " ago");
   }
 
   // ---- animal list ----
@@ -400,6 +442,67 @@
     if (wake) { try { wake.release(); } catch (e) {} wake = null; }
   }
 
+  // ---- events (from the Events page on our website) ----
+  var ICON_PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  var ICON_LINK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+  function fmt(ms, opts) { opts.timeZone = TIMEZONE; return new Intl.DateTimeFormat("en-US", opts).format(new Date(ms)); }
+  function dayKey(ms) { return fmt(ms, { year: "numeric", month: "2-digit", day: "2-digit" }); }
+  function clock(ms) { return fmt(ms, { hour: "numeric", minute: "2-digit" }).replace(":00", ""); }
+  function timeRange(e) {
+    if (!e.end || e.end <= e.start) return clock(e.start);
+    if (dayKey(e.start) !== dayKey(e.end)) return fmt(e.start, { weekday: "short", month: "short", day: "numeric" }) + ", " + clock(e.start) +
+      " \u2013 " + fmt(e.end, { weekday: "short", month: "short", day: "numeric" }) + ", " + clock(e.end);
+    var a = clock(e.start), b = clock(e.end);
+    if (a.slice(-2) === b.slice(-2)) a = a.slice(0, -3);   // "5 – 7 PM"
+    return a + " \u2013 " + b;
+  }
+  function upcomingEvents() { var now = Date.now(); return data.events.filter(function (e) { return (e.end || e.start) > now; }); }
+  function isNow(e) { var now = Date.now(); return e.start <= now && now < (e.end || e.start); }
+  function isToday(e) { return isNow(e) || dayKey(e.start) === dayKey(Date.now()); }
+  function directionsUrl(e) {
+    var q = encodeURIComponent([e.venue, e.address].filter(Boolean).join(", "));
+    return /iPhone|iPad|iPod/.test(navigator.userAgent) ? "https://maps.apple.com/?q=" + q : "https://www.google.com/maps/search/?api=1&query=" + q;
+  }
+  function renderEvents() {
+    var list = upcomingEvents();
+    $(".events").innerHTML = '<div class="section"><h2 class="cond">Upcoming events <small>' + list.length + "</small></h2>" +
+      '<p class="hint">From the Events page on our website.</p></div>' +
+      (list.length ? list.map(function (e) {
+        var when = isNow(e) ? "Happening now" : isToday(e) ? "Today" : "";
+        return '<article class="ev" id="ev-' + esc(e.id) + '">' +
+          (e.image ? '<div class="img"><img loading="lazy" src="' + esc(e.image) + '" alt=""></div>' : "") +
+          '<div class="body"><div class="date"><div class="m">' + esc(fmt(e.start, { month: "short" })) + '</div><div class="d">' +
+            esc(fmt(e.start, { day: "numeric" })) + '</div><div class="w">' + esc(fmt(e.start, { weekday: "short" })) + "</div></div>" +
+          '<div class="info">' + (when ? '<span class="pill tag">' + when + "</span>" : "") + '<h3 class="cond">' + esc(e.title) + "</h3>" +
+            '<div class="line">' + esc(timeRange(e)) + "</div>" +
+            (e.venue || e.address ? '<div class="line"><b>' + esc(e.venue) + "</b>" + (e.venue && e.address ? "<br>" : "") + esc(e.address) + "</div>" : "") +
+            (e.excerpt ? '<p class="excerpt">' + esc(e.excerpt.replace(/\s*\n\s*/g, " ")) + "</p>" : "") +
+          "</div></div>" +
+          '<div class="actions">' + (e.venue || e.address ? '<a class="primary" href="' + esc(directionsUrl(e)) + '" target="_blank" rel="noopener">' + ICON_PIN + "Directions</a>" : "") +
+            (e.url ? '<a href="' + esc(e.url) + '" target="_blank" rel="noopener">' + ICON_LINK + "Event page</a>" : "") + "</div>" +
+          "</article>";
+      }).join("") : '<p class="none">No upcoming events on our website right now.</p>');
+    renderToday();
+  }
+  function renderToday() {
+    $(".today").innerHTML = upcomingEvents().filter(isToday).map(function (e) {
+      return '<button type="button" class="today-card" data-ev="' + esc(e.id) + '"><div>' +
+        '<div class="when">' + (isNow(e) ? "Happening now \u00b7 until " + esc(clock(e.end)) : "Today \u00b7 " + esc(timeRange(e))) + "</div>" +
+        '<div class="title cond">' + esc(e.title) + "</div>" +
+        (e.venue ? '<div class="where">' + esc(e.venue) + "</div>" : "") +
+        '</div><span class="go" aria-hidden="true">\u203a</span></button>';
+    }).join("");
+  }
+  function openEvent(id) {
+    showTab("events");
+    var el = document.getElementById("ev-" + id);
+    if (!el) return;
+    el.scrollIntoView({ block: "start" });
+    window.scrollBy(0, -90);   // clear the sticky header
+    el.classList.add("flash");
+    setTimeout(function () { el.classList.remove("flash"); }, 1600);
+  }
+
   // ---- QR codes tab ----
   function renderLinks() {
     $(".links").innerHTML = LINKS.map(function (l) {
@@ -426,6 +529,7 @@
     var t = e.target;
     var c = t.closest(".card"); if (c) return openAnimal(c.getAttribute("data-id"), true);
     var tab = t.closest(".tabbar button"); if (tab) return showTab(tab.getAttribute("data-tab"));
+    var today = t.closest(".today-card"); if (today) return openEvent(today.getAttribute("data-ev"));
     var chip = t.closest(".chips button");
     if (chip) {
       filterType = chip.getAttribute("data-type");
@@ -447,6 +551,7 @@
     if (m) { history.replaceState(null, "", location.pathname); openAnimal(decodeURIComponent(m[1]), true); }
   });
   setInterval(function () { if (!document.hidden) load(); }, REFRESH_MS);
+  setInterval(function () { if (!document.hidden) renderEvents(); }, 60000);   // "Today" / "Happening now" stay current
   document.addEventListener("visibilitychange", function () { if (!document.hidden) showUpdated(false); });
 })();
 </script>
