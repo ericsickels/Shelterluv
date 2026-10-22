@@ -35,6 +35,12 @@ jobs:
           SHELTER_TIMEZONE: ${{ vars.SHELTER_TIMEZONE || 'America/New_York' }}
         run: python3 scripts/export_animals.py public
 
+      - name: Export upcoming events from our website (field guide)
+        continue-on-error: true   # if the website can't be reached, publish anyway; the guide keeps its last events
+        env:
+          EVENTS_URL: ${{ vars.EVENTS_URL || 'https://www.redemptionrescueinc.com/events?format=json' }}
+        run: python3 scripts/export_events.py public
+
       - name: Add the website widgets and preview page
         run: |
           cp web/* public/

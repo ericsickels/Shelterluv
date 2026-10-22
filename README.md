@@ -30,6 +30,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 | `web/screen.html` | Full-screen digital sign for partner screens (e.g. a restaurant TV), 16:9 or 9:16. See below. |
 | `web/fieldguide.html` | Volunteer field guide for events (phones), at `/fieldguide`. See below. |
 | `scripts/make_icons.py` | Makes the field guide's home screen icons from our logo during each publish. |
+| `scripts/export_events.py` | Writes `events.json` (upcoming events from our website's Events page) for the field guide. |
 | `web/qrcode.js` | QR code generator used by the sign ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4, MIT). |
 | `web/adopt.css` | Styles for all widgets. |
 | `web/index.html` | Preview page: `https://animals.redemptionrescueinc.com/` shows the widget outside Squarespace. |
@@ -140,6 +141,10 @@ one-tap access). Not linked from the website.
 - Tap an animal for photos, facts, days with us and their full bio. Available and Pending animals get a
   **Show QR code** button: a full-screen white QR to their page on our site (with the Apply button),
   keeping the screen awake while it's shown. Other statuses explain why they aren't available yet.
+- **Today banner + Events tab:** upcoming events from the Events page on our website (photo, date, time, place,
+  **Directions** and **Event page** buttons). On an event day an orange banner at the top of the Animals tab shows
+  it ("Today" / "Happening now"); tap it to jump to the event. Add or edit events in Squarespace as usual; the guide
+  picks them up within ~30 minutes (`scripts/export_events.py`, from `/events?format=json`).
 - **QR codes tab:** Donate, Adoption application, Foster application, Facebook, Instagram. Set the links
   in `LINKS` at the top of the script in `web/fieldguide.html`; an empty link shows as "Link needed".
 - **Add to Home Screen** (Share menu on iPhone, ⋮ menu on Android) gives an "RR Field Guide" icon
