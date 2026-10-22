@@ -14,8 +14,10 @@ Shelterluv API ──(API key, secret)──▶ GitHub Action (every 30 min)
                          Squarespace Code Blocks just load adopt.js / adopted.js / stats.js
 ```
 
-The API key lives only in GitHub's encrypted secrets. Visitors only ever see
-`animals.json`, which contains no foster/adopter info, microchips or internal notes.
+The API key lives only in GitHub's encrypted secrets. The website widgets only load files with
+no foster/adopter info, microchips or internal notes. The one exception is `fosters.json` (used only
+by the volunteer field guide), which holds each animal's foster's **first name** and nothing else.
+Like every file on this site it isn't secret: anyone who knows the address can open it.
 
 ## Files
 
@@ -30,6 +32,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 | `web/screen.html` | Full-screen digital sign for partner screens (e.g. a restaurant TV), 16:9 or 9:16. See below. |
 | `web/fieldguide.html` | Volunteer field guide for events (phones), at `/fieldguide`. See below. |
 | `scripts/make_icons.py` | Makes the field guide's home screen icons from our logo during each publish. |
+| `fosters.json` (written by `export_animals.py`) | Foster first names by animal ID, for the field guide only. |
 | `scripts/export_events.py` | Writes `events.json` (upcoming events from our website's Events page) for the field guide. |
 | `web/qrcode.js` | QR code generator used by the sign ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4, MIT). |
 | `web/adopt.css` | Styles for all widgets. |
@@ -138,7 +141,8 @@ one-tap access). Not linked from the website.
 - **Animals tab:** search, Dogs/Cats filter, and three sections: Available (Pending animals included,
   with an "Applications pending" / "Adoption pending" tag), Available soon (Intake / Assessment) and
   Currently unavailable (Medical Recovery, Routine Vetting; photos greyed out).
-- Tap an animal for photos, facts, days with us and their full bio. Available and Pending animals get a
+- Tap an animal for photos, facts, days with us, the foster's first name (so volunteers know who to connect
+  adopters with) and their full bio. Search also matches foster names. Available and Pending animals get a
   **Show QR code** button: a full-screen white QR to their page on our site (with the Apply button),
   keeping the screen awake while it's shown. Other statuses explain why they aren't available yet.
 - **Today banner + Events tab:** upcoming events from the Events page on our website (photo, date, time, place,
