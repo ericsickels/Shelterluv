@@ -29,6 +29,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 | `web/spotlight.js` | Homepage spotlight: "N dogs and N cats are looking for homes" count, then a rotating "Meet [name]" panel. Photo-only, Pending animals left out (still counted), longer stays weighted toward the front, pause button, no auto-motion for reduce-motion visitors. |
 | `web/screen.html` | Full-screen digital sign for partner screens (e.g. a restaurant TV), 16:9 or 9:16. See below. |
 | `web/fieldguide.html` | Volunteer field guide for events (phones), at `/fieldguide`. See below. |
+| `scripts/make_icons.py` | Makes the field guide's home screen icons from our logo during each publish. |
 | `web/qrcode.js` | QR code generator used by the sign ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4, MIT). |
 | `web/adopt.css` | Styles for all widgets. |
 | `web/index.html` | Preview page: `https://animals.redemptionrescueinc.com/` shows the widget outside Squarespace. |
@@ -141,6 +142,9 @@ one-tap access). Not linked from the website.
   keeping the screen awake while it's shown. Other statuses explain why they aren't available yet.
 - **QR codes tab:** Donate, Adoption application, Foster application, Facebook, Instagram. Set the links
   in `LINKS` at the top of the script in `web/fieldguide.html`; an empty link shows as "Link needed".
+- **Add to Home Screen** (Share menu on iPhone, ⋮ menu on Android) gives an "RR Field Guide" icon
+  with our logo. The publish run makes the icons from the logo on our website (`scripts/make_icons.py`);
+  the name is in `web/fieldguide.webmanifest` and the `apple-mobile-web-app-title` tag in `web/fieldguide.html`.
 - The phone's back button/gesture closes the QR, then the animal. The last data is saved on the phone,
   so the guide still works on weak event Wi-Fi (the header then says "Offline").
 
