@@ -113,6 +113,9 @@
   .detail { padding: 16px 16px 120px; max-width: 760px; margin: 0 auto; }
   .detail h2 { margin: 0; font-size: 36px; line-height: 1.1; }
   .detail .sub { margin-top: 6px; color: var(--muted); font-size: 16px; }
+  .foster { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; padding: 10px 14px; border-radius: 12px; background: var(--brand-soft); color: var(--text-2); font-size: 15px; }
+  .foster svg { width: 22px; height: 22px; flex: none; fill: none; stroke: var(--brand-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .foster b { color: var(--text); }
   .note { margin: 16px 0 0; padding: 12px 14px; border-radius: 12px; line-height: 1.45; font-size: 15px; color: var(--text-2); }
   .note b { display: block; margin-bottom: 2px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
   .note.pending { background: var(--pending-bg); border-left: 4px solid #e0a030; }
@@ -198,7 +201,7 @@
   <main>
     <section class="tab on" id="tab-animals" aria-label="Animals">
       <div class="today"></div>
-      <div class="tools"><input class="search" type="search" placeholder="Search by name or breed" aria-label="Search animals" autocomplete="off"></div>
+      <div class="tools"><input class="search" type="search" placeholder="Search by name, breed or foster" aria-label="Search animals" autocomplete="off"></div>
       <div class="chips" role="group" aria-label="Filter">
         <button type="button" data-type="All" aria-pressed="true">All</button>
         <button type="button" data-type="Dog" aria-pressed="false">Dogs</button>
@@ -278,7 +281,7 @@
   var ICON_IG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff"/></svg>';
 
   var $ = function (s, r) { return (r || document).querySelector(s); };
-  var data = { available: [], soon: [], unavailable: [], events: [], updated: null };
+  var data = { available: [], soon: [], unavailable: [], events: [], fosters: {}, updated: null };
   var filterType = "All", query = "";
 
   function esc(s) {
@@ -305,6 +308,7 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + (n + pad * 2) + " " + (n + pad * 2) + '" shape-rendering="crispEdges">' +
       '<rect width="100%" height="100%" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>';
   }
+  function foster(a) { return data.fosters[String(a.id)] || ""; }
   function animalUrl(a) { return ANIMAL_URL.replace("{id}", encodeURIComponent(a.id)); }
   function byName(x, y) { return x.name.localeCompare(y.name); }
   function all() { return data.available.concat(data.soon, data.unavailable); }
@@ -320,6 +324,7 @@
     data.soon = tag(raw.soon, "soon").sort(byName);
     data.unavailable = tag(raw.unavailable, "unavailable").sort(byName);
     data.updated = raw.updated;
+    data.fosters = raw.fosters || {};
     data.events = (raw.events || []).slice().sort(function (x, y) { return x.start - y.start; });
     renderAnimals();
     renderEvents();
@@ -327,10 +332,10 @@
   }
   function load() {
     return Promise.all([getJSON("animals.json"), getJSON("coming-soon.json"), getJSON("unavailable.json").catch(function () { return { animals: [] }; }),
-        getJSON("events.json").catch(function () { return null; })])
+        getJSON("events.json").catch(function () { return null; }), getJSON("fosters.json").catch(function () { return null; })])
       .then(function (r) {
         var raw = { available: r[0].animals, soon: r[1].animals, unavailable: r[2].animals, updated: r[0].updated || new Date().toISOString(),
-          events: r[3] ? r[3].events : data.events };
+          events: r[3] ? r[3].events : data.events, fosters: r[4] ? r[4].fosters : data.fosters };
         try { localStorage.setItem("slv-fieldguide", JSON.stringify(raw)); } catch (e) {}
         apply(raw);
       })
@@ -366,7 +371,7 @@
     var shown = list.filter(function (a) {
       if (filterType !== "All" && a.type !== filterType) return false;
       if (!query) return true;
-      return (a.name + " " + (a.breed || "")).toLowerCase().indexOf(query) >= 0;
+      return (a.name + " " + (a.breed || "") + " " + (foster(a) || "")).toLowerCase().indexOf(query) >= 0;
     });
     return '<div class="section"><h2 class="cond">' + esc(title) + " <small>" + shown.length + "</small></h2>" +
       (hint ? '<p class="hint">' + esc(hint) + "</p>" : "") +
@@ -408,7 +413,9 @@
       }).join("") : '<div class="noimg"></div>') + "</div>" +
       (a.photos.length > 1 ? '<span class="count">1 / ' + a.photos.length + "</span>" : "") + "</div>" +
       '<div class="detail"><h2 class="cond">' + esc(a.name) + "</h2>" +
-        '<div class="sub">' + esc([a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" \u00b7 ")) + "</div>" + note +
+        '<div class="sub">' + esc([a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" \u00b7 ")) + "</div>" +
+        (foster(a) ? '<div class="foster"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M12 17s-3-1.8-3-3.6a1.5 1.5 0 0 1 3-.6 1.5 1.5 0 0 1 3 .6C15 15.2 12 17 12 17z"/></svg>' +
+          "<span>Foster: <b>" + esc(foster(a)) + "</b></span></div>" : "") + note +
         '<dl class="facts">' + facts(a).map(function (f) { return "<div><dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd></div>"; }).join("") + "</dl>" +
         ((a.attributes || []).length ? '<div class="tags">' + a.attributes.map(function (t) { return '<span class="pill tag">' + esc(t) + "</span>"; }).join("") + "</div>" : "") +
         (paras ? '<div class="about"><h3 class="cond">About ' + esc(a.name) + "</h3>" + paras + "</div>" : "") +

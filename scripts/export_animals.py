@@ -8,6 +8,8 @@ Writes two files into the output directory:
   adopted.json  - animals with an adoption outcome in the last ADOPTED_DAYS days
                   that are still "Healthy In Home" (i.e. not returned)
   stats.json    - number of adoptions this month, last month and this year, by dogs/cats
+  fosters.json  - foster's FIRST name only, by animal ID, for the volunteer field guide
+                  (kept out of the other files, which the website widgets load)
 
 Only a whitelist of public fields is written. Nothing about people (fosters,
 adopters), microchips or internal attributes is ever written out.
@@ -187,6 +189,17 @@ def to_public_adopted(animal, adopted_time, tz):
     }
 
 
+def foster_first_names(in_custody, wanted):
+    """Animal ID -> current foster's first name. First name only: never the last name or contact details."""
+    names = {}
+    for a in in_custody:
+        person = a.get("AssociatedPerson") or {}
+        first = (person.get("FirstName") or "").strip()
+        if a.get("Status") in wanted and person.get("RelationshipType") == "foster" and first:
+            names[str(a.get("ID"))] = first
+    return names
+
+
 def write_json(path, animals):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(
@@ -243,9 +256,13 @@ def main():
     write_json(os.path.join(out_dir, "adopted.json"), adopted)
     with open(os.path.join(out_dir, "stats.json"), "w", encoding="utf-8") as f:
         json.dump(stats, f, indent=1)
+    fosters = foster_first_names(in_custody, statuses | coming_statuses | unavailable_statuses)
+    with open(os.path.join(out_dir, "fosters.json"), "w", encoding="utf-8") as f:
+        json.dump({"fosters": fosters}, f, ensure_ascii=False, indent=1)
     print(f"Wrote {len(animals)} animals ({', '.join(sorted(statuses))}) to animals.json")
     print(f"Wrote {len(coming_soon)} animals ({', '.join(sorted(coming_statuses))}) to coming-soon.json")
     print(f"Wrote {len(unavailable)} animals ({', '.join(sorted(unavailable_statuses))}) to unavailable.json")
+    print(f"Wrote foster first names for {len(fosters)} animals to fosters.json")
     print(f"Wrote {len(adopted)} animals adopted in the last {days} days to adopted.json")
     print(
         "Wrote adoption counts to stats.json: "
