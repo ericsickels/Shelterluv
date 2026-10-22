@@ -41,6 +41,12 @@ jobs:
           # Volunteer field guide also at the short address /fieldguide/
           mkdir -p public/fieldguide && cp web/fieldguide.html public/fieldguide/index.html
 
+      - name: Make the field guide's home screen icons from our logo
+        continue-on-error: true   # if the logo can't be downloaded, publish anyway without icons
+        run: |
+          pip install --quiet pillow
+          python3 scripts/make_icons.py public
+
       - uses: actions/configure-pages@v6
 
       - uses: actions/upload-pages-artifact@v5
