@@ -302,7 +302,8 @@ html.slv-lock { overflow: hidden; }
   html.slv-printing #slv-print { display: block !important; }
 }
 #slv-print { color: #222; font-size: 11pt; line-height: 1.4; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-.slv-p { height: 10.1in; display: flex; flex-direction: column; overflow: hidden; }
+/* 9in tall: fits iPhone/iPad printing, which uses its own wider margins plus a header and footer. */
+.slv-p { height: 9in; display: flex; flex-direction: column; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
 .slv-p-head { display: flex; align-items: center; gap: .15in; padding-bottom: .1in; border-bottom: 2px solid #222; }
 .slv-p-head img { height: .55in; width: auto; }
 .slv-p-org { font-size: 14pt; font-weight: 700; letter-spacing: .02em; }
@@ -311,7 +312,7 @@ html.slv-lock { overflow: hidden; }
 .slv-p-title h1 { margin: 0; font-size: 36pt; line-height: 1.1; color: #222; }
 .slv-p-tag { padding: 3pt 9pt; border-radius: 999px; font-size: 10pt; font-weight: 700; background: #fff3d6; color: #6b4a00; border: 1px solid #f0d58a; }
 .slv-p-sub { margin: .02in 0 .12in; font-size: 13pt; color: #444; }
-.slv-p-photos { flex: none; display: grid; gap: .08in; height: 3.1in; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
+.slv-p-photos { flex: none; display: grid; gap: .08in; height: 2.8in; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
 .slv-p-photos img { width: 100%; height: 100%; min-height: 0; object-fit: cover; object-position: 50% 30%; border-radius: 6pt; display: block; }
 .slv-p-photos .slv-p-main { grid-row: 1 / 3; }
 .slv-p-n1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
@@ -327,10 +328,10 @@ html.slv-lock { overflow: hidden; }
 .slv-p-about h2 { margin: 0 0 .05in; font-size: 12pt; letter-spacing: .06em; text-transform: uppercase; color: #222; }
 .slv-p-about p { margin: 0 0 .07in; font-size: 10.5pt; line-height: 1.45; }
 .slv-p-side { display: flex; flex-direction: column; min-height: 0; }
-.slv-p-tags { display: flex; flex-wrap: wrap; gap: 4pt; margin-bottom: .1in; }
+.slv-p-tags { display: flex; flex-wrap: wrap; gap: 4pt; margin: .02in 0 .08in; }
 .slv-p-tags span { padding: 2pt 7pt; border-radius: 999px; border: 1px solid #ccc; font-size: 8.5pt; }
 .slv-p-qr { margin-top: auto; padding: .12in; border: 2px solid #222; border-radius: 10pt; text-align: center; }
-.slv-p-code { width: 1.65in; height: 1.65in; margin: 0 auto .06in; }
+.slv-p-code { width: 1.55in; height: 1.55in; margin: 0 auto .06in; }
 .slv-p-code svg { width: 100%; height: 100%; display: block; }
 .slv-p-qr strong { display: block; font-size: 12pt; line-height: 1.25; }
 .slv-p-qr span { display: block; margin-top: 3pt; font-size: 8pt; color: #555; word-break: break-all; }

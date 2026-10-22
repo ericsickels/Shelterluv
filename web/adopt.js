@@ -322,9 +322,9 @@
             return "<div><dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd></div>";
           }).join("") + "</dl>" : "") +
           '<div class="slv-p-body">' +
-            '<div class="slv-p-about">' + (paragraphs ? "<h2>About " + esc(a.name) + "</h2>" + paragraphs : "") + "</div>" +
+            '<div class="slv-p-about">' + (paragraphs ? "<h2>About " + esc(a.name) + "</h2>" : "") +
+              ((a.attributes || []).length ? '<div class="slv-p-tags">' + a.attributes.map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</div>" : "") + paragraphs + "</div>" +
             '<div class="slv-p-side">' +
-              ((a.attributes || []).length ? '<div class="slv-p-tags">' + a.attributes.map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</div>" : "") +
               '<div class="slv-p-qr"><div class="slv-p-code"></div><strong>' +
                 esc(w.apply ? "Scan to meet " + a.name + " & apply" : "Scan to follow " + a.name) + "</strong>" +
                 "<span>" + esc(site + "#animal-" + a.id) + "</span></div>" +
