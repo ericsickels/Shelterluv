@@ -41,6 +41,9 @@
       notice: "{name} is settling in with us and will be available for adoption soon. Check back for updates!"
     }
   ];
+  // Printing while an animal's pop-up is open gives a one-page flyer with a QR code to them.
+  var PRINT_ORG = "Redemption Rescue";
+  var PRINT_LOGO = "https://images.squarespace-cdn.com/content/v1/5a25b56b51a5845bb4efad79/2b8394b7-51a2-4040-9d5f-2ceebdb5059a/2+color.png?format=300w";
   // --------------------------------------------------------------------------
 
   // The data files and adopt.css are published next to this script.
@@ -56,6 +59,44 @@
     link.href = BASE + "adopt.css?v=" + version;
     link.setAttribute("data-slv-css", "");
     document.head.appendChild(link);
+  }
+
+  // ---- One-page print flyer (shared by both widgets; only shown when printing) ----
+  var qrWaiting = null;
+  function withQr(cb) {
+    if (window.qrcode) return cb();
+    if (!qrWaiting) {
+      qrWaiting = [];
+      var s = document.createElement("script");
+      s.src = BASE + "qrcode.js?v=" + version;
+      s.onload = function () { var w = qrWaiting; qrWaiting = null; w.forEach(function (f) { f(); }); };
+      document.head.appendChild(s);
+    }
+    qrWaiting.push(cb);
+  }
+  function qrSvg(url) {
+    var q = window.qrcode(0, "M");
+    q.addData(url);
+    q.make();
+    var n = q.getModuleCount(), d = "";
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) d += "M" + c + "," + r + "h1v1h-1z";
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 ' + (n + 4) + " " + (n + 4) + '" shape-rendering="crispEdges">' +
+      '<rect x="-2" y="-2" width="' + (n + 4) + '" height="' + (n + 4) + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>';
+  }
+  function printSheet() {
+    var el = document.getElementById("slv-print");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "slv-print";
+      el.setAttribute("aria-hidden", "true");
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+  function clearPrint() {
+    document.documentElement.classList.remove("slv-printing");
+    var el = document.getElementById("slv-print");
+    if (el) el.innerHTML = "";
   }
 
   WIDGETS.forEach(function (w) {
@@ -245,6 +286,7 @@
           '<div class="slv-cta">' + cta + "</div>" +
         "</div>";
 
+      renderPrint(a, paragraphs);
       if (!modal.open) { modal.showModal(); document.documentElement.classList.add("slv-lock"); }
       if (a.photos.length) {
         showPhoto(0, true);
@@ -256,6 +298,46 @@
       modal.querySelector(".slv-scroll").scrollTop = 0;
       modal.querySelector(".slv-close").focus();
       if (location.hash !== "#animal-" + a.id) history.replaceState(null, "", "#animal-" + a.id);
+    }
+
+    function renderPrint(a, paragraphs) {
+      var url = location.origin + location.pathname + "#animal-" + encodeURIComponent(a.id);
+      var site = (location.host + location.pathname).replace(/^www\./, "").replace(/\/$/, "");
+      var photos = a.photos.slice(0, 3);
+      var factList = facts(a);
+      if (w.apply && a.adoptionFee) factList.push(["Adoption fee", "$" + a.adoptionFee]);
+      var tag = w.badge || (isPending(a) ? (a.status === "Hold - Pending Adoption" ? "Adoption pending" : "Applications pending") : STATUS_BADGES[a.status]);
+      var sheet = printSheet();
+      sheet.innerHTML =
+        '<div class="slv-p">' +
+          '<header class="slv-p-head">' + (PRINT_LOGO ? '<img src="' + esc(PRINT_LOGO) + '" alt="">' : "") +
+            '<span class="slv-p-org">' + esc(PRINT_ORG) + "</span>" +
+            '<span class="slv-p-site">' + esc(site) + "</span></header>" +
+          '<div class="slv-p-title"><h1>' + esc(a.name) + "</h1>" + (tag ? '<span class="slv-p-tag">' + esc(tag) + "</span>" : "") + "</div>" +
+          '<p class="slv-p-sub">' + esc(summary(a)) + "</p>" +
+          '<div class="slv-p-photos slv-p-n' + Math.max(1, photos.length) + '">' + (photos.length ? photos.map(function (src, i) {
+            return '<img class="' + (i ? "" : "slv-p-main") + '" src="' + esc(src) + '" alt="">';
+          }).join("") : placeholder(a.type, "slv-ph-large")) + "</div>" +
+          (factList.length ? '<dl class="slv-p-facts">' + factList.map(function (f) {
+            return "<div><dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd></div>";
+          }).join("") + "</dl>" : "") +
+          '<div class="slv-p-body">' +
+            '<div class="slv-p-about">' + (paragraphs ? "<h2>About " + esc(a.name) + "</h2>" + paragraphs : "") + "</div>" +
+            '<div class="slv-p-side">' +
+              ((a.attributes || []).length ? '<div class="slv-p-tags">' + a.attributes.map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</div>" : "") +
+              '<div class="slv-p-qr"><div class="slv-p-code"></div><strong>' +
+                esc(w.apply ? "Scan to meet " + a.name + " & apply" : "Scan to follow " + a.name) + "</strong>" +
+                "<span>" + esc(site + "#animal-" + a.id) + "</span></div>" +
+            "</div>" +
+          "</div>" +
+          '<footer class="slv-p-foot"><span>' + esc(w.apply ? "Apply online at " + site : (w.notice || "").replace("{name}", a.name)) + "</span>" +
+            "<span>Details as of " + esc(new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })) + "</span></footer>" +
+        "</div>";
+      document.documentElement.classList.add("slv-printing");
+      withQr(function () {
+        var box = sheet.querySelector(".slv-p-code");
+        if (box && current === a) box.innerHTML = qrSvg(url);
+      });
     }
 
     function closeModal() {
@@ -303,6 +385,7 @@
 
     modal.addEventListener("close", function () {
       document.documentElement.classList.remove("slv-lock");
+      clearPrint();
       current = null;
       if (location.hash.indexOf("#animal-") === 0) history.replaceState(null, "", location.pathname + location.search);
     });

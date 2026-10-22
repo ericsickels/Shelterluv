@@ -110,6 +110,11 @@ Settings live at the top of `web/adopt.js`:
   the title/text shown when a section has no animals (`emptyTitle`, `emptyText`).
   Recently Adopted's empty message is `EMPTY_TITLE` / `EMPTY_TEXT` at the top of `web/adopted.js`.
 
+**Printing an animal:** with an animal's pop-up open, use the browser's Print (Ctrl/Cmd+P) to get a
+one-page flyer: logo, name, up to 3 photos, the details, their bio and a QR code back to their pop-up
+(where people can apply). Printing with no pop-up open prints the page as usual. The logo and name at
+the top are `PRINT_LOGO` / `PRINT_ORG` in `web/adopt.js`; the layout is the "Printing" section of `web/adopt.css`.
+
 Button colour is `--slv-accent` at the top of `web/adopt.css`; the Adopted ribbon colour is
 `--slv-adopted`, and its text is `RIBBON_TEXT` at the top of `web/adopted.js`.
 
