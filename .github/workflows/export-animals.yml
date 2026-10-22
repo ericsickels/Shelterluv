@@ -30,12 +30,16 @@ jobs:
           SHELTERLUV_API_KEY: ${{ secrets.SHELTERLUV_API_KEY }}
           PUBLISH_STATUSES: ${{ vars.PUBLISH_STATUSES || 'Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending,Hold - Pending Adoption' }}
           COMING_SOON_STATUSES: ${{ vars.COMING_SOON_STATUSES || 'Unavailable - Intake / Assessment' }}
+          UNAVAILABLE_STATUSES: ${{ vars.UNAVAILABLE_STATUSES || 'Unavailable - Medical Recovery,Unavailable - Routine Vetting' }}
           ADOPTED_DAYS: ${{ vars.ADOPTED_DAYS || '60' }}
           SHELTER_TIMEZONE: ${{ vars.SHELTER_TIMEZONE || 'America/New_York' }}
         run: python3 scripts/export_animals.py public
 
       - name: Add the website widgets and preview page
-        run: cp web/* public/
+        run: |
+          cp web/* public/
+          # Volunteer field guide also at the short address /fieldguide/
+          mkdir -p public/fieldguide && cp web/fieldguide.html public/fieldguide/index.html
 
       - uses: actions/configure-pages@v6
 

@@ -21,13 +21,14 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 
 | File | Purpose |
 |---|---|
-| `scripts/export_animals.py` | Writes `animals.json` (adoptable animals, filtered by status), `coming-soon.json` (Intake / Assessment animals), `adopted.json` (adopted in the last 60 days and still "Healthy In Home") and `stats.json` (adoptions this month, last month and this year, split into dogs and cats). No dependencies. |
+| `scripts/export_animals.py` | Writes `animals.json` (adoptable animals, filtered by status), `coming-soon.json` (Intake / Assessment animals), `unavailable.json` (Medical Recovery / Routine Vetting, for the field guide), `adopted.json` (adopted in the last 60 days and still "Healthy In Home") and `stats.json` (adoptions this month, last month and this year, split into dogs and cats). No dependencies. |
 | `.github/workflows/export-animals.yml` | Every 30 minutes and on every merge to `main`: runs the export and publishes it with the widget to GitHub Pages. |
 | `web/adopt.js` | Adoptable animals and Coming Soon: cards, filters and the detail pop-up (Coming Soon shows a note instead of the Apply button). Missing or broken photos show a dog/cat "Photo coming soon" placeholder. |
 | `web/adopted.js` | Recently Adopted: non-clickable cards (name, sex, age, breed, photo, adoption date) with an "Adopted!" ribbon. |
 | `web/stats.js` | Adoption counts: This Month / Last Month / This Year tiles with dog and cat counts, animated when scrolled into view. |
 | `web/spotlight.js` | Homepage spotlight: "N dogs and N cats are looking for homes" count, then a rotating "Meet [name]" panel. Photo-only, Pending animals left out (still counted), longer stays weighted toward the front, pause button, no auto-motion for reduce-motion visitors. |
 | `web/screen.html` | Full-screen digital sign for partner screens (e.g. a restaurant TV), 16:9 or 9:16. See below. |
+| `web/fieldguide.html` | Volunteer field guide for events (phones), at `/fieldguide`. See below. |
 | `web/qrcode.js` | QR code generator used by the sign ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4, MIT). |
 | `web/adopt.css` | Styles for all widgets. |
 | `web/index.html` | Preview page: `https://animals.redemptionrescueinc.com/` shows the widget outside Squarespace. |
@@ -47,6 +48,7 @@ The API key lives only in GitHub's encrypted secrets. Visitors only ever see
 3. *(Optional)* **Variables** tab: `PUBLISH_STATUSES` = comma-separated Shelterluv statuses to
    show. Default: `Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending,Hold - Pending Adoption`.
    `COMING_SOON_STATUSES` = statuses shown under Coming Soon. Default `Unavailable - Intake / Assessment`.
+   `UNAVAILABLE_STATUSES` = statuses in the field guide's Currently Unavailable section. Default `Unavailable - Medical Recovery,Unavailable - Routine Vetting`.
    `ADOPTED_DAYS` = how far back Recently Adopted looks. Default `60`.
    `SHELTER_TIMEZONE` = time zone for adoption dates. Default `America/New_York`.
 4. **Settings → Pages → Source:** choose **GitHub Actions**. **Custom domain:** `animals.redemptionrescueinc.com`
@@ -125,6 +127,22 @@ or signage player. It needs no login and nothing on Squarespace.
 - Check it from a laptop with `?preview=1` (16:9 / 9:16 frame and buttons to jump to the info slides).
 - Wording (mission line, logo, links, timings) is in the Configuration block at the top of the script
   in `web/screen.html`; the orange is `--brand` at the top of its styles.
+
+## Volunteer field guide (events)
+
+Open **https://animals.redemptionrescueinc.com/fieldguide** on a phone (add it to the home screen for
+one-tap access). Not linked from the website.
+
+- **Animals tab:** search, Dogs/Cats filter, and three sections: Available (Pending animals included,
+  with an "Applications pending" / "Adoption pending" tag), Available soon (Intake / Assessment) and
+  Currently unavailable (Medical Recovery, Routine Vetting; photos greyed out).
+- Tap an animal for photos, facts, days with us and their full bio. Available and Pending animals get a
+  **Show QR code** button: a full-screen white QR to their page on our site (with the Apply button),
+  keeping the screen awake while it's shown. Other statuses explain why they aren't available yet.
+- **QR codes tab:** Donate, Adoption application, Foster application, Facebook, Instagram. Set the links
+  in `LINKS` at the top of the script in `web/fieldguide.html`; an empty link shows as "Link needed".
+- The phone's back button/gesture closes the QR, then the animal. The last data is saved on the phone,
+  so the guide still works on weak event Wi-Fi (the header then says "Offline").
 
 ## Day to day
 

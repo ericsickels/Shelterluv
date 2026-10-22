@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#151515">
+<meta name="robots" content="noindex">
+<title>Volunteer Field Guide - Redemption Rescue</title>
+<!--
+  Volunteer field guide for events: every animal in our care, with a QR code volunteers can show
+  attendees for available animals, plus a tab of general QR codes (donate, adopt, foster, social).
+  Open on a phone: https://animals.redemptionrescueinc.com/fieldguide
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #151515; --card: #222224; --line: #34343a; --text: #f4f1ec; --muted: #a9a6a1;
+    --brand: rgb(221, 115, 8); --brand-soft: rgba(221, 115, 8, .14);
+    --pending: #f2b33d; --soon: #6cb7ff; --unavail: #9a9aa2;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  body { padding-bottom: calc(76px + var(--safe-b)); }
+  button { font: inherit; color: inherit; }
+  .cond { font-family: Oswald, "Arial Narrow", sans-serif; text-transform: uppercase; letter-spacing: .03em; }
+
+  /* ---- Header ---- */
+  .top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    background: rgba(21,21,21,.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 2px solid var(--brand); }
+  .top img { width: 46px; height: 46px; object-fit: contain; border-radius: 8px; background: #fff; padding: 3px; flex: none; }
+  .top .eyebrow { color: var(--brand); font-size: 12px; letter-spacing: .14em; }
+  .top h1 { margin: 2px 0 0; font-size: 24px; line-height: 1; }
+  .top .updated { margin-left: auto; text-align: right; font-size: 12px; color: var(--muted); }
+
+  main { padding: 14px 16px 24px; max-width: 760px; margin: 0 auto; }
+  .tab { display: none; } .tab.on { display: block; }
+
+  /* ---- Search + filters ---- */
+  .tools { display: flex; gap: 8px; margin-bottom: 6px; }
+  .search { flex: 1; min-width: 0; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--card);
+    color: var(--text); font-size: 16px; }
+  .chips { display: flex; gap: 8px; margin: 10px 0 4px; }
+  .chips button { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; font-size: 14px; font-weight: 600; }
+  .chips button[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #111; }
+
+  /* ---- Sections + cards ---- */
+  .section h2 { display: flex; align-items: baseline; gap: 10px; margin: 22px 0 4px; font-size: 22px; }
+  .section h2 small { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 14px; color: var(--muted); letter-spacing: 0; text-transform: none; }
+  .section .hint { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (min-width: 620px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .card { display: block; width: 100%; padding: 0; text-align: left; border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+    background: var(--card); cursor: pointer; }
+  .card .ph { position: relative; aspect-ratio: 4 / 3; background: #2c2c30; }
+  .card .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card .body { padding: 10px 12px 12px; }
+  .card h3 { margin: 0; font-size: 21px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .meta { margin-top: 3px; font-size: 14px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .qr-flag { position: absolute; right: 8px; bottom: 8px; width: 30px; height: 30px; border-radius: 8px; background: rgba(0,0,0,.6);
+    display: flex; align-items: center; justify-content: center; }
+  .card .qr-flag svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; }
+  .muted-photo img { filter: grayscale(1) brightness(.85); }
+  .pill { display: inline-block; margin-top: 8px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+  .pill.pending { background: rgba(242,179,61,.16); color: var(--pending); }
+  .pill.soon { background: rgba(108,183,255,.15); color: var(--soon); }
+  .pill.unavail { background: rgba(154,154,162,.18); color: #cfcfd6; }
+  .pill.tag { background: var(--brand-soft); color: var(--brand); }
+  .none { padding: 18px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); text-align: center; font-size: 14px; }
+
+  /* ---- QR codes tab ---- */
+  .directions { display: flex; gap: 14px; align-items: flex-start; padding: 16px; border: 1px solid var(--line); border-radius: 16px; margin-bottom: 16px; }
+  .directions h2 { margin: 0 0 6px; font-size: 19px; }
+  .directions p { margin: 0; line-height: 1.5; color: #dcd8d2; }
+  .links { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .lnk { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 64px; padding: 14px; border-radius: 16px;
+    border: 2px solid var(--brand); background: transparent; font-size: 17px; font-weight: 700; text-align: center; cursor: pointer; }
+  .lnk.primary { grid-column: 1 / -1; min-height: 76px; background: var(--brand); color: #111; font-size: 20px; }
+  .lnk.fb { border: none; background: #1877f2; color: #fff; }
+  .lnk.ig { border: none; background: linear-gradient(45deg, #5b51d8, #c13584 55%, #f77737); color: #fff; }
+  .lnk svg { width: 24px; height: 24px; flex: none; }
+  .lnk[disabled] { opacity: .45; cursor: default; }
+  .lnk small { display: block; font-size: 12px; font-weight: 500; opacity: .8; }
+
+  /* ---- Bottom tab bar ---- */
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center; gap: 8px;
+    padding: 8px 16px calc(8px + var(--safe-b)); background: #1b1b1d; border-top: 1px solid var(--line); }
+  .tabbar button { flex: 1; max-width: 220px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; border: none;
+    background: transparent; color: var(--muted); font-size: 13px; font-weight: 600; position: relative; cursor: pointer; }
+  .tabbar button svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tabbar button[aria-selected="true"] { color: var(--brand); }
+  .tabbar button[aria-selected="true"]::before { content: ""; position: absolute; top: -9px; left: 30%; right: 30%; height: 3px; border-radius: 3px; background: var(--brand); }
+
+  /* ---- Animal detail sheet ---- */
+  .sheet { position: fixed; inset: 0; z-index: 30; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch;
+    transform: translateY(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1); visibility: hidden; }
+  .sheet.open { transform: none; visibility: visible; }
+  .sheet-close { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 12px; z-index: 2; width: 44px; height: 44px; border-radius: 50%; border: none;
+    background: rgba(0,0,0,.55); color: #fff; font-size: 26px; line-height: 1; cursor: pointer; }
+  .gallery { position: relative; }
+  .track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .track::-webkit-scrollbar { display: none; }
+  .track img, .track .noimg { flex: 0 0 100%; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; scroll-snap-align: center; background: #2c2c30; }
+  .count { position: absolute; right: 12px; bottom: 12px; padding: 3px 10px; border-radius: 999px; background: rgba(0,0,0,.6); font-size: 13px; }
+  .detail { padding: 16px 16px 120px; max-width: 760px; margin: 0 auto; }
+  .detail h2 { margin: 0; font-size: 38px; line-height: 1.05; }
+  .detail .sub { margin-top: 6px; color: var(--muted); font-size: 16px; }
+  .note { margin: 16px 0 0; padding: 12px 14px; border-radius: 12px; line-height: 1.45; font-size: 15px; }
+  .note b { display: block; margin-bottom: 2px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+  .note.pending { background: rgba(242,179,61,.12); border-left: 4px solid var(--pending); }
+  .note.pending b { color: var(--pending); }
+  .note.soon { background: rgba(108,183,255,.1); border-left: 4px solid var(--soon); }
+  .note.soon b { color: var(--soon); }
+  .note.unavail { background: rgba(154,154,162,.12); border-left: 4px solid var(--unavail); }
+  .note.unavail b { color: #cfcfd6; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 18px 0 0; border-radius: 12px; overflow: hidden; background: var(--line); border: 1px solid var(--line); }
+  .facts div { padding: 10px 12px; background: var(--card); }
+  .facts div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .facts dt { font-size: 12px; color: var(--muted); }
+  .facts dd { margin: 2px 0 0; font-weight: 700; font-size: 16px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .about h3 { margin: 22px 0 8px; font-size: 18px; color: var(--brand); }
+  .about p { margin: 0 0 12px; line-height: 1.6; color: #e6e2dc; }
+  .cta { position: fixed; left: 0; right: 0; bottom: 0; z-index: 2; padding: 12px 16px calc(12px + var(--safe-b));
+    background: linear-gradient(transparent, var(--bg) 30%); }
+  .cta button { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 728px; margin: 0 auto; min-height: 58px;
+    border: none; border-radius: 16px; background: var(--brand); color: #111; font-size: 19px; font-weight: 800; cursor: pointer; }
+  .cta svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.2; }
+
+  /* ---- Full-screen QR (white for easy scanning) ---- */
+  .qr-view { position: fixed; inset: 0; z-index: 40; display: none; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px 24px calc(24px + var(--safe-b)); background: #fff; color: #111; text-align: center; }
+  .qr-view.open { display: flex; }
+  .qr-view .close { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; width: 48px; height: 48px; border-radius: 50%;
+    border: none; background: #eee; color: #111; font-size: 28px; line-height: 1; cursor: pointer; }
+  .qr-view .label { font-family: Oswald, "Arial Narrow", sans-serif; text-transform: uppercase; font-size: 34px; line-height: 1.1; margin-bottom: 4px; }
+  .qr-view .sublabel { color: #555; font-size: 16px; margin-bottom: 18px; }
+  .qr-view .code { width: min(84vw, 62vh, 420px); height: min(84vw, 62vh, 420px); }
+  .qr-view .code svg { width: 100%; height: 100%; display: block; }
+  .qr-view .url { margin-top: 16px; font-size: 15px; color: #444; word-break: break-all; }
+  .qr-view .brand { position: absolute; left: 0; right: 0; bottom: calc(18px + var(--safe-b)); display: flex; align-items: center; justify-content: center; gap: 8px;
+    color: #777; font-size: 13px; }
+  .qr-view .brand img { height: 28px; }
+
+  .loading { padding: 40px 0; text-align: center; color: var(--muted); }
+</style>
+</head>
+<body>
+  <header class="top">
+    <img src="https://images.squarespace-cdn.com/content/v1/5a25b56b51a5845bb4efad79/2b8394b7-51a2-4040-9d5f-2ceebdb5059a/2+color.png?format=300w" alt="Redemption Rescue">
+    <div>
+      <div class="eyebrow cond">Volunteer field guide</div>
+      <h1 class="cond">Redemption Rescue</h1>
+    </div>
+    <div class="updated" aria-live="polite"></div>
+  </header>
+
+  <main>
+    <section class="tab on" id="tab-animals" aria-label="Animals">
+      <div class="tools"><input class="search" type="search" placeholder="Search by name or breed" aria-label="Search animals" autocomplete="off"></div>
+      <div class="chips" role="group" aria-label="Filter">
+        <button type="button" data-type="All" aria-pressed="true">All</button>
+        <button type="button" data-type="Dog" aria-pressed="false">Dogs</button>
+        <button type="button" data-type="Cat" aria-pressed="false">Cats</button>
+      </div>
+      <div class="sections"><p class="loading">Loading our animals&hellip;</p></div>
+    </section>
+
+    <section class="tab" id="tab-qr" aria-label="QR codes">
+      <div class="directions">
+        <div>
+          <h2 class="cond">How to use</h2>
+          <p>Tap a button to show a big QR code, then turn your phone so the attendee can scan it with their camera.</p>
+        </div>
+      </div>
+      <div class="links"></div>
+    </section>
+  </main>
+
+  <nav class="tabbar" role="tablist">
+    <button type="button" role="tab" data-tab="animals" aria-selected="true">
+      <svg viewBox="0 0 24 24"><circle cx="6" cy="9" r="2"/><circle cx="10" cy="5" r="2"/><circle cx="14" cy="5" r="2"/><circle cx="18" cy="9" r="2"/><path d="M12 11c-3 0-6 4-6 7 0 2 2 3 3.5 2.4 1.6-.6 3.4-.6 5 0C16 21 18 20 18 18c0-3-3-7-6-7z"/></svg>Animals</button>
+    <button type="button" role="tab" data-tab="qr" aria-selected="false">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3"/></svg>QR codes</button>
+  </nav>
+
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Animal details">
+    <button type="button" class="sheet-close" aria-label="Close">&times;</button>
+    <div class="sheet-body"></div>
+  </div>
+
+  <div class="qr-view" role="dialog" aria-modal="true" aria-label="QR code">
+    <button type="button" class="close" aria-label="Close QR code">&times;</button>
+    <div class="label"></div>
+    <div class="sublabel">Scan with your phone&rsquo;s camera</div>
+    <div class="code"></div>
+    <div class="url"></div>
+    <div class="brand"><img src="https://images.squarespace-cdn.com/content/v1/5a25b56b51a5845bb4efad79/2b8394b7-51a2-4040-9d5f-2ceebdb5059a/2+color.png?format=300w" alt="">Redemption Rescue</div>
+  </div>
+
+<script src="/qrcode.js"></script>
+<script>
+(function () {
+  // ---- Configuration -------------------------------------------------------
+  // Where an animal's QR code goes: their page on our site, which has the Apply button.
+  var ANIMAL_URL = "https://redemptionrescueinc.com/adopt#animal-{id}";
+  // General QR codes on the "QR codes" tab. Leave a url empty ("") to show the button as "Link needed".
+  var LINKS = [
+    { key: "donate", label: "Donate", qrLabel: "Donate to Redemption Rescue", url: "", style: "primary" },
+    { key: "adopt", label: "Adoption application", qrLabel: "Adopt", url: "https://redemptionrescueinc.com/adopt" },
+    { key: "foster", label: "Foster application", qrLabel: "Foster", url: "" },
+    { key: "facebook", label: "Follow on Facebook", qrLabel: "Follow us on Facebook", url: "", style: "fb" },
+    { key: "instagram", label: "Follow on Instagram", qrLabel: "Follow us on Instagram", url: "", style: "ig" }
+  ];
+  var PENDING_STATUSES = ["Hold - Applications Pending", "Hold - Pending Adoption"];
+  var REFRESH_MS = 10 * 60000;
+  // --------------------------------------------------------------------------
+
+  var EMBEDDED = null; /*EMBEDDED_DATA*/
+  var STATUS_TEXT = {
+    "Hold - Applications Pending": "Applications pending",
+    "Hold - Pending Adoption": "Adoption pending",
+    "Unavailable - Intake / Assessment": "Available soon",
+    "Unavailable - Medical Recovery": "Medical recovery",
+    "Unavailable - Routine Vetting": "Routine vetting",
+    "Available - Fospice": "Fospice"
+  };
+  var ICON_QR = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3"/></svg>';
+  var ICON_FB = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#fff"/><path fill="#1877f2" d="M13.4 20v-6.3h2.1l.3-2.5h-2.4V9.7c0-.7.2-1.2 1.2-1.2h1.3V6.3a17 17 0 0 0-1.9-.1c-1.9 0-3.2 1.2-3.2 3.3v1.8H8.7v2.5h2.1V20z"/></svg>';
+  var ICON_IG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff"/></svg>';
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var data = { available: [], soon: [], unavailable: [], updated: null };
+  var filterType = "All", query = "";
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function age(m) {
+    if (m == null || m === "") return "";
+    var y = Math.floor(m / 12), r = m % 12;
+    if (!y) return r + (r === 1 ? " month" : " months");
+    return y + (y === 1 ? " year" : " years") + (r ? ", " + r + " mo" : "");
+  }
+  function days(a) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(a.intakeDate || "");
+    return m ? Math.max(0, Math.floor((Date.now() - Date.UTC(+m[1], +m[2] - 1, +m[3])) / 86400000)) : null;
+  }
+  function isPending(a) { return PENDING_STATUSES.indexOf(a.status) >= 0; }
+  function hasQr(a) { return a.group === "available"; }   // available + pending only
+  function qrSvg(url) {
+    var q = qrcode(0, "M"); q.addData(url); q.make();
+    var n = q.getModuleCount(), pad = 3, d = "";
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) d += "M" + (c + pad) + "," + (r + pad) + "h1v1h-1z";
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + (n + pad * 2) + " " + (n + pad * 2) + '" shape-rendering="crispEdges">' +
+      '<rect width="100%" height="100%" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>';
+  }
+  function animalUrl(a) { return ANIMAL_URL.replace("{id}", encodeURIComponent(a.id)); }
+  function byName(x, y) { return x.name.localeCompare(y.name); }
+  function all() { return data.available.concat(data.soon, data.unavailable); }
+  function find(id) { return all().filter(function (a) { return String(a.id) === String(id); })[0]; }
+
+  // ---- data (cached on the phone so the guide still works on weak event Wi-Fi) ----
+  function getJSON(name) {
+    return fetch("/" + name + "?v=" + Math.floor(Date.now() / 300000)).then(function (r) { if (!r.ok) throw 0; return r.json(); });
+  }
+  function apply(raw) {
+    function tag(list, group) { return (list || []).map(function (a) { a.group = group; a.photos = a.photos || []; return a; }); }
+    data.available = tag(raw.available, "available").sort(function (x, y) { return (isPending(x) - isPending(y)) || byName(x, y); });
+    data.soon = tag(raw.soon, "soon").sort(byName);
+    data.unavailable = tag(raw.unavailable, "unavailable").sort(byName);
+    data.updated = raw.updated;
+    renderAnimals();
+    showUpdated(raw.offline);
+  }
+  function load() {
+    return Promise.all([getJSON("animals.json"), getJSON("coming-soon.json"), getJSON("unavailable.json").catch(function () { return { animals: [] }; })])
+      .then(function (r) {
+        var raw = { available: r[0].animals, soon: r[1].animals, unavailable: r[2].animals, updated: r[0].updated || new Date().toISOString() };
+        try { localStorage.setItem("slv-fieldguide", JSON.stringify(raw)); } catch (e) {}
+        apply(raw);
+      })
+      .catch(function () {
+        var cached = null;
+        try { cached = JSON.parse(localStorage.getItem("slv-fieldguide")); } catch (e) {}
+        if (!cached && EMBEDDED) cached = EMBEDDED;
+        if (cached) { cached.offline = true; apply(cached); }
+        else $(".sections").innerHTML = '<p class="none">Couldn\u2019t load the animals. Check your connection and pull down to refresh.</p>';
+      });
+  }
+  function showUpdated(offline) {
+    var t = data.updated ? new Date(data.updated) : null, mins = t ? Math.round((Date.now() - t) / 60000) : null;
+    $(".updated").innerHTML = (offline ? "Offline<br>" : "") + (mins === null ? "" : mins < 2 ? "Updated just now" : "Updated " + (mins < 90 ? mins + " min" : Math.round(mins / 60) + " hr") + " ago");
+  }
+
+  // ---- animal list ----
+  function card(a) {
+    var pill = a.group === "available"
+      ? (STATUS_TEXT[a.status] ? '<span class="pill ' + (isPending(a) ? "pending" : "tag") + '">' + esc(STATUS_TEXT[a.status]) + "</span>" : "")
+      : '<span class="pill ' + (a.group === "soon" ? "soon" : "unavail") + '">' + esc(STATUS_TEXT[a.status] || a.status.replace(/^Unavailable - /, "")) + "</span>";
+    return '<button type="button" class="card" data-id="' + esc(a.id) + '">' +
+      '<div class="ph' + (a.group === "unavailable" ? " muted-photo" : "") + '">' +
+        (a.photos[0] ? '<img loading="lazy" src="' + esc(a.photos[0]) + '" alt="">' : "") +
+        (hasQr(a) ? '<span class="qr-flag" title="Has a QR code">' + ICON_QR + "</span>" : "") +
+      "</div>" +
+      '<div class="body"><h3 class="cond">' + esc(a.name) + "</h3>" +
+        '<div class="meta">' + esc([a.sex, age(a.ageMonths)].filter(Boolean).join(" \u00b7 ")) + "</div>" +
+        '<div class="meta">' + esc(a.breed || "") + "</div>" + pill +
+      "</div></button>";
+  }
+  function section(title, hint, list) {
+    var shown = list.filter(function (a) {
+      if (filterType !== "All" && a.type !== filterType) return false;
+      if (!query) return true;
+      return (a.name + " " + (a.breed || "")).toLowerCase().indexOf(query) >= 0;
+    });
+    return '<div class="section"><h2 class="cond">' + esc(title) + " <small>" + shown.length + "</small></h2>" +
+      (hint ? '<p class="hint">' + esc(hint) + "</p>" : "") +
+      (shown.length ? '<div class="grid">' + shown.map(card).join("") + "</div>" : '<p class="none">' + (query || filterType !== "All" ? "No matches" : "None right now") + "</p>") +
+      "</div>";
+  }
+  function renderAnimals() {
+    $(".sections").innerHTML =
+      section("Available", "Tap an animal to show their QR code. Pending pets can still get applications.", data.available) +
+      section("Available soon", "Settling in and finishing intake. No applications yet.", data.soon) +
+      section("Currently unavailable", "In medical recovery or routine vetting. Not available for adoption right now.", data.unavailable);
+  }
+
+  // ---- animal detail ----
+  function facts(a) {
+    var d = days(a), fixed = a.altered === "Yes" ? "Yes" : a.altered === "No" ? "Not yet" : "";
+    return [
+      ["Age", age(a.ageMonths)], ["Sex", a.sex], ["Breed", a.breed], ["Color", [a.color, a.pattern].filter(Boolean).join(", ")],
+      ["Size", a.size], ["Weight", a.weightLbs ? a.weightLbs + " lbs" : ""],
+      [a.sex === "Female" ? "Spayed" : a.sex === "Male" ? "Neutered" : "Spayed / neutered", fixed],
+      ["With us", d === null ? "" : d === 0 ? "Arrived today" : d + (d === 1 ? " day" : " days")],
+      ["Adoption fee", a.group === "available" && a.adoptionFee ? "$" + a.adoptionFee : ""]
+    ].filter(function (f) { return f[1]; });
+  }
+  var openId = null;
+  function openAnimal(id, push) {
+    var a = find(id);
+    if (!a) return;
+    if (!push && openId === String(a.id) && $(".sheet").classList.contains("open")) return;   // back from its QR code
+    openId = String(a.id);
+    var note = "";
+    if (isPending(a)) note = '<div class="note pending"><b>' + esc(STATUS_TEXT[a.status]) + "</b>Applications are under review. Attendees can still apply, but " + esc(a.name) + " may find a home first.</div>";
+    else if (a.group === "soon") note = '<div class="note soon"><b>Available soon</b>' + esc(a.name) + " is settling in and finishing intake. Not taking applications yet.</div>";
+    else if (a.group === "unavailable") note = '<div class="note unavail"><b>' + esc(STATUS_TEXT[a.status] || "Unavailable") + "</b>" + esc(a.name) + " isn\u2019t available for adoption right now.</div>";
+    var paras = (a.description || "").split(/\n\s*\n/).filter(Boolean).map(function (p) { return "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>"; }).join("");
+    $(".sheet-body").innerHTML =
+      '<div class="gallery"><div class="track">' + (a.photos.length ? a.photos.map(function (p, i) {
+        return '<img ' + (i > 1 ? 'loading="lazy" ' : "") + 'src="' + esc(p) + '" alt="Photo ' + (i + 1) + " of " + esc(a.name) + '">';
+      }).join("") : '<div class="noimg"></div>') + "</div>" +
+      (a.photos.length > 1 ? '<span class="count">1 / ' + a.photos.length + "</span>" : "") + "</div>" +
+      '<div class="detail"><h2 class="cond">' + esc(a.name) + "</h2>" +
+        '<div class="sub">' + esc([a.sex, age(a.ageMonths), a.breed].filter(Boolean).join(" \u00b7 ")) + "</div>" + note +
+        '<dl class="facts">' + facts(a).map(function (f) { return "<div><dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd></div>"; }).join("") + "</dl>" +
+        ((a.attributes || []).length ? '<div class="tags">' + a.attributes.map(function (t) { return '<span class="pill tag">' + esc(t) + "</span>"; }).join("") + "</div>" : "") +
+        (paras ? '<div class="about"><h3 class="cond">About ' + esc(a.name) + "</h3>" + paras + "</div>" : "") +
+      "</div>" +
+      (hasQr(a) ? '<div class="cta"><button type="button" class="show-qr">' + ICON_QR + "Show " + esc(a.name) + "\u2019s QR code</button></div>" : "");
+    var track = $(".sheet .track"), count = $(".sheet .count");
+    if (count) track.addEventListener("scroll", function () {
+      count.textContent = (Math.round(track.scrollLeft / track.clientWidth) + 1) + " / " + a.photos.length;
+    }, { passive: true });
+    var btn = $(".sheet .show-qr");
+    if (btn) btn.addEventListener("click", function () { openQr("Meet " + a.name, animalUrl(a), true); });
+    $(".sheet").scrollTop = 0;
+    $(".sheet").classList.add("open");
+    if (push) history.pushState({ v: "animal", id: a.id }, "", "#animal-" + a.id);
+  }
+  function closeAnimal() { $(".sheet").classList.remove("open"); openId = null; }
+
+  // ---- full-screen QR ----
+  var wake = null;
+  function openQr(label, url, push) {
+    $(".qr-view .label").textContent = label;
+    $(".qr-view .code").innerHTML = qrSvg(url);
+    $(".qr-view .url").textContent = url.replace(/^https?:\/\//, "");
+    $(".qr-view").classList.add("open");
+    // Keep the screen awake while someone scans.
+    try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { wake = w; }).catch(function () {}); } catch (e) {}
+    if (push) history.pushState({ v: "qr", label: label, url: url }, "", location.hash);
+  }
+  function closeQr() {
+    $(".qr-view").classList.remove("open");
+    if (wake) { try { wake.release(); } catch (e) {} wake = null; }
+  }
+
+  // ---- QR codes tab ----
+  function renderLinks() {
+    $(".links").innerHTML = LINKS.map(function (l) {
+      var icon = l.style === "fb" ? ICON_FB : l.style === "ig" ? ICON_IG : "";
+      return '<button type="button" class="lnk ' + (l.style || "") + '" data-key="' + l.key + '"' + (l.url ? "" : " disabled") + ">" + icon +
+        "<span>" + esc(l.label) + (l.url ? "" : "<small>Link needed</small>") + "</span></button>";
+    }).join("");
+  }
+
+  // ---- navigation (phone back button/gesture closes the QR, then the animal) ----
+  function showTab(name) {
+    document.querySelectorAll(".tabbar button").forEach(function (b) { b.setAttribute("aria-selected", String(b.getAttribute("data-tab") === name)); });
+    document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t.id === "tab-" + name); });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener("popstate", function (e) {
+    var s = e.state || {};
+    if (s.v !== "qr") closeQr();
+    if (s.v === "animal") openAnimal(s.id, false); else if (s.v !== "qr") closeAnimal();
+  });
+  function back() { if (history.state && history.state.v) history.back(); else { closeQr(); closeAnimal(); } }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    var c = t.closest(".card"); if (c) return openAnimal(c.getAttribute("data-id"), true);
+    var tab = t.closest(".tabbar button"); if (tab) return showTab(tab.getAttribute("data-tab"));
+    var chip = t.closest(".chips button");
+    if (chip) {
+      filterType = chip.getAttribute("data-type");
+      document.querySelectorAll(".chips button").forEach(function (b) { b.setAttribute("aria-pressed", String(b === chip)); });
+      return renderAnimals();
+    }
+    var lnk = t.closest(".lnk");
+    if (lnk && !lnk.disabled) {
+      var l = LINKS.filter(function (x) { return x.key === lnk.getAttribute("data-key"); })[0];
+      return openQr(l.qrLabel, l.url, true);
+    }
+    if (t.closest(".qr-view .close") || t.closest(".sheet-close")) return back();
+  });
+  $(".search").addEventListener("input", function (e) { query = e.target.value.trim().toLowerCase(); renderAnimals(); });
+
+  renderLinks();
+  load().then(function () {
+    var m = location.hash.match(/^#animal-(.+)$/);
+    if (m) { history.replaceState(null, "", location.pathname); openAnimal(decodeURIComponent(m[1]), true); }
+  });
+  setInterval(function () { if (!document.hidden) load(); }, REFRESH_MS);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) showUpdated(false); });
+})();
+</script>
+</body>
+</html>
