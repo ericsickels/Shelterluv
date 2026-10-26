@@ -134,6 +134,11 @@ or signage player. It needs no login and nothing on Squarespace.
 - Detects landscape/portrait and scales to the screen. Refreshes data every 30 minutes, keeps the
   last good data if the internet drops, and reloads itself around 4am.
 - Address options: `?seconds=20` (time per animal), `?only=dogs` / `?only=cats`, `?qr=off`.
+- **Touch (e.g. an iPad on our event table):** swipe left or up for the next slide, right or down to go back.
+  Double-tap an animal to open their full details: swipeable photos, adoption fee, days waiting, at-a-glance facts,
+  full bio and a QR code to apply. Nothing on it leaves the page. The rotation pauses while it's open and resumes after
+  30 seconds without a touch (or tap the X / outside the card). On a laptop: arrow keys, Enter (or double-click), Esc.
+  Tip: use the iPad's Guided Access to keep the sign on screen.
 - Check it from a laptop with `?preview=1` (16:9 / 9:16 frame and buttons to jump to the info slides).
 - Wording (mission line, logo, links, timings) is in the Configuration block at the top of the script
   in `web/screen.html`; the orange is `--brand` at the top of its styles.
