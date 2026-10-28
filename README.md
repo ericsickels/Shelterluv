@@ -131,7 +131,8 @@ or signage player. It needs no login and nothing on Squarespace.
   waiting since their latest intake, and a QR code to that animal on our Adopt page.
 - After every 5 animals: "Who we are" (mission + live counts), "How to adopt", or "Happy tails"
   (recent adoptions). A strip with our name and website is always on screen.
-- Detects landscape/portrait and scales to the screen. Refreshes data every 30 minutes, keeps the
+- Detects landscape/portrait and scales to the screen. Portrait tablets (an iPad is about 3:4, not 9:16) get their
+  own layout with the QR code beside the name, and any slide that would still be too tall is scaled down to fit. Refreshes data every 30 minutes, keeps the
   last good data if the internet drops, and reloads itself around 4am.
 - Address options: `?seconds=20` (time per animal), `?only=dogs` / `?only=cats`, `?qr=off`.
 - **Touch (e.g. an iPad on our event table):** swipe left or up for the next slide, right or down to go back.

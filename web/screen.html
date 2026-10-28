@@ -73,7 +73,8 @@
     background: rgba(255,255,255,.35); box-shadow: 0 0 calc(var(--u) * .4) rgba(0,0,0,.25); }
   .photo-bars i { display: block; height: 100%; width: 0; background: #fff; }
 
-  .panel { display: flex; flex-direction: column; justify-content: center; padding: calc(var(--u) * 5) calc(var(--u) * 5.5); min-width: 0; }
+  .panel { display: flex; flex-direction: column; justify-content: center; padding: calc(var(--u) * 5) calc(var(--u) * 5.5); min-width: 0; min-height: 0; overflow: hidden; }
+  .panel > * { flex-shrink: 0; }   /* never squash the name or bio line to nothing; fitSlide() scales down instead */
   .portrait .panel { padding: calc(var(--u) * 4) calc(var(--u) * 6) calc(var(--u) * 3); }
   .logo { height: calc(var(--u) * 14); width: auto; align-self: flex-start; margin-bottom: calc(var(--u) * 3); }
   .portrait .logo { height: calc(var(--u) * 11); margin-bottom: calc(var(--u) * 2); }
@@ -110,6 +111,26 @@
   .portrait .qr-card.big .qr svg { width: calc(var(--u) * 28); height: calc(var(--u) * 28); }
   .portrait .qr-card.big .qr-cta { font-size: calc(var(--u) * 3.4); }
   .no-qr .qr-card { display: none; }
+
+  /* Portrait tablets (e.g. iPad, about 3:4) are much less tall than a 9:16 screen: more room for the
+     details panel, a smaller logo and QR. Anything that still doesn't fit is scaled down by fitSlide(). */
+  .squat .animal { grid-template-rows: 46% 54%; }
+  .squat .panel { padding: calc(var(--u) * 3.2) calc(var(--u) * 6) calc(var(--u) * 2.6); }
+  .squat .logo { height: calc(var(--u) * 8.5); margin-bottom: calc(var(--u) * 1.6); }
+  .squat .name { font-size: calc(var(--u) * 8.5); }
+  .squat .line { margin-top: calc(var(--u) * 1.6); }
+  /* The QR "ticket" moves beside the text (it's a wide screen for portrait), freeing height for the name and bio. */
+  .squat .panel { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: calc(var(--u) * 4); align-content: center; }
+  .squat .panel > * { grid-column: 1; }
+  .squat .logo { justify-self: start; }
+  .squat .line { -webkit-line-clamp: 3; }
+  .squat .facts { display: contents; }
+  .squat .wait { grid-column: 1; margin-top: calc(var(--u) * 2.8); }
+  .squat .wait b { font-size: calc(var(--u) * 7.5); }
+  .squat .qr-card { grid-column: 2; grid-row: 1 / span 6; align-self: center; width: calc(var(--u) * 23); }
+  .squat .qr svg { width: calc(var(--u) * 20); height: calc(var(--u) * 20); }
+  .squat .qr-cta { font-size: calc(var(--u) * 2.6); }
+  .squat .detail { grid-template-rows: 42% 58%; }
 
   /* ---- Info slides: who we are / how to adopt / happy tails ---- */
   .info { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
@@ -274,10 +295,40 @@
       w = Math.min(aw, ah * r); h = w / r;
       screen.style.cssText = "width:" + w + "px;height:" + h + "px;left:" + (aw - w) / 2 + "px;top:" + (ah - h) / 2 + "px;right:auto;bottom:auto";
     } else { w = stage.clientWidth; h = stage.clientHeight; }
-    screen.style.setProperty("--u", Math.min(w, h) / 100 + "px");
+    U = Math.min(w, h) / 100;
+    screen.style.setProperty("--u", U + "px");
     screen.classList.toggle("portrait", h > w);
+    screen.classList.toggle("squat", h > w && h / w < 1.6);   // portrait tablet rather than a 9:16 screen
+    if (current) fitSlide(current);
   }
   window.addEventListener("resize", fit);
+
+  // Safety net for any screen shape: if a slide's content is taller than its box, shrink that slide's
+  // --u (every size is a multiple of it) until it fits, instead of cutting anything off.
+  var U = 10;
+  function fitBox(box) {
+    box.style.removeProperty("--u");
+    for (var tries = 0; tries < 3; tries++) {
+      var kids = [], top = Infinity, bottom = -Infinity;
+      [].forEach.call(box.children, function (k) {   // look inside display:contents wrappers (.facts on tablets)
+        if (getComputedStyle(k).display === "contents") [].push.apply(kids, k.children); else kids.push(k);
+      });
+      for (var i = 0; i < kids.length; i++) {
+        var r = kids[i].getBoundingClientRect(), cs = getComputedStyle(kids[i]);
+        if (!r.height) continue;
+        top = Math.min(top, r.top - parseFloat(cs.marginTop)); bottom = Math.max(bottom, r.bottom + parseFloat(cs.marginBottom));
+      }
+      var bs = getComputedStyle(box), room = box.clientHeight - parseFloat(bs.paddingTop) - parseFloat(bs.paddingBottom);
+      var need = bottom - top;
+      if (!(need > room + 1)) return;
+      var u = parseFloat(bs.getPropertyValue("--u")) || U;
+      box.style.setProperty("--u", (u * room / need * 0.98) + "px");
+    }
+  }
+  function fitSlide(el) {
+    var panel = el.querySelector(".panel");
+    fitBox(panel || el);
+  }
 
   // ---- helpers ----
   function esc(s) {
@@ -455,7 +506,7 @@
       "</div>";
     }
     el.start = function () {};
-    el.ready = Promise.resolve();
+    el.ready = Promise.all([].map.call(el.querySelectorAll("img"), function (i) { return load(i.src); }));
     return el;
   }
 
@@ -466,9 +517,11 @@
     var el = item.kind === "animal" ? animalSlide(item.a) : infoSlide(item.kind);
     var ms = item.kind === "animal" ? ANIMAL_MS : INFO_MS;
     if (back) el.classList.add("from-top");
+    el.addEventListener("load", function () { if (el === current) fitSlide(el); }, true);   // an image arrived late
     slidesEl.appendChild(el);
     el.ready.then(function () {
       if (seq !== showSeq) { if (el.parentNode) el.parentNode.removeChild(el); return; }   // swiped again while loading
+      fitSlide(el);
       var old = current; current = el; currentItem = item;
       requestAnimationFrame(function () { el.classList.add("on"); });
       if (old) {
