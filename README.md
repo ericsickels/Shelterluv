@@ -139,7 +139,9 @@ or signage player. It needs no login and nothing on Squarespace.
   Double-tap an animal to open their full details: swipeable photos, adoption fee, days waiting, at-a-glance facts,
   full bio and a QR code to apply. Nothing on it leaves the page. The rotation pauses while it's open and resumes after
   30 seconds without a touch (or tap the X / outside the card). On a laptop: arrow keys, Enter (or double-click), Esc.
-  Tip: use the iPad's Guided Access to keep the sign on screen.
+  **Full screen on an iPad:** open the page in Safari (not from a home-screen icon: those always show the
+  status bar) and tap the sign once. It goes full screen with no status bar or Safari bars. Then start Guided Access
+  to keep it there.
 - Check it from a laptop with `?preview=1` (16:9 / 9:16 frame and buttons to jump to the info slides).
 - Wording (mission line, logo, links, timings) is in the Configuration block at the top of the script
   in `web/screen.html`; the orange is `--brand` at the top of its styles.

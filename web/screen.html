@@ -13,6 +13,8 @@
   Touch screens (e.g. an iPad on our event table): swipe left/up for the next slide, right/down for the
   previous one; double-tap an animal for their full details (rotation pauses; 30s without a touch resumes it).
   Keyboard: arrow keys for next/previous, Enter for details, Esc to close.
+  Tap (or click) once to go full screen, hiding the browser bars and the iPad's status bar (open it in Safari,
+  not from a home-screen icon, which can't go full screen).
 -->
 <style>
   :root {
@@ -686,6 +688,21 @@
       else if (j && !detailOpen) go({ kind: j });
     });
   });
+
+  // ---- full screen: the first touch/click hides the browser bars and the iPad status bar ----
+  // (Browsers only allow this from a tap. Not available in home-screen web apps, which keep the status bar.)
+  function goFullscreen() {
+    var d = document, el = d.documentElement;
+    if (preview || d.fullscreenElement || d.webkitFullscreenElement) return;
+    var req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req || !(d.fullscreenEnabled || d.webkitFullscreenEnabled)) return;
+    try { var r = req.call(el); if (r && r.catch) r.catch(function () {}); } catch (e) {}
+  }
+  document.addEventListener("touchend", goFullscreen);
+  document.addEventListener("click", goFullscreen);
+  // Keep the screen sized correctly when entering/leaving full screen.
+  document.addEventListener("fullscreenchange", fit);
+  document.addEventListener("webkitfullscreenchange", fit);
 
   // ---- run ----
   fit();
