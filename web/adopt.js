@@ -23,6 +23,9 @@
   var PENDING_NOTICE = "This pet has applications under review or an adoption pending. You\u2019re welcome to apply, " +
     "but they may find their home before we review your application. If that happens, we\u2019d love to help you " +
     "find another great match!";
+  // Coming Soon note for animals getting vet care or recovering before adoption. {name} is the animal's name.
+  var CARE_NOTICE = "{name} is getting some extra care right now to make sure they\u2019re healthy and ready for " +
+    "their new home. They\u2019ll be available for adoption as soon as they\u2019re ready, so check back for updates!";
   // Each widget: the div it fills, its data file and its wording.
   var WIDGETS = [
     {
@@ -33,12 +36,18 @@
       emptyText: "New friends are on the way \u2014 please check back soon!"
     },
     {
-      id: "slv-coming-soon", data: "coming-soon.json", apply: false, badge: "Coming soon",
+      // New arrivals (coming-soon.json) plus animals getting vet care or recovering (unavailable.json).
+      id: "slv-coming-soon", data: "coming-soon.json", moreData: ["unavailable.json"], apply: false, badge: "Coming soon",
       loading: "Loading&hellip;",
       emptyTitle: "No new arrivals at the moment",
-      emptyText: "Animals appear here while they settle in with us before becoming available. Check back soon!",
+      emptyText: "Animals appear here while they settle in or get the care they need before becoming available. Check back soon!",
       // Shown in the pop-up in place of the Apply button. {name} is the animal's name.
-      notice: "{name} is settling in with us and will be available for adoption soon. Check back for updates!"
+      notice: "{name} is settling in with us and will be available for adoption soon. Check back for updates!",
+      // A different note for particular statuses.
+      statusNotices: {
+        "Unavailable - Routine Vetting": CARE_NOTICE,
+        "Unavailable - Medical Recovery": CARE_NOTICE
+      }
     }
   ];
   // Printing while an animal's pop-up is open gives a one-page flyer with a QR code to them.
@@ -150,6 +159,10 @@
       return PENDING_STATUSES.indexOf(a.status) >= 0;
     }
 
+    function noticeFor(a) {
+      return ((w.statusNotices && w.statusNotices[a.status]) || w.notice || "").replace(/\{name\}/g, a.name);
+    }
+
     function badge(a) {
       var label = w.badge || STATUS_BADGES[a.status];
       return label ? '<span class="slv-badge">' + esc(label) + "</span>" : "";
@@ -255,7 +268,7 @@
       var cta = w.apply
         ? (a.adoptionFee ? '<div class="slv-fee">Adoption fee<strong>$' + esc(a.adoptionFee) + "</strong></div>" : "<div></div>") +
           '<a class="slv-apply" target="_blank" rel="noopener" href="' + esc(applyUrl.replace("{id}", encodeURIComponent(a.id))) + '">Apply to adopt ' + esc(a.name) + "</a>"
-        : '<p class="slv-notice">' + esc((w.notice || "").replace("{name}", a.name)) + "</p>";
+        : '<p class="slv-notice">' + esc(noticeFor(a)) + "</p>";
 
       modal.innerHTML =
         '<button type="button" class="slv-close" aria-label="Close">&times;</button>' +
@@ -330,7 +343,7 @@
                 "<span>" + esc(site + "#animal-" + a.id) + "</span></div>" +
             "</div>" +
           "</div>" +
-          '<footer class="slv-p-foot"><span>' + esc(w.apply ? "Apply online at " + site : (w.notice || "").replace("{name}", a.name)) + "</span>" +
+          '<footer class="slv-p-foot"><span>' + esc(w.apply ? "Apply online at " + site : noticeFor(a)) + "</span>" +
             "<span>Details as of " + esc(new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })) + "</span></footer>" +
         "</div>";
       document.documentElement.classList.add("slv-printing");
@@ -402,10 +415,20 @@
       else if (thumb) thumb.style.visibility = "hidden";
     }, true);
 
-    fetch(DATA_URL + (DATA_URL.indexOf("?") < 0 ? "?" : "&") + "v=" + version)
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (data) {
-        animals = (data.animals || []).map(function (a) { a.photos = a.photos || []; return a; });
+    function getData(url) {
+      return fetch(url + (url.indexOf("?") < 0 ? "?" : "&") + "v=" + version)
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+    }
+    // Extra lists are optional: if one can't load, the section still shows the rest.
+    var extra = root.getAttribute("data-data-url") ? [] : (w.moreData || []);
+    Promise.all([getData(DATA_URL)].concat(extra.map(function (f) {
+      return getData(BASE + f).catch(function () { return { animals: [] }; });
+    })))
+      .then(function (lists) {
+        var all = [];
+        lists.forEach(function (d) { all = all.concat(d.animals || []); });
+        if (lists.length > 1) all.sort(function (x, y) { return (x.type || "").localeCompare(y.type || "") || x.name.localeCompare(y.name); });
+        animals = all.map(function (a) { a.photos = a.photos || []; return a; });
         renderFilters();
         renderGrid();
         var m = location.hash.match(/^#animal-(.+)$/);

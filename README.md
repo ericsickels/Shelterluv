@@ -23,9 +23,9 @@ Like every file on this site it isn't secret: anyone who knows the address can o
 
 | File | Purpose |
 |---|---|
-| `scripts/export_animals.py` | Writes `animals.json` (adoptable animals, filtered by status), `coming-soon.json` (Intake / Assessment animals), `unavailable.json` (Medical Recovery / Routine Vetting, for the field guide), `adopted.json` (adopted in the last 60 days and still "Healthy In Home") and `stats.json` (adoptions this month, last month and this year, split into dogs and cats). No dependencies. |
+| `scripts/export_animals.py` | Writes `animals.json` (adoptable animals, filtered by status), `coming-soon.json` (Intake / Assessment animals), `unavailable.json` (Medical Recovery / Routine Vetting: shown under Coming Soon and in the field guide), `adopted.json` (adopted in the last 60 days and still "Healthy In Home") and `stats.json` (adoptions this month, last month and this year, split into dogs and cats). No dependencies. |
 | `.github/workflows/export-animals.yml` | Every 30 minutes and on every merge to `main`: runs the export and publishes it with the widget to GitHub Pages. |
-| `web/adopt.js` | Adoptable animals and Coming Soon: cards, filters and the detail pop-up (Coming Soon shows a note instead of the Apply button). Missing or broken photos show a dog/cat "Photo coming soon" placeholder. |
+| `web/adopt.js` | Adoptable animals and Coming Soon: cards, filters and the detail pop-up. Coming Soon lists new arrivals plus animals getting vet care or recovering, each with a note instead of the Apply button. Missing or broken photos show a dog/cat "Photo coming soon" placeholder. |
 | `web/adopted.js` | Recently Adopted: non-clickable cards (name, sex, age, breed, photo, adoption date) with an "Adopted!" ribbon. |
 | `web/stats.js` | Adoption counts: This Month / Last Month / This Year tiles with dog and cat counts, animated when scrolled into view. |
 | `web/spotlight.js` | Homepage spotlight: "N dogs and N cats are looking for homes" count, then a rotating "Meet [name]" panel. Photo-only, Pending animals left out (still counted), longer stays weighted toward the front, pause button, no auto-motion for reduce-motion visitors. |
@@ -52,8 +52,8 @@ Like every file on this site it isn't secret: anyone who knows the address can o
    `SHELTERLUV_API_KEY` = your Shelterluv API key.
 3. *(Optional)* **Variables** tab: `PUBLISH_STATUSES` = comma-separated Shelterluv statuses to
    show. Default: `Available - Public,Available - Social Only,Available - Fospice,Hold - Applications Pending,Hold - Pending Adoption`.
-   `COMING_SOON_STATUSES` = statuses shown under Coming Soon. Default `Unavailable - Intake / Assessment`.
-   `UNAVAILABLE_STATUSES` = statuses in the field guide's Currently Unavailable section. Default `Unavailable - Medical Recovery,Unavailable - Routine Vetting`.
+   `COMING_SOON_STATUSES` = new-arrival statuses shown under Coming Soon. Default `Unavailable - Intake / Assessment`.
+   `UNAVAILABLE_STATUSES` = vet care / recovery statuses, also shown under Coming Soon (with a "getting some extra care" note) and in the field guide's Currently Unavailable section. Default `Unavailable - Medical Recovery,Unavailable - Routine Vetting`.
    `ADOPTED_DAYS` = how far back Recently Adopted looks. Default `60`.
    `SHELTER_TIMEZONE` = time zone for adoption dates. Default `America/New_York`.
 4. **Settings → Pages → Source:** choose **GitHub Actions**. **Custom domain:** `animals.redemptionrescueinc.com`
@@ -106,6 +106,7 @@ Settings live at the top of `web/adopt.js`:
 - `STATUS_BADGES`: which statuses get a badge, and its wording.
 - `PENDING_STATUSES`, `PENDING_RIBBON`, `PENDING_NOTICE`: Hold statuses that stay listed with an amber
   "Pending" ribbon and a note in the pop-up (ribbon colour: `--slv-pending` in `web/adopt.css`).
+- `CARE_NOTICE`: the Coming Soon note for animals getting vet care or recovering (`statusNotices` in `WIDGETS` says which statuses use it).
 - `WIDGETS`: per-section wording, e.g. the Coming Soon badge, the note shown in its pop-up, and
   the title/text shown when a section has no animals (`emptyTitle`, `emptyText`).
   Recently Adopted's empty message is `EMPTY_TITLE` / `EMPTY_TEXT` at the top of `web/adopted.js`.
