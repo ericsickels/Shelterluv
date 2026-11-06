@@ -822,6 +822,18 @@
           return '<li class="' + (past ? "past" : i === nextIdx && day ? "next" : "") + '"><span class="t">' + (t.time ? esc(hm12(t.time)) : "&mdash;") + "</span><span>" +
             bold(t.label) + (t.note ? "<small>" + bold(t.note) + "</small>" : "") + "</span></li>";
         }).join("") + "</ol></section>";
+      if ((b.volunteers || []).length && (b.shifts || []).length) html += crewHtml(b, day, now);
+      else if ((b.shifts || []).length) html += '<section class="bf-sec"><h3 class="cond">Shifts</h3><div class="bf-shifts">' + b.shifts.map(function (s) {
+          var on = day && now >= tzMs(b.date, s.start) && now < tzMs(b.date, s.end);
+          return '<div class="' + (on ? "now" : "") + '"><b>' + esc(s.name) + (on ? " &middot; now" : "") + "</b><span>" + esc(hm12(s.start)) + " &ndash; " + esc(hm12(s.end)) + "</span></div>";
+        }).join("") + "</div>" + (b.shiftNote ? '<p class="bf-note">' + bold(b.shiftNote) + "</p>" : "") + "</section>";
+      if (b.pass) html += '<section class="bf-sec"><h3 class="cond">' + esc(b.pass.label || "Parking pass") + '</h3><div class="bf-pass">' +
+          '<img class="bf-pass-open" data-b="' + esc(b.id) + '" src="' + esc(asset(b.pass.image)) + '" alt="' + esc(b.pass.label || "Parking pass") + '">' +
+          '<div class="btns"><button type="button" class="primary bf-pass-open" data-b="' + esc(b.id) + '">View full screen</button>' +
+            '<button type="button" class="bf-pass-print" data-b="' + esc(b.id) + '">Print</button>' +
+            (b.pass.pdf ? '<a href="' + esc(asset(b.pass.pdf)) + '" target="_blank" rel="noopener">Open PDF</a>' : "") + "</div></div>" +
+          (b.pass.note ? '<p class="bf-note">' + bold(b.pass.note) + "</p>" : "") + "</section>";
+      (b.sections || []).forEach(function (sec, si) { html += secHtml(b, sec, si, done); });
       if (b.videos && (b.videos.groups || []).length) {
         var shortsShown = false;
         html += '<section class="bf-sec"><h3 class="cond">' + esc(b.videos.title || "Our videos") + "</h3>" +
@@ -839,18 +851,6 @@
             }).join("") + "</div></div>";
           }).join("") + "</section>";
       }
-      if ((b.volunteers || []).length && (b.shifts || []).length) html += crewHtml(b, day, now);
-      else if ((b.shifts || []).length) html += '<section class="bf-sec"><h3 class="cond">Shifts</h3><div class="bf-shifts">' + b.shifts.map(function (s) {
-          var on = day && now >= tzMs(b.date, s.start) && now < tzMs(b.date, s.end);
-          return '<div class="' + (on ? "now" : "") + '"><b>' + esc(s.name) + (on ? " &middot; now" : "") + "</b><span>" + esc(hm12(s.start)) + " &ndash; " + esc(hm12(s.end)) + "</span></div>";
-        }).join("") + "</div>" + (b.shiftNote ? '<p class="bf-note">' + bold(b.shiftNote) + "</p>" : "") + "</section>";
-      if (b.pass) html += '<section class="bf-sec"><h3 class="cond">' + esc(b.pass.label || "Parking pass") + '</h3><div class="bf-pass">' +
-          '<img class="bf-pass-open" data-b="' + esc(b.id) + '" src="' + esc(asset(b.pass.image)) + '" alt="' + esc(b.pass.label || "Parking pass") + '">' +
-          '<div class="btns"><button type="button" class="primary bf-pass-open" data-b="' + esc(b.id) + '">View full screen</button>' +
-            '<button type="button" class="bf-pass-print" data-b="' + esc(b.id) + '">Print</button>' +
-            (b.pass.pdf ? '<a href="' + esc(asset(b.pass.pdf)) + '" target="_blank" rel="noopener">Open PDF</a>' : "") + "</div></div>" +
-          (b.pass.note ? '<p class="bf-note">' + bold(b.pass.note) + "</p>" : "") + "</section>";
-      (b.sections || []).forEach(function (sec, si) { html += secHtml(b, sec, si, done); });
       if (b.contact && b.contact.note) html += '<p class="bf-note" style="text-align:center;margin-top:14px">' + bold(b.contact.note) + "</p>";
       return html + "</article>";
     }).join("");
@@ -932,7 +932,7 @@
   // fails, the tile shows a branded gradient. thumbHtml leaves the .bf-th span open so callers can add a caption inside.
   var thumbs = {};
   function thumbHtml(v, tone) {
-    var u = thumbs[v.vimeo];
+    var u = v.thumb ? asset(v.thumb) : thumbs[v.vimeo];   // "thumb" in briefings.json overrides Vimeo's thumbnail
     return '<span class="bf-th t-' + (tone % 3) + '" data-th="' + esc(v.vimeo) + '"' + (u ? ' style="background-image:url(\'' + esc(u) + '\')"' : "") + ">";
   }
   function loadThumbs() {
