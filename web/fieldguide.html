@@ -214,6 +214,13 @@
   .bf-shifts b { display: block; font-size: 15px; color: var(--brand-ink); }
   .bf-shifts span { font-size: 16px; font-weight: 600; color: var(--text); }
   .bf-shifts .now { box-shadow: 0 0 0 2px var(--brand); }
+  .bf-crew + .bf-crew { margin-top: 14px; }
+  .bf-crew h4 { margin: 0 0 8px; font-size: 15px; color: var(--text); }
+  .bf-crew h4 small { font-weight: 500; color: var(--muted); }
+  .bf-crew ul { list-style: none; padding: 0 !important; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+  .bf-crew li { margin: 0 !important; font-size: 15px; color: var(--text-2); }
+  .bf-crew li em { font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--brand-ink); background: var(--brand-soft);
+    padding: 1px 6px; border-radius: 999px; margin-left: 4px; white-space: nowrap; }
   .bf-time { list-style: none; padding: 0 !important; }
   .bf-time li { display: flex; gap: 12px; padding: 8px 10px; margin: 0 !important; border-radius: 10px; }
   .bf-time .t { flex: none; width: 74px; font-weight: 700; color: var(--text); }
@@ -691,6 +698,16 @@
           var on = day && now >= tzMs(b.date, s.start) && now < tzMs(b.date, s.end);
           return '<div class="' + (on ? "now" : "") + '"><b>' + esc(s.name) + (on ? " &middot; now" : "") + "</b><span>" + esc(hm12(s.start)) + " &ndash; " + esc(hm12(s.end)) + "</span></div>";
         }).join("") + "</div>" + (b.shiftNote ? '<p class="bf-note">' + bold(b.shiftNote) + "</p>" : "") + "</section>";
+      if ((b.volunteers || []).length) {
+        var shiftNames = (b.shifts || []).map(function (x) { return x.name; });
+        html += '<section class="bf-sec"><h3 class="cond">Who&rsquo;s volunteering</h3>' + shiftNames.map(function (sn) {
+          var crew = b.volunteers.filter(function (v) { return (v.shifts || []).indexOf(sn) >= 0; });
+          if (!crew.length) return "";
+          return '<div class="bf-crew"><h4>' + esc(sn) + " <small>&middot; " + crew.length + "</small></h4><ul>" + crew.map(function (v) {
+            return "<li>" + esc(v.name) + ((v.shifts || []).length > 1 ? "<em>both</em>" : "") + "</li>";
+          }).join("") + "</ul></div>";
+        }).join("") + "</section>";
+      }
       if ((b.timeline || []).length) html += '<section class="bf-sec"><h3 class="cond">' + (day ? "Today" : "Schedule") + '</h3><ol class="bf-time">' + b.timeline.map(function (t, i) {
           var past = day && t.time && tzMs(b.date, t.time) <= now;
           return '<li class="' + (past ? "past" : i === nextIdx && day ? "next" : "") + '"><span class="t">' + (t.time ? esc(hm12(t.time)) : "&mdash;") + "</span><span>" +
