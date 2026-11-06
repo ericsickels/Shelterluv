@@ -176,6 +176,10 @@ one-tap access). Not linked from the website.
 - **Add to Home Screen** (Share menu on iPhone, ⋮ menu on Android) gives an "RR Field Guide" icon
   with our logo. The publish run makes the icons from the logo on our website (`scripts/make_icons.py`);
   the name is in `web/fieldguide.webmanifest` and the `apple-mobile-web-app-title` tag in `web/fieldguide.html`.
+- **Add to home screen link:** share `https://animals.redemptionrescueinc.com/fieldguide/?install`. It opens the guide
+  with step-by-step help for that phone: a one-tap **Add to Home screen** button on Android Chrome, Share then Add to Home
+  Screen steps on iPhone, and "open in Safari/Chrome first" when the link was opened inside Messenger, Facebook or
+  another app. From the home screen the guide opens full screen like an app.
 - The phone's back button/gesture closes the QR, then the animal. The last data is saved on the phone,
   so the guide still works on weak event Wi-Fi (the header then says "Offline").
 
