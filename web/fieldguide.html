@@ -949,8 +949,11 @@
         }).catch(function () {});
     });
   }
+  // iPhone/iPad only allow sound after a tap inside the player itself, so autoplay there starts muted. Open it paused
+  // instead: tapping Vimeo's play button then plays with sound. Everywhere else, autoplay with sound.
+  var IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   function openVideo(id, title, push) {
-    $(".video-view .frame").innerHTML = '<iframe src="https://player.vimeo.com/video/' + encodeURIComponent(id) + '?badge=0&autopause=0&autoplay=1&playsinline=1&dnt=1" ' +
+    $(".video-view .frame").innerHTML = '<iframe src="https://player.vimeo.com/video/' + encodeURIComponent(id) + '?badge=0&autopause=0&playsinline=1&dnt=1' + (IOS ? "" : "&autoplay=1") + '" ' +
       'allow="autoplay; fullscreen; picture-in-picture; encrypted-media" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="' + esc(title) + '"></iframe>';
     $(".video-view .ttl").textContent = title;
     $(".video-view").classList.add("open");
