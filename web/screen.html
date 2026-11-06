@@ -124,7 +124,8 @@
   .squat .name { font-size: calc(var(--u) * 8.5); }
   .squat .line { margin-top: calc(var(--u) * 1.6); }
   /* The QR "ticket" moves beside the text (it's a wide screen for portrait), freeing height for the name and bio. */
-  .squat .panel { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: calc(var(--u) * 4); align-content: center; }
+  .squat .panel { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-auto-rows: max-content; column-gap: calc(var(--u) * 4); align-content: center; }
+  /* (max-content rows: never squeeze clipped text like the bio line; if it's too tall, fitSlide() scales the panel down) */
   .squat .panel > * { grid-column: 1; }
   .squat .logo { justify-self: start; }
   .squat .line { -webkit-line-clamp: 3; }
@@ -135,6 +136,21 @@
   .squat .qr svg { width: calc(var(--u) * 20); height: calc(var(--u) * 20); }
   .squat .qr-cta { font-size: calc(var(--u) * 2.6); }
   .squat .detail { grid-template-rows: 42% 58%; }
+
+  /* ---- Next event slide (events.json, from the Events page on our website) ---- */
+  .evt .photos.noimg { display: flex; align-items: center; justify-content: center; background: #fff1e2; }
+  .evt .photos.noimg .big-logo { position: static; width: 46%; max-width: calc(var(--u) * 40); height: auto; -webkit-clip-path: none; clip-path: none; }
+  .evt-title { margin: calc(var(--u) * .4) 0 calc(var(--u) * .6); padding-bottom: .08em; font-size: calc(var(--u) * 6); line-height: 1.1; font-weight: 700;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .evt .line b { color: var(--ink); }
+  .evt-ex { margin-top: calc(var(--u) * 1.4); font-size: calc(var(--u) * 2.4); line-height: 1.4; color: var(--muted);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .evt-date { flex: none; width: calc(var(--u) * 13); padding: calc(var(--u) * 1.2) 0 calc(var(--u) * 1.4); border-radius: calc(var(--u) * 1.6);
+    background: rgba(221, 115, 8, .12); text-align: center; }
+  .evt-date .m { font-size: calc(var(--u) * 2.2); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); }
+  .evt-date .d { font-size: calc(var(--u) * 7); font-weight: 800; line-height: 1; color: var(--ink); }
+  .evt-date .w { margin-top: calc(var(--u) * .4); font-size: calc(var(--u) * 2); color: var(--muted); }
+  .squat .evt-date { grid-column: 1; margin-top: calc(var(--u) * 2.4); }
 
   /* ---- Info slides: who we are / how to adopt / happy tails ---- */
   .info { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
@@ -252,7 +268,7 @@
   <div class="previewbar">
     <strong>Screen preview</strong>
     <span>Screen</span><button data-orient="landscape" aria-pressed="true">16:9 landscape</button><button data-orient="portrait">9:16 portrait</button>
-    <span>Jump to</span><button data-jump="animal">Next animal</button><button data-jump="who">Who we are</button><button data-jump="how">How to adopt</button><button data-jump="tails">Happy tails</button>
+    <span>Jump to</span><button data-jump="animal">Next animal</button><button data-jump="who">Who we are</button><button data-jump="how">How to adopt</button><button data-jump="tails">Happy tails</button><button data-jump="event">Next event</button>
   </div>
   <div class="stage"><div class="screen">
     <div class="slides"></div>
@@ -394,13 +410,15 @@
   }
 
   // ---- data ----
-  var data = { animals: [], adopted: [], stats: null };
+  var data = { animals: [], adopted: [], stats: null, events: [] };
   function getJSON(name) {
     return fetch(name + "?v=" + Math.floor(Date.now() / 600000)).then(function (r) { if (!r.ok) throw 0; return r.json(); });
   }
   function refresh() {
-    return Promise.all([getJSON("animals.json"), getJSON("adopted.json").catch(function () { return null; }), getJSON("stats.json").catch(function () { return null; })])
+    return Promise.all([getJSON("animals.json"), getJSON("adopted.json").catch(function () { return null; }), getJSON("stats.json").catch(function () { return null; }),
+        getJSON("events.json").catch(function () { return null; })])
       .then(function (res) {
+        if (res[3]) data.events = res[3].events || [];
         data.animals = res[0].animals || [];
         if (res[1]) data.adopted = res[1].animals || [];
         if (res[2]) data.stats = res[2];
@@ -421,15 +439,61 @@
 
   // ---- slides ----
   var queue = [], infoTurn = 0, current = null, slideTimer = null, photoTimer = null;
-  var INFO = ["who", "how", "tails"];
+  var INFO = ["who", "event", "how", "tails"];
+  // Next event from our website that hasn't ended yet (the "event" info slide is skipped when there is none).
+  function nextEvent() {
+    var now = Date.now();
+    return data.events.filter(function (e) { return e.start && (e.end || e.start) > now; })
+      .sort(function (x, y) { return x.start - y.start; })[0] || null;
+  }
+  function nextInfo() {
+    for (var i = 0; i < INFO.length; i++) {
+      var k = INFO[infoTurn++ % INFO.length];
+      if (k !== "event" || nextEvent()) return k;
+    }
+    return "who";
+  }
   function buildQueue() {
     var list = weightedShuffle(rotation());
     queue = [];
     list.forEach(function (a, i) {
       queue.push({ kind: "animal", a: a });
-      if ((i + 1) % INFO_EVERY === 0) queue.push({ kind: INFO[infoTurn++ % INFO.length] });
+      if ((i + 1) % INFO_EVERY === 0) queue.push({ kind: nextInfo() });
     });
-    if (list.length % INFO_EVERY !== 0 || !list.length) queue.push({ kind: INFO[infoTurn++ % INFO.length] });
+    if (list.length % INFO_EVERY !== 0 || !list.length) queue.push({ kind: nextInfo() });
+  }
+
+  var TIMEZONE = "America/New_York";   // event dates and times on the sign
+  function tfmt(ms, opts) { opts.timeZone = TIMEZONE; return new Intl.DateTimeFormat("en-US", opts).format(new Date(ms)); }
+  function tclock(ms) { return tfmt(ms, { hour: "numeric", minute: "2-digit" }).replace(":00", ""); }
+  function eventSlide(e) {
+    var now = Date.now(), live = e.start <= now && now < (e.end || e.start);
+    var day = function (ms) { return tfmt(ms, { year: "numeric", month: "2-digit", day: "2-digit" }); };
+    var today = day(e.start) === day(now), tomorrow = day(e.start) === day(now + 86400000);
+    var a = tclock(e.start), b2 = e.end && e.end > e.start ? tclock(e.end) : "";
+    if (b2 && a.slice(-2) === b2.slice(-2)) a = a.slice(0, -3);
+    var when = (today ? "Today" : tomorrow ? "Tomorrow" : tfmt(e.start, { weekday: "long", month: "long", day: "numeric" })) + " \u00b7 " + a + (b2 ? " \u2013 " + b2 : "");
+    var el = document.createElement("div");
+    el.className = "slide animal evt";
+    el.innerHTML =
+      (e.image ? '<div class="photos"><img class="on instant" src="' + esc(e.image) + '" alt=""></div>'
+               : '<div class="photos noimg"><img class="big-logo" src="' + esc(LOGO) + '" alt=""></div>') +
+      '<div class="panel">' +
+        '<img class="logo" src="' + esc(LOGO) + '" alt="Redemption Rescue">' +
+        '<div class="eyebrow">' + (live ? "Happening now" : today ? "Today with Redemption Rescue" : "Come see us! Our next event") + "</div>" +
+        '<div class="evt-title serif">' + esc(e.title) + "</div>" +
+        '<div class="meta">' + esc(when) + "</div>" +
+        (e.venue || e.address ? '<div class="line"><b>' + esc(e.venue || "") + "</b>" + (e.venue && e.address ? " \u00b7 " : "") + esc(e.address || "") + "</div>" : "") +
+        (e.excerpt ? '<div class="evt-ex">' + esc(e.excerpt.replace(/\s*\n\s*/g, " ")) + "</div>" : "") +
+        '<div class="facts">' +
+          '<div class="evt-date"><div class="m">' + esc(tfmt(e.start, { month: "short" })) + '</div><div class="d">' + esc(tfmt(e.start, { day: "numeric" })) +
+            '</div><div class="w">' + esc(tfmt(e.start, { weekday: "short" })) + "</div></div>" +
+          (e.url ? qrCard(e.url, "Event details") : "") +
+        "</div>" +
+      "</div>";
+    el.start = function () {};
+    el.ready = e.image ? load(e.image) : Promise.resolve();
+    return el;
   }
 
   function animalSlide(a) {
@@ -518,7 +582,9 @@
   function show(item, back) {
     clearTimeout(slideTimer); clearTimeout(photoTimer);
     var seq = ++showSeq;
-    var el = item.kind === "animal" ? animalSlide(item.a) : infoSlide(item.kind);
+    var ev = item.kind === "event" ? nextEvent() : null;
+    if (item.kind === "event" && !ev) item = { kind: "who" };   // event ended since the queue was built
+    var el = item.kind === "animal" ? animalSlide(item.a) : ev ? eventSlide(ev) : infoSlide(item.kind);
     var ms = item.kind === "animal" ? ANIMAL_MS : INFO_MS;
     if (back) el.classList.add("from-top");
     el.addEventListener("load", function () { if (el === current) fitSlide(el); }, true);   // an image arrived late
