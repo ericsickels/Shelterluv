@@ -98,134 +98,155 @@
    ],
    "volunteers": [
     {
-     "name": "Allison Zwickl",
+     "first": "Jalon",
+     "last": "Burns",
      "shifts": [
       "First shift"
      ]
     },
     {
-     "name": "Andrew McIntyre",
+     "first": "Nicholas",
+     "last": "Cornelius",
+     "shifts": [
+      "First shift"
+     ]
+    },
+    {
+     "first": "David",
+     "last": "Garber",
+     "shifts": [
+      "Second shift"
+     ]
+    },
+    {
+     "first": "Kristen",
+     "last": "Garber",
+     "shifts": [
+      "Second shift"
+     ]
+    },
+    {
+     "first": "Olivia",
+     "last": "Garber",
+     "shifts": [
+      "Second shift"
+     ]
+    },
+    {
+     "first": "Justin",
+     "last": "Growden",
+     "shifts": [
+      "First shift"
+     ]
+    },
+    {
+     "first": "Kelly",
+     "last": "Growden",
+     "shifts": [
+      "First shift"
+     ]
+    },
+    {
+     "first": "Micah",
+     "last": "Growden",
+     "shifts": [
+      "First shift"
+     ]
+    },
+    {
+     "first": "Andrew",
+     "last": "McIntyre",
      "shifts": [
       "First shift",
       "Second shift"
      ]
     },
     {
-     "name": "Daniel Mullen",
+     "first": "Daniel",
+     "last": "Mullen",
      "shifts": [
       "First shift"
      ]
     },
     {
-     "name": "David Garber",
+     "first": "Nicole",
+     "last": "Mullen",
+     "shifts": [
+      "First shift"
+     ]
+    },
+    {
+     "first": "Justin",
+     "last": "Ogle",
      "shifts": [
       "Second shift"
      ]
     },
     {
-     "name": "Eric Sickels",
+     "first": "Katy",
+     "last": "Patterson",
      "shifts": [
       "First shift",
       "Second shift"
      ]
     },
     {
-     "name": "Holly Tumey",
+     "first": "Lindsay",
+     "last": "Powell",
      "shifts": [
       "First shift",
       "Second shift"
      ]
     },
     {
-     "name": "Jalon Burns",
+     "first": "Jenn",
+     "last": "Sahagun",
      "shifts": [
       "First shift"
      ]
     },
     {
-     "name": "Jeannie Taylor",
+     "first": "Eric",
+     "last": "Sickels",
      "shifts": [
       "First shift",
       "Second shift"
      ]
     },
     {
-     "name": "Jenn Sahagun",
-     "shifts": [
-      "First shift"
-     ]
-    },
-    {
-     "name": "Justin Growden",
-     "shifts": [
-      "First shift"
-     ]
-    },
-    {
-     "name": "Justin Ogle",
-     "shifts": [
-      "Second shift"
-     ]
-    },
-    {
-     "name": "Katy Patterson",
+     "first": "Jeannie",
+     "last": "Taylor",
      "shifts": [
       "First shift",
       "Second shift"
      ]
     },
     {
-     "name": "Kelly Growden",
-     "shifts": [
-      "First shift"
-     ]
-    },
-    {
-     "name": "Kristen Garber",
-     "shifts": [
-      "Second shift"
-     ]
-    },
-    {
-     "name": "Lindsay Powell",
+     "first": "Ryan",
+     "last": "Taylor",
      "shifts": [
       "First shift",
       "Second shift"
      ]
     },
     {
-     "name": "Micah Growden",
-     "shifts": [
-      "First shift"
-     ]
-    },
-    {
-     "name": "Nicholas Cornelius",
-     "shifts": [
-      "First shift"
-     ]
-    },
-    {
-     "name": "Nicole Mullen",
-     "shifts": [
-      "First shift"
-     ]
-    },
-    {
-     "name": "Olivia Garber",
-     "shifts": [
-      "Second shift"
-     ]
-    },
-    {
-     "name": "Ryan Taylor",
+     "first": "Holly",
+     "last": "Tumey",
      "shifts": [
       "First shift",
       "Second shift"
      ]
     },
     {
-     "name": "Tori Walter",
+     "first": "Tori",
+     "last": "Walter",
+     "shifts": [
+      "First shift"
+     ]
+    },
+    {
+     "first": "Allison",
+     "last": "Zwickl",
      "shifts": [
       "First shift"
      ]
