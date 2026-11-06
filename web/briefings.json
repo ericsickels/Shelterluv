@@ -33,6 +33,10 @@
      "label": "Call time: first shift starts"
     },
     {
+     "time": "15:00",
+     "label": "Doors open"
+    },
+    {
      "time": "16:00",
      "label": "Puck drop"
     },
@@ -46,7 +50,7 @@
     },
     {
      "label": "2nd intermission",
-     "note": "Our video plays, right before the Chuck-a-Puck game that benefits Redemption Rescue (time varies)"
+     "note": "Our video plays, right before the Chuck-a-Puck game that benefits Redemption Rescue (time varies). [[chuck|How Chuck-a-Puck works]]"
     },
     {
      "time": "19:00",
@@ -72,7 +76,7 @@
     {
      "title": "What you'll be doing",
      "items": [
-      "Selling **Chuck-a-Puck** foam pucks at our entrance table and around the concourse. **The rescue keeps 60% of every sale!**",
+      "Selling **Chuck-a-Puck** foam pucks at our entrance table and around the concourse. **The rescue keeps 60% of every sale!** [[chuck|How Chuck-a-Puck works]]",
       "Chatting with fans and staffing our rescue table: answering questions, accepting donations, and sharing how to adopt, foster and volunteer.",
       "Helping set up our table and materials before doors open.",
       "The most helpful thing you can bring is a **friendly, outgoing attitude**. Enthusiasm makes a big difference in puck sales!"
@@ -107,6 +111,13 @@
     {
      "first": "Nicholas",
      "last": "Cornelius",
+     "shifts": [
+      "First shift"
+     ]
+    },
+    {
+     "first": "Allison",
+     "last": "Cornelius-Zwickl",
      "shifts": [
       "First shift"
      ]
@@ -243,12 +254,36 @@
      "shifts": [
       "First shift"
      ]
-    },
+    }
+   ],
+   "info": [
     {
-     "first": "Allison",
-     "last": "Zwickl",
-     "shifts": [
-      "First shift"
+     "id": "chuck",
+     "title": "How Chuck-a-Puck works",
+     "sections": [
+      {
+       "text": "Chuck-a-Puck is a fan game played on the ice during the **2nd intermission**. Fans buy foam pucks, then toss them from the stands at a target on the ice. It's tonight's fundraiser for Redemption Rescue."
+      },
+      {
+       "title": "How it works",
+       "steps": [
+        "Fans buy foam pucks from us at the entrance table and around the concourse before the 2nd intermission.",
+        "During the **2nd intermission**, right after our video plays, everyone throws their pucks onto the ice, aiming for the target.",
+        "The puck that lands closest to the target wins a prize, announced at the game."
+       ]
+      },
+      {
+       "title": "Price",
+       "text": "**$3 per puck** (price not confirmed yet). Encourage fans to grab a few: more pucks, more chances to win."
+      },
+      {
+       "title": "Where the money goes",
+       "text": "Redemption Rescue keeps **60% of every sale**. Every puck helps rescue dogs and cats in Indiana shelters."
+      },
+      {
+       "title": "Quick pitch",
+       "text": "“Want to play Chuck-a-Puck? Pucks are $3, you throw them at the 2nd intermission for a prize, and the money helps rescue dogs and cats!”"
+      }
      ]
     }
    ]

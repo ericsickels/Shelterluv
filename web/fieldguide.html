@@ -215,7 +215,9 @@
   .bf-shifts span { font-size: 16px; font-weight: 600; color: var(--text); }
   .bf-shifts .now { box-shadow: 0 0 0 2px var(--brand); }
   /* Who's volunteering: one row per person, a bar for the time they're working */
-  .bf-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: -2px 0 12px; font-size: 13px; color: var(--muted); }
+  .bf-shifts .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .bf-shifts small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
+  .bf-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 12px; font-size: 13px; color: var(--muted); }
   .bf-legend span { display: inline-flex; align-items: center; gap: 6px; }
   .bf-legend i { width: 18px; height: 10px; border-radius: 3px; display: inline-block; }
   .bf-gantt { --name: 46%; }
@@ -237,6 +239,17 @@
   .bf-grid i { position: absolute; top: 0; bottom: 0; border-left: 1px dashed #e3dbcf; }
   .bf-grid .nowline { border-left: 2px solid #d33; }
   .bf-count-line { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+  .bf-info-link { display: inline-flex; align-items: center; margin: 6px 0 0; padding: 5px 12px; border: 1.5px solid var(--brand); border-radius: 999px;
+    background: var(--card); color: var(--brand-ink); font-size: 14px; font-weight: 600; cursor: pointer; }
+  li .bf-info-link, small .bf-info-link { display: flex; width: max-content; }
+  .info-sheet { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 44; display: none; background: rgba(30,26,22,.45); }
+  .info-sheet.open { display: flex; align-items: flex-end; }
+  .info-sheet .panel { position: relative; width: 100%; max-width: 760px; margin: 0 auto; max-height: 88vh; display: flex; flex-direction: column;
+    border-radius: 18px 18px 0 0; background: var(--bg); box-shadow: 0 -6px 24px rgba(0,0,0,.2); }
+  .info-sheet .close { position: absolute; top: 10px; right: 10px; z-index: 2; width: 44px; height: 44px; border-radius: 50%; border: none;
+    background: #fff; color: var(--text); font-size: 26px; line-height: 1; box-shadow: 0 1px 4px rgba(0,0,0,.15); cursor: pointer; }
+  .info-sheet .body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 18px 16px calc(24px + var(--safe-b)); }
+  .info-sheet h2 { margin: 2px 56px 4px 2px; font-size: 26px; color: var(--brand-ink); }
   .bf-time { list-style: none; padding: 0 !important; }
   .bf-time li { display: flex; gap: 12px; padding: 8px 10px; margin: 0 !important; border-radius: 10px; }
   .bf-time .t { flex: none; width: 74px; font-weight: 700; color: var(--text); }
@@ -352,6 +365,9 @@
     <div class="url"></div>
   </div>
 
+  <div class="info-sheet" role="dialog" aria-modal="true" aria-label="More info">
+    <div class="panel"><button type="button" class="close" aria-label="Close">&times;</button><div class="body"></div></div>
+  </div>
   <div class="pass-view" role="dialog" aria-modal="true" aria-label="Parking pass">
     <button type="button" class="close" aria-label="Close parking pass">&times;</button>
     <div class="img"><img alt="Parking pass"></div>
@@ -678,7 +694,10 @@
     return { text: "Thank you for volunteering today!", sub: "" };
   }
   function asset(u) { return !u || /^(https?:)?\//.test(u) ? u : "/" + u; }   // the guide is also served at /fieldguide/
-  function bold(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+  function bold(s) {
+    return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+      .replace(/\[\[([\w-]+)\|(.+?)\]\]/g, '<button type="button" class="bf-info-link" data-info="$1">$2 &rsaquo;</button>');
+  }
   function checks(b) { try { return JSON.parse(localStorage.getItem("slv-brief-check-" + b.id)) || []; } catch (e) { return []; } }
   function seenBrief(b) { try { return localStorage.getItem("slv-brief-seen-" + b.id) === "1"; } catch (e) { return true; } }
   function renderBriefings() {
@@ -710,36 +729,23 @@
           (tel ? '<a href="tel:' + esc(tel) + '">' + ICON_PHONE + "Call " + esc(b.contact.name || "") + "</a>" +
                  '<a href="sms:' + esc(tel) + '">' + ICON_TEXT + "Text " + esc(b.contact.name || "") + "</a>" : "") +
         "</div>";
-      if ((b.shifts || []).length) html += '<section class="bf-sec"><h3 class="cond">Shifts</h3><div class="bf-shifts">' + b.shifts.map(function (s) {
-          var on = day && now >= tzMs(b.date, s.start) && now < tzMs(b.date, s.end);
-          return '<div class="' + (on ? "now" : "") + '"><b>' + esc(s.name) + (on ? " &middot; now" : "") + "</b><span>" + esc(hm12(s.start)) + " &ndash; " + esc(hm12(s.end)) + "</span></div>";
-        }).join("") + "</div>" + (b.shiftNote ? '<p class="bf-note">' + bold(b.shiftNote) + "</p>" : "") + "</section>";
-      if ((b.volunteers || []).length && (b.shifts || []).length) html += crewHtml(b, day, now);
       if ((b.timeline || []).length) html += '<section class="bf-sec"><h3 class="cond">' + (day ? "Today" : "Schedule") + '</h3><ol class="bf-time">' + b.timeline.map(function (t, i) {
           var past = day && t.time && tzMs(b.date, t.time) <= now;
           return '<li class="' + (past ? "past" : i === nextIdx && day ? "next" : "") + '"><span class="t">' + (t.time ? esc(hm12(t.time)) : "&mdash;") + "</span><span>" +
             bold(t.label) + (t.note ? "<small>" + bold(t.note) + "</small>" : "") + "</span></li>";
         }).join("") + "</ol></section>";
+      if ((b.volunteers || []).length && (b.shifts || []).length) html += crewHtml(b, day, now);
+      else if ((b.shifts || []).length) html += '<section class="bf-sec"><h3 class="cond">Shifts</h3><div class="bf-shifts">' + b.shifts.map(function (s) {
+          var on = day && now >= tzMs(b.date, s.start) && now < tzMs(b.date, s.end);
+          return '<div class="' + (on ? "now" : "") + '"><b>' + esc(s.name) + (on ? " &middot; now" : "") + "</b><span>" + esc(hm12(s.start)) + " &ndash; " + esc(hm12(s.end)) + "</span></div>";
+        }).join("") + "</div>" + (b.shiftNote ? '<p class="bf-note">' + bold(b.shiftNote) + "</p>" : "") + "</section>";
       if (b.pass) html += '<section class="bf-sec"><h3 class="cond">' + esc(b.pass.label || "Parking pass") + '</h3><div class="bf-pass">' +
           '<img class="bf-pass-open" data-b="' + esc(b.id) + '" src="' + esc(asset(b.pass.image)) + '" alt="' + esc(b.pass.label || "Parking pass") + '">' +
           '<div class="btns"><button type="button" class="primary bf-pass-open" data-b="' + esc(b.id) + '">View full screen</button>' +
             '<button type="button" class="bf-pass-print" data-b="' + esc(b.id) + '">Print</button>' +
             (b.pass.pdf ? '<a href="' + esc(asset(b.pass.pdf)) + '" target="_blank" rel="noopener">Open PDF</a>' : "") + "</div></div>" +
           (b.pass.note ? '<p class="bf-note">' + bold(b.pass.note) + "</p>" : "") + "</section>";
-      (b.sections || []).forEach(function (sec, si) {
-        html += '<section class="bf-sec"><h3 class="cond">' + esc(sec.title) + "</h3>";
-        if (sec.steps) html += "<ol>" + sec.steps.map(function (x) { return "<li>" + bold(x) + "</li>"; }).join("") + "</ol>";
-        if (sec.items) html += "<ul>" + sec.items.map(function (x) { return "<li>" + bold(x) + "</li>"; }).join("") + "</ul>";
-        if (sec.checklist) {
-          var n = 0;
-          html += '<div class="bf-checks">' + sec.checklist.map(function (x, i) {
-            var key = si + "." + i, on = done.indexOf(key) >= 0; if (on) n++;
-            return '<button type="button" class="bf-check' + (on ? " on" : "") + '" data-b="' + esc(b.id) + '" data-k="' + key + '" aria-pressed="' + on + '"><i></i><span>' + bold(x) + "</span></button>";
-          }).join("") + "</div>" + (n === sec.checklist.length ? '<p class="bf-checks-done">All set. See you there!</p>' : "");
-        }
-        if (sec.text) html += "<p>" + bold(sec.text) + "</p>";
-        html += "</section>";
-      });
+      (b.sections || []).forEach(function (sec, si) { html += secHtml(b, sec, si, done); });
       if (b.contact && b.contact.note) html += '<p class="bf-note" style="text-align:center;margin-top:14px">' + bold(b.contact.note) + "</p>";
       return html + "</article>";
     }).join("");
@@ -762,10 +768,14 @@
     var idx = function (name) { for (var i = 0; i < b.shifts.length; i++) if (b.shifts[i].name === name) return i; return -1; };
     var nowM = day ? mins(new Intl.DateTimeFormat("en-GB", { timeZone: TIMEZONE, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(now))) : -1;
     var counts = b.shifts.map(function (s) { return people.filter(function (p) { return p.shifts.indexOf(s.name) >= 0; }).length; });
-    return '<section class="bf-sec"><h3 class="cond">Who&rsquo;s volunteering</h3>' +
-      '<div class="bf-legend">' + b.shifts.map(function (s, i) {
-        return '<span><i style="background:' + CREW_COLORS[i % 2] + '"></i>' + esc(s.name) + " (" + counts[i] + ")</span>";
-      }).join("") + (b.shifts.length > 1 ? '<span><i style="background:' + CREW_BOTH + '"></i>Both</span>' : "") + "</div>" +
+    return '<section class="bf-sec"><h3 class="cond">Shifts &amp; volunteers</h3>' +
+      '<div class="bf-shifts">' + b.shifts.map(function (s, i) {
+        var on = day && now >= tzMs(b.date, s.start) && now < tzMs(b.date, s.end);
+        return '<div class="' + (on ? "now" : "") + '"><b><i class="sw" style="background:' + CREW_COLORS[i % 2] + '"></i>' + esc(s.name) +
+          (on ? " &middot; now" : "") + "</b><span>" + esc(hm12(s.start)) + " &ndash; " + esc(hm12(s.end)) + "</span><small>" + counts[i] + " volunteers</small></div>";
+      }).join("") + "</div>" +
+      (b.shiftNote ? '<p class="bf-note">' + bold(b.shiftNote) + "</p>" : "") +
+      (b.shifts.length > 1 ? '<div class="bf-legend"><span><i style="background:' + CREW_BOTH + '"></i>Working both shifts</span></div>' : "") +
       '<div class="bf-gantt"><div class="bf-axis"><span></span><div class="track">' + ticks.map(function (t) {
         return '<span style="left:' + pct(mins(t)) + '">' + esc(hm12(t).replace(" PM", "").replace(" AM", "")) + "</span>";
       }).join("") + "</div></div>" +
@@ -782,6 +792,35 @@
       }).join("") + "</div></div>" +
       '<p class="bf-count-line">' + people.length + " volunteers, sorted by last name" + (nowM >= lo && nowM <= hi ? " &middot; red line = now" : "") + "</p></section>";
   }
+  function secHtml(b, sec, si, done) {
+    var html = '<section class="bf-sec">' + (sec.title ? '<h3 class="cond">' + esc(sec.title) + "</h3>" : "");
+    if (sec.text) html += "<p>" + bold(sec.text) + "</p>";
+    if (sec.steps) html += "<ol>" + sec.steps.map(function (x) { return "<li>" + bold(x) + "</li>"; }).join("") + "</ol>";
+    if (sec.items) html += "<ul>" + sec.items.map(function (x) { return "<li>" + bold(x) + "</li>"; }).join("") + "</ul>";
+    if (sec.checklist) {
+      var n = 0;
+      html += '<div class="bf-checks">' + sec.checklist.map(function (x, i) {
+        var key = si + "." + i, on = done.indexOf(key) >= 0; if (on) n++;
+        return '<button type="button" class="bf-check' + (on ? " on" : "") + '" data-b="' + esc(b.id) + '" data-k="' + key + '" aria-pressed="' + on + '"><i></i><span>' + bold(x) + "</span></button>";
+      }).join("") + "</div>" + (n === sec.checklist.length ? '<p class="bf-checks-done">All set. See you there!</p>' : "");
+    }
+    return html + "</section>";
+  }
+  // Pop-up explainers (briefing "info" entries), opened from [[id|link text]] in any briefing text.
+  function findInfo(id) {
+    var bs = activeBriefings();
+    for (var i = 0; i < bs.length; i++) for (var j = 0; j < (bs[i].info || []).length; j++) if (bs[i].info[j].id === id) return { b: bs[i], info: bs[i].info[j] };
+    return null;
+  }
+  function openInfo(id, push) {
+    var f = findInfo(id); if (!f) return;
+    $(".info-sheet .body").innerHTML = '<h2 class="cond">' + esc(f.info.title) + "</h2>" +
+      (f.info.sections || []).map(function (sec, i) { return secHtml(f.b, sec, i, []); }).join("");
+    $(".info-sheet .body").scrollTop = 0;
+    $(".info-sheet").classList.add("open");
+    if (push) history.pushState({ v: "info", id: id }, "", location.hash);
+  }
+  function closeInfo() { $(".info-sheet").classList.remove("open"); }
   function findBrief(id) { return (data.briefings || []).filter(function (b) { return b.id === id; })[0]; }
   function toggleCheck(id, key) {
     var b = findBrief(id); if (!b) return;
@@ -837,10 +876,11 @@
   window.addEventListener("popstate", function (e) {
     var s = e.state || {};
     if (s.v !== "pass") closePass();
+    if (s.v !== "info") closeInfo();
     if (s.v !== "qr") closeQr();
     if (s.v === "animal") openAnimal(s.id, false); else if (s.v !== "qr") closeAnimal();
   });
-  function back() { if (history.state && history.state.v) history.back(); else { closePass(); closeQr(); closeAnimal(); } }
+  function back() { if (history.state && history.state.v) history.back(); else { closeInfo(); closePass(); closeQr(); closeAnimal(); } }
 
   document.addEventListener("click", function (e) {
     var t = e.target;
@@ -848,6 +888,8 @@
     var tab = t.closest(".tabbar button"); if (tab) return showTab(tab.getAttribute("data-tab"));
     var today = t.closest(".today-card");
     if (today) return today.getAttribute("data-brief") ? showTab("brief") : openEvent(today.getAttribute("data-ev"));
+    var il = t.closest(".bf-info-link"); if (il) return openInfo(il.getAttribute("data-info"), true);
+    if (t.classList && t.classList.contains("info-sheet")) return back();   // tap outside the panel
     var bc = t.closest(".bf-check"); if (bc) return toggleCheck(bc.getAttribute("data-b"), bc.getAttribute("data-k"));
     var po = t.closest(".bf-pass-open"); if (po) return openPass(po.getAttribute("data-b"), true);
     var pp = t.closest(".bf-pass-print, .pass-print"); if (pp) return printPass(pp.getAttribute("data-b"));
@@ -862,7 +904,7 @@
       var l = LINKS.filter(function (x) { return x.key === lnk.getAttribute("data-key"); })[0];
       return openQr(l.qrLabel, l.url, true);
     }
-    if (t.closest(".qr-view .close") || t.closest(".sheet-close") || t.closest(".pass-view .close")) return back();
+    if (t.closest(".qr-view .close") || t.closest(".sheet-close") || t.closest(".pass-view .close") || t.closest(".info-sheet .close")) return back();
   });
   $(".search").addEventListener("input", function (e) { query = e.target.value.trim().toLowerCase(); renderAnimals(); });
 
