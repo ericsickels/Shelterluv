@@ -10,9 +10,11 @@
    "venue": "Fishers Event Center",
    "address": "11000 Stockdale Street, Fishers, IN 46037",
    "contact": {
-    "name": "Eric",
-    "phone": "317-501-8562",
-    "note": "Questions or running late? Call or text Eric."
+    "chat": {
+     "label": "Event group chat",
+     "url": "https://m.me/j/PUz6aWh3nl_TwWvC/?send_source=rrfieldguide"
+    },
+    "note": "Questions or running late? Post in the event group chat on Facebook Messenger."
    },
    "shifts": [
     {
