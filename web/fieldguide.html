@@ -952,8 +952,13 @@
   // iPhone/iPad only allow sound after a tap inside the player itself, so autoplay there starts muted. Open it paused
   // instead: tapping Vimeo's play button then plays with sound. Everywhere else, autoplay with sound.
   var IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  // A bare player: just a centred play button and full screen. Vimeo ignores the ones the video owner's plan doesn't
+  // allow (those can also be switched off in the video's Embed settings on vimeo.com).
+  var VIMEO_PARAMS = "autopause=0&playsinline=1&dnt=1&color=dd7308&play_button_position=center&fullscreen=1" +
+    "&title=0&byline=0&portrait=0&badge=0&vimeo_logo=0&like=0&watchlater=0&watch_later=0&share=0&collections=0" +
+    "&speed=0&pip=0&airplay=0&chromecast=0&cc=0&closed_captions=0&transcript=0&chapters=0&quality_selector=0&progress_bar=0&volume=0";
   function openVideo(id, title, push) {
-    $(".video-view .frame").innerHTML = '<iframe src="https://player.vimeo.com/video/' + encodeURIComponent(id) + '?badge=0&autopause=0&playsinline=1&dnt=1' + (IOS ? "" : "&autoplay=1") + '" ' +
+    $(".video-view .frame").innerHTML = '<iframe src="https://player.vimeo.com/video/' + encodeURIComponent(id) + '?' + VIMEO_PARAMS + (IOS ? "" : "&autoplay=1") + '" ' +
       'allow="autoplay; fullscreen; picture-in-picture; encrypted-media" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="' + esc(title) + '"></iframe>';
     $(".video-view .ttl").textContent = title;
     $(".video-view").classList.add("open");
