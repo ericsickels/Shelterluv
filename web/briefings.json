@@ -10,10 +10,11 @@
    "startsAt": { "time": "15:00", "label": "doors open" },
    "videos": {
     "title": "Our videos",
+    "shortsNote": "Shorts may play during media breaks and stoppages. Swipe for more.",
     "groups": [
      { "title": "Main video", "note": "Guaranteed to play \u00b7 2nd intermission", "featured": true,
        "items": [ { "label": "Little Problem", "vimeo": "1244327694" } ] },
-     { "title": "Rescue Trivia", "note": "These shorts and the calls to action below may play during media breaks and stoppages.",
+     { "title": "Rescue Trivia",
        "items": [
         { "label": "Dog Smell", "vimeo": "1244337939" },
         { "label": "Puppy Point", "vimeo": "1244337943" },
