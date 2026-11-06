@@ -8,10 +8,25 @@
    "title": "Indy Fuel vs. Cincinnati",
    "subtitle": "We're the **Nonprofit of the Game** at Toy Story & Family Fun Day.",
    "startsAt": { "time": "15:00", "label": "doors open" },
-   "video": {
-    "title": "Our video",
-    "vimeo": "1244327694",
-    "note": "Plays on the big screen during the **2nd intermission**. Watch it ahead of time so you know what fans saw when they stop by our table."
+   "videos": {
+    "title": "Our videos",
+    "groups": [
+     { "title": "Main video", "note": "Guaranteed to play \u00b7 2nd intermission", "featured": true,
+       "items": [ { "label": "Little Problem", "vimeo": "1244327694" } ] },
+     { "title": "Rescue Trivia", "note": "These shorts and the calls to action below may play during media breaks and stoppages.",
+       "items": [
+        { "label": "Dog Smell", "vimeo": "1244337939" },
+        { "label": "Puppy Point", "vimeo": "1244337943" },
+        { "label": "Cat Blink", "vimeo": "1244337888" },
+        { "label": "Cat Names", "vimeo": "1244337899" },
+        { "label": "Most Adopted", "vimeo": "1244337941" } ] },
+     { "title": "Calls to action",
+       "items": [
+        { "label": "Adopt", "vimeo": "1244337658" },
+        { "label": "Follow", "vimeo": "1244337657" },
+        { "label": "Donate", "vimeo": "1244337661" },
+        { "label": "Foster", "vimeo": "1244337659" } ] }
+    ]
    },
    "venue": "Fishers Event Center",
    "address": "11000 Stockdale Street, Fishers, IN 46037",
