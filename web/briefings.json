@@ -28,7 +28,6 @@
      "end": "19:00"
     }
    ],
-   "shiftNote": "Your shift is the one you signed up for in POINT.",
    "timeline": [
     {
      "time": "14:15",
@@ -79,7 +78,9 @@
      "title": "What you'll be doing",
      "items": [
       "Selling **Chuck-a-Puck** foam pucks at our entrance table and around the concourse. **The rescue keeps 60% of every sale!** [[chuck|How Chuck-a-Puck works]]",
-      "Chatting with fans and staffing our rescue table: answering questions, accepting donations, and sharing how to adopt, foster and volunteer.",
+      "Offering **animal and fall temporary tattoos** for kids. It's a fun ice breaker before following up with a Chuck-a-Puck ask!",
+      "Chatting with fans and staffing our rescue table: answering questions and sharing how to adopt, foster and volunteer.",
+      "Collecting **donations** for the rescue. **Cash is welcome**, and our Donate QR code is ready to scan on the QR codes tab. [[qr:donate|Show Donate QR code]]",
       "Helping set up our table and materials before doors open.",
       "The most helpful thing you can bring is a **friendly, outgoing attitude**. Enthusiasm makes a big difference in puck sales!"
      ]
@@ -97,7 +98,7 @@
     {
      "title": "Good to know",
      "items": [
-      "We are **not bringing animals** this time because of the weather.",
+      "We're **not bringing animals** to this event. The venue doesn't allow animals inside, and with only a few event-ready animals and colder temperatures, we decided to sit this one out.",
       "Our video is expected to play during the **2nd intermission**, right before the Chuck-a-Puck game that benefits Redemption Rescue."
      ]
     }

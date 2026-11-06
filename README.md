@@ -167,7 +167,7 @@ one-tap access). Not linked from the website.
 - **Volunteer briefing tab (big events):** an extra tab with everything volunteers need: live countdown,
   Directions / Call / Text buttons, shifts, the day's schedule, arrival steps, a "before you leave home" checklist
   (ticks are saved on the phone), what you'll be doing, good to know, and a parking pass to view full screen or print.
-  It appears 7 days before the event (labelled with the weekday, then "Today", with an orange dot until first opened)
+  It appears 7 days before the event as the first tab and opens by default (labelled with the weekday, then "Today")
   and disappears at midnight at the end of the event day. On the day, a banner at the top of the Animals tab opens it.
   Briefings live in `web/briefings.json` (one entry per event; times are 24-hour Eastern; `**bold**` works). Put any
   parking pass image/PDF in `web/` next to it. Send Claude the volunteer email and it can write the entry.
