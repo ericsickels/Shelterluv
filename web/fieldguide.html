@@ -275,6 +275,14 @@
   .bf-checks-done { margin: 8px 0 0; font-size: 14px; font-weight: 600; color: var(--brand-ink); }
   .today-card.brief { background: #2a2622; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
   .today-card.brief .when { color: #ffb366; opacity: 1; }
+  /* Milestone countdown: a small bar above the tab bar for the 15 minutes before each scheduled time */
+  .bf-alert { position: fixed; left: 0; right: 0; bottom: calc(66px + var(--safe-b)); z-index: 19; display: none; justify-content: center; padding: 0 12px 8px; pointer-events: none; }
+  .bf-alert.on { display: flex; }
+  .bf-alert button { pointer-events: auto; display: flex; align-items: center; gap: 10px; width: 100%; max-width: 560px; padding: 10px 14px; border: none; border-radius: 14px;
+    background: #2a2622; color: #fff; font-size: 15px; font-weight: 600; text-align: left; box-shadow: 0 6px 18px rgba(0,0,0,.25); cursor: pointer; }
+  .bf-alert .clock { margin-left: auto; padding: 3px 10px; border-radius: 999px; background: var(--brand); font-variant-numeric: tabular-nums; font-weight: 700; }
+  .bf-alert .ic { font-size: 18px; line-height: 1; }
+  body.has-alert { padding-bottom: calc(130px + var(--safe-b)); }
   /* Parking pass, full screen */
   .pass-view { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 45; display: none; flex-direction: column; background: #fff; }
   .pass-view.open { display: flex; }
@@ -366,6 +374,7 @@
     <div class="url"></div>
   </div>
 
+  <div class="bf-alert" aria-live="polite"><button type="button"><span class="ic" aria-hidden="true">&#9201;</span><span class="what"></span><span class="clock"></span></button></div>
   <div class="info-sheet" role="dialog" aria-modal="true" aria-label="More info">
     <div class="panel"><button type="button" class="close" aria-label="Close">&times;</button><div class="body"></div></div>
   </div>
@@ -829,6 +838,28 @@
     if (push) history.pushState({ v: "info", id: id }, "", location.hash);
   }
   function closeInfo() { $(".info-sheet").classList.remove("open"); }
+  // The next scheduled milestone within 15 minutes (or one that just happened), for the countdown bar.
+  var ALERT_BEFORE = 15 * 60000, ALERT_AFTER = 60000;
+  function updateAlert() {
+    var now = Date.now(), hit = null;
+    activeBriefings().filter(isBriefDay).forEach(function (b) {
+      (b.timeline || []).forEach(function (t) {
+        if (!t.time) return;
+        var at = tzMs(b.date, t.time), d = at - now;
+        if (d <= ALERT_BEFORE && d > -ALERT_AFTER && (!hit || at < hit.at)) hit = { at: at, label: t.label, d: d };
+      });
+    });
+    var el = $(".bf-alert");
+    el.classList.toggle("on", !!hit);
+    document.body.classList.toggle("has-alert", !!hit);
+    if (!hit) return;
+    var label = hit.label.replace(/^Call time: /, "");
+    label = label.charAt(0).toUpperCase() + label.slice(1);
+    if (hit.d <= 0) { el.querySelector(".what").textContent = label + " now!"; el.querySelector(".clock").textContent = hm12(fmt(hit.at, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })); return; }
+    var sec = Math.ceil(hit.d / 1000);
+    el.querySelector(".what").textContent = label + " in";
+    el.querySelector(".clock").textContent = Math.floor(sec / 60) + ":" + ("0" + sec % 60).slice(-2);
+  }
   function findBrief(id) { return (data.briefings || []).filter(function (b) { return b.id === id; })[0]; }
   function toggleCheck(id, key) {
     var b = findBrief(id); if (!b) return;
@@ -898,6 +929,7 @@
     if (today) return today.getAttribute("data-brief") ? showTab("brief") : openEvent(today.getAttribute("data-ev"));
     var ql = t.closest(".bf-qr-link");
     if (ql) { var lq = LINKS.filter(function (x) { return x.key === ql.getAttribute("data-qr"); })[0]; return lq && lq.url && openQr(lq.qrLabel, lq.url, true); }
+    if (t.closest(".bf-alert button")) { tabPicked = true; return showTab("brief"); }
     var il = t.closest(".bf-info-link"); if (il) return openInfo(il.getAttribute("data-info"), true);
     if (t.classList && t.classList.contains("info-sheet")) return back();   // tap outside the panel
     var bc = t.closest(".bf-check"); if (bc) return toggleCheck(bc.getAttribute("data-b"), bc.getAttribute("data-k"));
@@ -924,7 +956,8 @@
     if (m) { history.replaceState(null, "", location.pathname); showTab("animals"); openAnimal(decodeURIComponent(m[1]), true); }
   });
   setInterval(function () { if (!document.hidden) load(); }, REFRESH_MS);
-  setInterval(function () { if (!document.hidden) renderEvents(); }, 60000);   // "Today" / "Happening now" stay current
+  setInterval(function () { if (!document.hidden) renderEvents(); }, 60000);
+  setInterval(function () { if (!document.hidden) updateAlert(); }, 1000);   // milestone countdown bar   // "Today" / "Happening now" stay current
   document.addEventListener("visibilitychange", function () { if (!document.hidden) showUpdated(false); });
 })();
 </script>
