@@ -180,6 +180,10 @@ one-tap access). Not linked from the website.
   with step-by-step help for that phone: a one-tap **Add to Home screen** button on Android Chrome, Share then Add to Home
   Screen steps on iPhone, and "open in Safari/Chrome first" when the link was opened inside Messenger, Facebook or
   another app. From the home screen the guide opens full screen like an app.
+- **Escape Messenger/Facebook/Instagram's built-in browser:** add `open` to the link, e.g. `/fieldguide/?open` or
+  `/fieldguide/?install&open`. Only links with `open` do this: opened inside one of those apps, the guide immediately tries
+  to reopen in Safari (iPhone, unofficial `x-safari-` link) or Chrome (Android `intent:` link), with an
+  **Open in Safari / Chrome** button and manual steps as a fallback. In a normal browser `open` is ignored.
 - The phone's back button/gesture closes the QR, then the animal. The last data is saved on the phone,
   so the guide still works on weak event Wi-Fi (the header then says "Offline").
 

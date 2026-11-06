@@ -928,10 +928,21 @@
   var ICO_MORE = '<span class="ico"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span>';
   var ICO_DOTS = '<span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>';
   function renderInstall(state) {
-    var url = location.origin + "/fieldguide/?install", html = '<div class="hero"><img src="/fieldguide-icon-180.png" alt=""><div><b>Add RR Field Guide to your home screen</b>' +
-      "<span>One tap to open it at events, even on weak Wi-Fi.</span></div></div>";
+    var opening = inAppBrowser && escapeMode && !wantInstall && !isStandalone && state !== "done";
+    var url = location.origin + "/fieldguide/?install", html = '<div class="hero"><img src="/fieldguide-icon-180.png" alt=""><div><b>' +
+      (opening ? "Open RR Field Guide in " + (isIOS ? "Safari" : "Chrome") : "Add RR Field Guide to your home screen") + "</b>" +
+      "<span>" + (opening ? "It works best in your phone&rsquo;s browser." : "One tap to open it at events, even on weak Wi-Fi.") + "</span></div></div>";
     if (state === "done" || isStandalone) {
       html += "<p>All set! Open <b>RR Field Guide</b> from your home screen any time.</p>";
+    } else if (inAppBrowser && escapeMode && escapeUrl()) {
+      // ?open: offer a one-tap jump out of Messenger/Facebook/Instagram into Safari or Chrome.
+      var app = isIOS ? "Safari" : "Chrome";
+      html += "<p>You&rsquo;re in another app&rsquo;s browser. Open the guide in <b>" + app + "</b> for the best experience" +
+        (wantInstall ? " and to add it to your home screen" : "") + ".</p>" +
+        '<button type="button" class="big install-escape">Open in ' + app + "</button>" +
+        '<p class="tip">Nothing happened? Tap the ' + (isIOS ? ICO_MORE + " or " + ICO_SHARE : ICO_DOTS) + " button in this app&rsquo;s browser and choose <b>Open in " + app +
+        "</b> (or <b>Open in browser</b>).</p>" + '<button type="button" class="alt install-copy">Copy link instead</button>' +
+        (wantInstall ? "" : '<p class="tip"><button type="button" class="alt install-close" style="margin-top:4px">Keep using it here</button></p>');
     } else if (inAppBrowser) {
       html += "<p>This link opened inside another app, which can&rsquo;t add home screen icons. Open it in your phone&rsquo;s browser first:</p><ol>" +
         (isIOS ? "<li>Tap the " + ICO_MORE + " or " + ICO_SHARE + " button in this app&rsquo;s browser.</li><li>Choose <b>Open in Safari</b> (or <b>Open in browser</b>).</li>"
@@ -950,6 +961,16 @@
     }
     $(".install-sheet .body").innerHTML = html;
   }
+  // ?open (only when the link includes it): jump from an in-app browser to Safari/Chrome, keeping ?install if present.
+  var wantInstall = /[?&]install\b/.test(location.search), escapeMode = false;
+  var escapeTarget = location.origin + location.pathname + (wantInstall ? "?install" : "") + location.hash;
+  function escapeUrl() {
+    if (isIOS) return "x-safari-" + escapeTarget;   // unofficial, but widely supported on recent iOS
+    if (isAndroid) return "intent://" + escapeTarget.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=" +
+      encodeURIComponent(escapeTarget) + ";end";
+    return "";
+  }
+  function tryEscape() { var u = escapeUrl(); if (u) location.href = u; }
   function openInstall() { renderInstall(); $(".install-sheet").classList.add("open"); }
   function closeInstall() { $(".install-sheet").classList.remove("open"); }
 
@@ -987,6 +1008,7 @@
     var tab = t.closest(".tabbar button"); if (tab) { tabPicked = true; return showTab(tab.getAttribute("data-tab")); }
     var today = t.closest(".today-card");
     if (today) return today.getAttribute("data-brief") ? showTab("brief") : openEvent(today.getAttribute("data-ev"));
+    if (t.closest(".install-escape")) return tryEscape();
     if (t.closest(".install-close") || (t.classList && t.classList.contains("install-sheet"))) return closeInstall();
     if (t.closest(".install-go") && installEvt) {
       installEvt.prompt();
@@ -994,7 +1016,7 @@
       installEvt = null; return;
     }
     if (t.closest(".install-copy")) {
-      var lnk2 = location.origin + "/fieldguide/?install";
+      var lnk2 = escapeMode ? escapeTarget : location.origin + "/fieldguide/?install";
       try { navigator.clipboard.writeText(lnk2).then(function () { t.textContent = "Link copied! Paste it in your browser"; }); } catch (e2) { prompt("Copy this link:", lnk2); }
       return;
     }
@@ -1022,10 +1044,10 @@
   $(".search").addEventListener("input", function (e) { query = e.target.value.trim().toLowerCase(); renderAnimals(); });
 
   renderLinks();
-  if (/[?&]install\b/.test(location.search)) {
-    history.replaceState(null, "", location.pathname + location.hash);   // keep ?install out of the saved address
-    openInstall();
-  }
+  var wantOpen = /[?&]open\b/.test(location.search);
+  if (wantInstall || wantOpen) history.replaceState(null, "", location.pathname + location.hash);   // keep ?install / ?open out of the saved address
+  if (wantOpen && inAppBrowser) { escapeMode = true; openInstall(); tryEscape(); }
+  else if (wantInstall) openInstall();
   load().then(function () {
     var m = location.hash.match(/^#animal-(.+)$/);
     if (m) { history.replaceState(null, "", location.pathname); showTab("animals"); openAnimal(decodeURIComponent(m[1]), true); }
