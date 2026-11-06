@@ -1,0 +1,59 @@
+{
+ "_help": "Volunteer briefings for the field guide. Each one appears as its own tab from showDaysBefore days ahead until midnight on the event date (Eastern time). Times are 24-hour (\"16:15\"). Text can use **bold**.",
+ "briefings": [
+  {
+   "id": "indy-fuel-2026-11-08",
+   "date": "2026-11-08",
+   "showDaysBefore": 7,
+   "title": "Indy Fuel game",
+   "subtitle": "Toy Story & Family Fun Day vs. Cincinnati. Redemption Rescue is the **Nonprofit of the Game**!",
+   "venue": "Fishers Event Center",
+   "address": "11000 Stockdale Street, Fishers, IN 46037",
+   "contact": { "name": "Eric", "phone": "317-501-8562", "note": "Questions or running late? Call or text Eric." },
+   "shifts": [
+    { "name": "First shift", "start": "14:15", "end": "17:00" },
+    { "name": "Second shift", "start": "16:15", "end": "19:00" }
+   ],
+   "shiftNote": "Your shift is the one you signed up for in POINT.",
+   "timeline": [
+    { "time": "14:15", "label": "Call time: first shift starts" },
+    { "time": "16:00", "label": "Puck drop" },
+    { "time": "16:15", "label": "Second shift starts" },
+    { "time": "17:00", "label": "First shift ends" },
+    { "label": "2nd intermission", "note": "Our video plays, right before the Chuck-a-Puck game that benefits Redemption Rescue (time varies)" },
+    { "time": "19:00", "label": "Second shift ends" }
+   ],
+   "pass": {
+    "label": "Parking pass",
+    "image": "indy-fuel-2026-11-08-parking-pass.jpg",
+    "pdf": "indy-fuel-2026-11-08-parking-pass.pdf",
+    "note": "Print it and place it on your dashboard. Eric will have a few printed copies in case you forget."
+   },
+   "sections": [
+    { "title": "Arrival & parking", "steps": [
+      "Park in the **staff lot** (there is a sign). The parking pass has a map.",
+      "Put your **printed parking pass** on your dashboard.",
+      "Enter at the **Honda Gate** on the south/southeast side of the venue.",
+      "Head to the **main entrance**. We're at **two tables side by side near the box office**."
+    ] },
+    { "title": "What you'll be doing", "items": [
+      "Selling **Chuck-a-Puck** foam pucks at our entrance table and around the concourse. **The rescue keeps 60% of every sale!**",
+      "Chatting with fans and staffing our rescue table: answering questions, accepting donations, and sharing how to adopt, foster and volunteer.",
+      "Helping set up our table and materials before doors open.",
+      "The most helpful thing you can bring is a **friendly, outgoing attitude**. Enthusiasm makes a big difference in puck sales!"
+    ] },
+    { "title": "Before you leave home", "checklist": [
+      "Redemption Rescue shirt (any RR shirt works; no shirt? We'll try to get you one)",
+      "Comfortable shoes: you'll be on your feet",
+      "Clear bag only: leave large or non-clear bags in the car",
+      "Card or phone: the venue takes card and mobile payments only",
+      "Printed parking pass"
+    ] },
+    { "title": "Good to know", "items": [
+      "We are **not bringing animals** this time because of the weather.",
+      "Our video is expected to play during the **2nd intermission**, right before the Chuck-a-Puck game that benefits Redemption Rescue."
+    ] }
+   ]
+  }
+ ]
+}

@@ -34,6 +34,7 @@ Like every file on this site it isn't secret: anyone who knows the address can o
 | `scripts/make_icons.py` | Makes the field guide's home screen icons from our logo during each publish. |
 | `fosters.json` (written by `export_animals.py`) | Foster first names by animal ID, for the field guide only. |
 | `scripts/export_events.py` | Writes `events.json` (upcoming events from our website's Events page) for the field guide. |
+| `web/briefings.json` | Volunteer briefings for big events, shown as a temporary tab in the field guide (plus any parking pass files next to it). |
 | `web/qrcode.js` | QR code generator used by the sign ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4, MIT). |
 | `web/adopt.css` | Styles for all widgets. |
 | `web/index.html` | Preview page: `https://animals.redemptionrescueinc.com/` shows the widget outside Squarespace. |
@@ -163,6 +164,13 @@ one-tap access). Not linked from the website.
   **Directions** and **Event page** buttons). On an event day an orange banner at the top of the Animals tab shows
   it ("Today" / "Happening now"); tap it to jump to the event. Add or edit events in Squarespace as usual; the guide
   picks them up within ~30 minutes (`scripts/export_events.py`, from `/events?format=json`).
+- **Volunteer briefing tab (big events):** an extra tab with everything volunteers need: live countdown,
+  Directions / Call / Text buttons, shifts, the day's schedule, arrival steps, a "before you leave home" checklist
+  (ticks are saved on the phone), what you'll be doing, good to know, and a parking pass to view full screen or print.
+  It appears 7 days before the event (labelled with the weekday, then "Today", with an orange dot until first opened)
+  and disappears at midnight at the end of the event day. On the day, a banner at the top of the Animals tab opens it.
+  Briefings live in `web/briefings.json` (one entry per event; times are 24-hour Eastern; `**bold**` works). Put any
+  parking pass image/PDF in `web/` next to it. Send Claude the volunteer email and it can write the entry.
 - **QR codes tab:** Donate, Adoption application, Foster application, Facebook, Instagram. Set the links
   in `LINKS` at the top of the script in `web/fieldguide.html`; an empty link shows as "Link needed".
 - **Add to Home Screen** (Share menu on iPhone, ⋮ menu on Android) gives an "RR Field Guide" icon
