@@ -131,8 +131,9 @@ or signage player. It needs no login and nothing on Squarespace.
 - Rotates available animals (photo-only, Pending left out, longer stays shown more often), about 15s
   each, showing 3 of their photos at random (each wipes in over the last; no zooming). Shows name, sex/age/breed, one line from the bio, days
   waiting since their latest intake, and a QR code to that animal on our Adopt page.
-- After every 5 animals: "Who we are" (mission + live counts), "How to adopt", or "Happy tails"
-  (recent adoptions). A strip with our name and website is always on screen.
+- After every 5 animals: "Who we are" (mission + live counts), "Next event" (the soonest upcoming event from our
+  website's Events page: photo, title, date/time, venue, a line of description and a QR code to the event page; skipped
+  when there's no upcoming event), "How to adopt", or "Happy tails" (recent adoptions). A strip with our name and website is always on screen.
 - Detects landscape/portrait and scales to the screen. Portrait tablets (an iPad is about 3:4, not 9:16) get their
   own layout with the QR code beside the name, and any slide that would still be too tall is scaled down to fit. Refreshes data every 30 minutes, keeps the
   last good data if the internet drops, and reloads itself around 4am.
