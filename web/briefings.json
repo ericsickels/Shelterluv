@@ -1,12 +1,13 @@
 {
- "_help": "Volunteer briefings for the field guide. Each one appears as its own tab from showDaysBefore days ahead until midnight on the event date (Eastern time). Times are 24-hour (\"16:15\"). Text can use **bold**.",
+ "_help": "Volunteer briefings for the field guide. Each one appears as its own tab from showDaysBefore days ahead until midnight on the event date (Eastern time). Times are 24-hour (\"16:15\"). Text can use **bold**. startsAt is what the countdown at the top counts down to.",
  "briefings": [
   {
    "id": "indy-fuel-2026-11-08",
    "date": "2026-11-08",
    "showDaysBefore": 7,
-   "title": "Indy Fuel game",
-   "subtitle": "Toy Story & Family Fun Day vs. Cincinnati. Redemption Rescue is the **Nonprofit of the Game**!",
+   "title": "Indy Fuel vs. Cincinnati",
+   "subtitle": "We're the **Nonprofit of the Game** at Toy Story & Family Fun Day.",
+   "startsAt": { "time": "15:00", "label": "doors open" },
    "venue": "Fishers Event Center",
    "address": "11000 Stockdale Street, Fishers, IN 46037",
    "contact": {

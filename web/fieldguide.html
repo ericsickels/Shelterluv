@@ -192,19 +192,24 @@
   .tabbar button .dot { position: absolute; top: 2px; right: calc(50% - 20px); width: 9px; height: 9px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 2px #fff; }
   .tabbar button[hidden] { display: none; }
   .bf { margin-bottom: 26px; }
-  .bf-hero { padding: 18px 16px 16px; border-radius: 16px; background: var(--brand); color: #fff; box-shadow: 0 4px 14px rgba(221,115,8,.25); }
-  .bf-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .9; }
-  .bf-hero h2 { margin: 4px 0 4px; font-size: 28px; line-height: 1.1; }
-  .bf-hero p { margin: 0; font-size: 15px; line-height: 1.45; opacity: .95; }
-  .bf-hero .where { margin-top: 8px; font-size: 14px; opacity: .92; }
-  .bf-count { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.18); font-size: 16px; font-weight: 700; }
-  .bf-count small { display: block; font-size: 13px; font-weight: 500; opacity: .9; }
-  .bf-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-  .bf-actions a, .bf-actions button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 8px; border-radius: 12px;
-    border: 1.5px solid var(--brand); background: var(--card); color: var(--brand-ink); font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer; }
-  .bf-actions .primary { background: var(--brand); color: #fff; }
-  .bf-actions .chat { grid-column: 1 / -1; border: none; background: linear-gradient(90deg, #0a7cff, #a033ff); color: #fff; }
-  .bf-actions svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .bf-hero { border-radius: 16px; background: var(--card); box-shadow: var(--shadow); border-top: 4px solid var(--brand); overflow: hidden; }
+  .bf-head { padding: 12px 16px 14px; }
+  .bf-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .bf-top .d { color: var(--muted); }
+  .bf-count { color: var(--brand-ink); text-align: right; }
+  .bf-count.live::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: #d63b2f; vertical-align: 1px; animation: bfpulse 1.6s infinite; }
+  @keyframes bfpulse { 50% { opacity: .3; } }
+  .bf-hero h2 { margin: 6px 0 4px; font-size: 26px; line-height: 1.1; color: var(--text); }
+  .bf-hero p { margin: 0; font-size: 15px; line-height: 1.4; color: var(--text-2); }
+  .bf-hero .where { margin-top: 4px; font-size: 14px; color: var(--muted); }
+  .bf-actions { display: flex; border-top: 1px solid var(--line); }
+  .bf-actions a, .bf-actions button { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 62px; padding: 8px 4px;
+    border: none; background: none; color: var(--brand-ink); font: inherit; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
+  .bf-actions > * + * { border-left: 1px solid var(--line); }
+  .bf-actions a:active, .bf-actions button:active { background: var(--brand-soft); }
+  .bf-actions .chat svg { stroke: #6a4dff; }
+  .bf-actions .chat { color: #4b3bd6; }
+  .bf-actions svg { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .bf-sec { margin-top: 14px; padding: 14px 16px; border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
   .bf-sec h3 { margin: 0 0 10px; font-size: 18px; color: var(--brand-ink); }
   .bf-sec p, .bf-sec li { font-size: 15px; line-height: 1.5; color: var(--text-2); }
@@ -718,18 +723,19 @@
     var m = Math.max(1, Math.round(ms / 60000)), h = Math.floor(m / 60);
     return h ? h + " hr" + (m % 60 ? " " + (m % 60) + " min" : "") : m + " min";
   }
+  // Countdown to when the event itself starts (startsAt, e.g. doors open), not anyone's shift.
   function countdown(b) {
-    var now = Date.now(), timed = (b.timeline || []).filter(function (t) { return t.time; });
+    var now = Date.now(), st = b.startsAt || {}, timed = (b.timeline || []).filter(function (t) { return t.time; });
+    var time = st.time || (timed[0] && timed[0].time), label = st.label || "starts";
+    if (!time) return { text: "" };
+    var Label = label.charAt(0).toUpperCase() + label.slice(1), at = tzMs(b.date, time);
     if (!isBriefDay(b)) {
       var days = Math.round((tzMs(b.date, "12:00") - tzMs(ymd(now), "12:00")) / 86400000);
-      var first = timed[0];
-      return { text: (days === 1 ? "Tomorrow" : "In " + days + " days") + (first ? " \u00b7 " + first.label.split(":")[0] + " " + hm12(first.time) : ""), sub: "" };
+      return { text: Label + (days === 1 ? " tomorrow" : " in " + days + " days") };
     }
-    for (var i = 0; i < timed.length; i++) {
-      var at = tzMs(b.date, timed[i].time);
-      if (at > now) return { text: timed[i].label + " in " + fmtDur(at - now), sub: "at " + hm12(timed[i].time) };
-    }
-    return { text: "Thank you for volunteering today!", sub: "" };
+    if (at > now) return { text: Label + " in " + fmtDur(at - now) };
+    var last = timed.length ? tzMs(b.date, timed[timed.length - 1].time) : at;
+    return now < last ? { text: "Happening now", live: true } : { text: "Thank you for volunteering today!" };
   }
   function asset(u) { return !u || /^(https?:)?\//.test(u) ? u : "/" + u; }   // the guide is also served at /fieldguide/
   function bold(s) {
@@ -762,17 +768,16 @@
       (b.timeline || []).forEach(function (t, i) { if (nextIdx < 0 && t.time && tzMs(b.date, t.time) > now) nextIdx = i; });
       var done = checks(b), html = "";
       html += '<article class="bf">' +
-        '<div class="bf-hero"><div class="bf-eyebrow">Volunteer briefing &middot; ' + esc(fmt(tzMs(b.date, "12:00"), { weekday: "short", month: "short", day: "numeric" })) + "</div>" +
+        '<div class="bf-hero"><div class="bf-head"><div class="bf-top"><span class="d">' + esc(fmt(tzMs(b.date, "12:00"), { weekday: "short", month: "short", day: "numeric" })) + "</span>" +
+          (c.text ? '<span class="bf-count' + (c.live ? " live" : "") + '">' + esc(c.text) + "</span>" : "") + "</div>" +
           '<h2 class="cond">' + esc(b.title) + "</h2>" + (b.subtitle ? "<p>" + bold(b.subtitle) + "</p>" : "") +
-          (b.venue || b.address ? '<div class="where">' + esc([b.venue, b.address].filter(Boolean).join(", ")) + "</div>" : "") +
-          '<div class="bf-count">' + esc(c.text) + (c.sub ? "<small>" + esc(c.sub) + "</small>" : "") + "</div></div>" +
+          (b.venue ? '<div class="where">' + esc(b.venue) + "</div>" : "") + "</div>" +
         '<div class="bf-actions">' +
-          (b.venue || b.address ? '<a class="primary" ' + appLink(directionsUrl(b)) + '>' + ICON_PIN + "Directions</a>" : "") +
-          (b.pass ? '<button type="button" class="bf-pass-open" data-b="' + esc(b.id) + '">' + ICON_TICKET + esc(b.pass.label || "Parking pass") + "</button>" : "") +
-          (chat ? '<a class="chat" ' + appLink(chat.url) + '>' + ICON_MESSENGER + esc(chat.label || "Group chat") + "</a>" : "") +
-          (tel ? '<a href="tel:' + esc(tel) + '">' + ICON_PHONE + "Call " + esc(b.contact.name || "") + "</a>" +
-                 '<a href="sms:' + esc(tel) + '">' + ICON_TEXT + "Text " + esc(b.contact.name || "") + "</a>" : "") +
-        "</div>";
+          (b.venue || b.address ? '<a ' + appLink(directionsUrl(b)) + '>' + ICON_PIN + "Directions</a>" : "") +
+          (b.pass ? '<button type="button" class="bf-pass-open" data-b="' + esc(b.id) + '">' + ICON_TICKET + esc(b.pass.short || "Parking pass") + "</button>" : "") +
+          (chat ? '<a class="chat" ' + appLink(chat.url) + '>' + ICON_MESSENGER + esc(chat.short || "Group chat") + "</a>" : "") +
+          (tel ? '<a href="tel:' + esc(tel) + '">' + ICON_PHONE + "Call</a>" + '<a href="sms:' + esc(tel) + '">' + ICON_TEXT + "Text</a>" : "") +
+        "</div></div>";
       if ((b.timeline || []).length) html += '<section class="bf-sec"><h3 class="cond">' + (day ? "Today" : "Schedule") + '</h3><ol class="bf-time">' + b.timeline.map(function (t, i) {
           var past = day && t.time && tzMs(b.date, t.time) <= now;
           return '<li class="' + (past ? "past" : i === nextIdx && day ? "next" : "") + '"><span class="t">' + (t.time ? esc(hm12(t.time)) : "&mdash;") + "</span><span>" +
