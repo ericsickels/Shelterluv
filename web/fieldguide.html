@@ -217,8 +217,27 @@
   .bf-sec ul, .bf-sec ol { margin: 0; padding-left: 22px; }
   .bf-sec li + li { margin-top: 8px; }
   .bf-sec ol li::marker { color: var(--brand-ink); font-weight: 700; }
-  .bf-video { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; background: #111; }
-  .bf-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .bf-vg + .bf-vg { margin-top: 12px; }
+  .bf-vg h4 { margin: 0; font-size: 14px; font-weight: 700; color: var(--text); }
+  .bf-vg .bf-note { margin: 2px 0 8px; }
+  .bf-vids { display: flex; flex-wrap: wrap; gap: 8px; }
+  .bf-vid { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px 7px 8px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--card); color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .bf-vid:active { background: var(--brand-soft); }
+  .bf-vid i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--brand); flex: none; }
+  .bf-vid i::after { content: ""; margin-left: 2px; border-left: 8px solid #fff; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+  .bf-vid.big { width: 100%; padding: 10px 14px 10px 10px; border-radius: 14px; font-size: 16px; }
+  .bf-vid.big span { text-align: left; } .bf-vid.big small { display: block; font-size: 13px; font-weight: 500; color: var(--muted); }
+  .bf-vid.big i { width: 38px; height: 38px; }
+  .bf-vid.big i::after { border-left-width: 12px; border-top-width: 8px; border-bottom-width: 8px; margin-left: 4px; }
+  .video-view { position: fixed; inset: 0; z-index: 46; display: none; flex-direction: column; justify-content: center; padding: calc(56px + env(safe-area-inset-top, 0px)) 12px calc(20px + var(--safe-b));
+    background: rgba(12,10,8,.94); }
+  .video-view.open { display: flex; }
+  .video-view .frame { position: relative; width: 100%; max-width: 960px; margin: 0 auto; aspect-ratio: 16 / 9; max-height: 80vh; background: #000; border-radius: 10px; overflow: hidden; }
+  .video-view iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .video-view .ttl { margin: 12px auto 0; color: #fff; font-size: 16px; font-weight: 600; text-align: center; }
+  .video-view .close { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: 12px; width: 44px; height: 44px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,.16); color: #fff; font-size: 28px; line-height: 1; cursor: pointer; }
   .bf-note { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
   .bf-shifts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .bf-shifts div { padding: 10px 12px; border-radius: 12px; background: var(--brand-soft); }
@@ -405,6 +424,10 @@
   </div>
   <div class="info-sheet" role="dialog" aria-modal="true" aria-label="More info">
     <div class="panel"><button type="button" class="close" aria-label="Close">&times;</button><div class="body"></div></div>
+  </div>
+  <div class="video-view" role="dialog" aria-modal="true" aria-label="Video">
+    <button type="button" class="close" aria-label="Close video">&times;</button>
+    <div class="frame"></div><div class="ttl"></div>
   </div>
   <div class="pass-view" role="dialog" aria-modal="true" aria-label="Parking pass">
     <button type="button" class="close" aria-label="Close parking pass">&times;</button>
@@ -785,10 +808,16 @@
           return '<li class="' + (past ? "past" : i === nextIdx && day ? "next" : "") + '"><span class="t">' + (t.time ? esc(hm12(t.time)) : "&mdash;") + "</span><span>" +
             bold(t.label) + (t.note ? "<small>" + bold(t.note) + "</small>" : "") + "</span></li>";
         }).join("") + "</ol></section>";
-      if (b.video && b.video.vimeo) html += '<section class="bf-sec"><h3 class="cond">' + esc(b.video.title || "Our video") + "</h3>" +
-          '<div class="bf-video"><iframe src="https://player.vimeo.com/video/' + encodeURIComponent(b.video.vimeo) + '?badge=0&amp;autopause=0&amp;dnt=1" loading="lazy" ' +
-          'allow="autoplay; fullscreen; picture-in-picture; encrypted-media" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="' + esc(b.video.title || "Our video") + '"></iframe></div>' +
-          (b.video.note ? '<p class="bf-note">' + bold(b.video.note) + "</p>" : "") + "</section>";
+      if (b.videos && (b.videos.groups || []).length) html += '<section class="bf-sec"><h3 class="cond">' + esc(b.videos.title || "Our videos") + "</h3>" +
+          b.videos.groups.map(function (g) {
+            // The featured (main) video is one wide button carrying its group's title and note; shorts are small pills.
+            return '<div class="bf-vg">' + (g.featured ? "" : "<h4>" + esc(g.title) + "</h4>" + (g.note ? '<p class="bf-note">' + bold(g.note) + "</p>" : "")) + '<div class="bf-vids">' +
+              (g.items || []).map(function (v) {
+                var name = (g.featured ? "" : g.title + ": ") + v.label;
+                return '<button type="button" class="bf-vid' + (g.featured ? " big" : "") + '" data-vimeo="' + esc(v.vimeo) + '" data-title="' + esc(name) + '"><i></i>' +
+                  (g.featured ? "<span><b>" + esc(g.title) + ": " + esc(v.label) + "</b><small>" + esc(g.note || "") + "</small></span>" : esc(v.label)) + "</button>";
+              }).join("") + "</div></div>";
+          }).join("") + "</section>";
       if ((b.volunteers || []).length && (b.shifts || []).length) html += crewHtml(b, day, now);
       else if ((b.shifts || []).length) html += '<section class="bf-sec"><h3 class="cond">Shifts</h3><div class="bf-shifts">' + b.shifts.map(function (s) {
           var on = day && now >= tzMs(b.date, s.start) && now < tzMs(b.date, s.end);
@@ -876,6 +905,14 @@
     if (push) history.pushState({ v: "info", id: id }, "", location.hash);
   }
   function closeInfo() { $(".info-sheet").classList.remove("open"); }
+  function openVideo(id, title, push) {
+    $(".video-view .frame").innerHTML = '<iframe src="https://player.vimeo.com/video/' + encodeURIComponent(id) + '?badge=0&autopause=0&autoplay=1&playsinline=1&dnt=1" ' +
+      'allow="autoplay; fullscreen; picture-in-picture; encrypted-media" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="' + esc(title) + '"></iframe>';
+    $(".video-view .ttl").textContent = title;
+    $(".video-view").classList.add("open");
+    if (push) history.pushState({ v: "video" }, "", location.hash);
+  }
+  function closeVideo() { $(".video-view").classList.remove("open"); $(".video-view .frame").innerHTML = ""; }   // removing the player stops it
   // The next scheduled milestone within 15 minutes (or one that just happened), for the countdown bar.
   var ALERT_BEFORE = 15 * 60000, ALERT_AFTER = 60000;
   function updateAlert() {
@@ -1014,10 +1051,11 @@
     var s = e.state || {};
     if (s.v !== "pass") closePass();
     if (s.v !== "info") closeInfo();
+    if (s.v !== "video") closeVideo();
     if (s.v !== "qr") closeQr();
     if (s.v === "animal") openAnimal(s.id, false); else if (s.v !== "qr") closeAnimal();
   });
-  function back() { if (history.state && history.state.v) history.back(); else { closeInfo(); closePass(); closeQr(); closeAnimal(); } }
+  function back() { if (history.state && history.state.v) history.back(); else { closeInfo(); closeVideo(); closePass(); closeQr(); closeAnimal(); } }
 
   document.addEventListener("click", function (e) {
     var t = e.target;
@@ -1041,6 +1079,8 @@
     if (ql) { var lq = LINKS.filter(function (x) { return x.key === ql.getAttribute("data-qr"); })[0]; return lq && lq.url && openQr(lq.qrLabel, lq.url, true); }
     if (t.closest(".bf-alert button")) { tabPicked = true; return showTab("brief"); }
     var il = t.closest(".bf-info-link"); if (il) return openInfo(il.getAttribute("data-info"), true);
+    var vb = t.closest(".bf-vid"); if (vb) return openVideo(vb.getAttribute("data-vimeo"), vb.getAttribute("data-title"), true);
+    if (t.classList && t.classList.contains("video-view")) return back();   // tap outside the video
     if (t.classList && t.classList.contains("info-sheet")) return back();   // tap outside the panel
     var bc = t.closest(".bf-check"); if (bc) return toggleCheck(bc.getAttribute("data-b"), bc.getAttribute("data-k"));
     var po = t.closest(".bf-pass-open"); if (po) return openPass(po.getAttribute("data-b"), true);
@@ -1056,7 +1096,7 @@
       var l = LINKS.filter(function (x) { return x.key === lnk.getAttribute("data-key"); })[0];
       return openQr(l.qrLabel, l.url, true);
     }
-    if (t.closest(".qr-view .close") || t.closest(".sheet-close") || t.closest(".pass-view .close") || t.closest(".info-sheet .close")) return back();
+    if (t.closest(".qr-view .close") || t.closest(".sheet-close") || t.closest(".pass-view .close") || t.closest(".info-sheet .close") || t.closest(".video-view .close")) return back();
   });
   $(".search").addEventListener("input", function (e) { query = e.target.value.trim().toLowerCase(); renderAnimals(); });
 
