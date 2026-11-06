@@ -214,13 +214,29 @@
   .bf-shifts b { display: block; font-size: 15px; color: var(--brand-ink); }
   .bf-shifts span { font-size: 16px; font-weight: 600; color: var(--text); }
   .bf-shifts .now { box-shadow: 0 0 0 2px var(--brand); }
-  .bf-crew + .bf-crew { margin-top: 14px; }
-  .bf-crew h4 { margin: 0 0 8px; font-size: 15px; color: var(--text); }
-  .bf-crew h4 small { font-weight: 500; color: var(--muted); }
-  .bf-crew ul { list-style: none; padding: 0 !important; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
-  .bf-crew li { margin: 0 !important; font-size: 15px; color: var(--text-2); }
-  .bf-crew li em { font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--brand-ink); background: var(--brand-soft);
-    padding: 1px 6px; border-radius: 999px; margin-left: 4px; white-space: nowrap; }
+  /* Who's volunteering: one row per person, a bar for the time they're working */
+  .bf-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: -2px 0 12px; font-size: 13px; color: var(--muted); }
+  .bf-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .bf-legend i { width: 18px; height: 10px; border-radius: 3px; display: inline-block; }
+  .bf-gantt { --name: 46%; }
+  .bf-axis, .bf-row { display: grid; grid-template-columns: var(--name) 1fr; align-items: center; }
+  .bf-axis { margin-bottom: 4px; font-size: 11px; font-weight: 600; color: var(--muted); }
+  .bf-axis .track, .bf-row .track { position: relative; height: 100%; }
+  .bf-axis .track { height: 16px; }
+  .bf-axis .track span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+  .bf-axis .track span:first-child { transform: none; }
+  .bf-axis .track span:last-child { transform: translateX(-100%); }
+  .bf-rows { position: relative; }
+  .bf-row { min-height: 30px; border-top: 1px solid #f1ece5; }
+  .bf-row:nth-child(even) { background: #fcfaf6; }
+  .bf-row .nm { padding: 5px 8px 5px 2px; font-size: 15px; line-height: 1.2; color: var(--text-2); }
+  .bf-row .nm b { color: var(--text); font-weight: 600; }
+  .bf-row .track { height: 30px; }
+  .bf-bar { position: absolute; top: 8px; bottom: 8px; border-radius: 4px; }
+  .bf-grid { position: absolute; top: 0; bottom: 0; right: 0; left: var(--name); pointer-events: none; }
+  .bf-grid i { position: absolute; top: 0; bottom: 0; border-left: 1px dashed #e3dbcf; }
+  .bf-grid .nowline { border-left: 2px solid #d33; }
+  .bf-count-line { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
   .bf-time { list-style: none; padding: 0 !important; }
   .bf-time li { display: flex; gap: 12px; padding: 8px 10px; margin: 0 !important; border-radius: 10px; }
   .bf-time .t { flex: none; width: 74px; font-weight: 700; color: var(--text); }
@@ -698,16 +714,7 @@
           var on = day && now >= tzMs(b.date, s.start) && now < tzMs(b.date, s.end);
           return '<div class="' + (on ? "now" : "") + '"><b>' + esc(s.name) + (on ? " &middot; now" : "") + "</b><span>" + esc(hm12(s.start)) + " &ndash; " + esc(hm12(s.end)) + "</span></div>";
         }).join("") + "</div>" + (b.shiftNote ? '<p class="bf-note">' + bold(b.shiftNote) + "</p>" : "") + "</section>";
-      if ((b.volunteers || []).length) {
-        var shiftNames = (b.shifts || []).map(function (x) { return x.name; });
-        html += '<section class="bf-sec"><h3 class="cond">Who&rsquo;s volunteering</h3>' + shiftNames.map(function (sn) {
-          var crew = b.volunteers.filter(function (v) { return (v.shifts || []).indexOf(sn) >= 0; });
-          if (!crew.length) return "";
-          return '<div class="bf-crew"><h4>' + esc(sn) + " <small>&middot; " + crew.length + "</small></h4><ul>" + crew.map(function (v) {
-            return "<li>" + esc(v.name) + ((v.shifts || []).length > 1 ? "<em>both</em>" : "") + "</li>";
-          }).join("") + "</ul></div>";
-        }).join("") + "</section>";
-      }
+      if ((b.volunteers || []).length && (b.shifts || []).length) html += crewHtml(b, day, now);
       if ((b.timeline || []).length) html += '<section class="bf-sec"><h3 class="cond">' + (day ? "Today" : "Schedule") + '</h3><ol class="bf-time">' + b.timeline.map(function (t, i) {
           var past = day && t.time && tzMs(b.date, t.time) <= now;
           return '<li class="' + (past ? "past" : i === nextIdx && day ? "next" : "") + '"><span class="t">' + (t.time ? esc(hm12(t.time)) : "&mdash;") + "</span><span>" +
@@ -736,6 +743,44 @@
       if (b.contact && b.contact.note) html += '<p class="bf-note" style="text-align:center;margin-top:14px">' + bold(b.contact.note) + "</p>";
       return html + "</article>";
     }).join("");
+  }
+  // Who's volunteering as a timeline: rows sorted by last name, a bar per person from their first shift's start
+  // to their last shift's end; colour = which shift(s).
+  var CREW_COLORS = ["#e07a1a", "#5a6fb0"], CREW_BOTH = "linear-gradient(90deg, #e07a1a 0%, #e07a1a 40%, #5a6fb0 60%, #5a6fb0 100%)";
+  function crewHtml(b, day, now) {
+    var mins = function (hm) { var t = hm.split(":").map(Number); return t[0] * 60 + t[1]; };
+    var lo = Math.min.apply(null, b.shifts.map(function (s) { return mins(s.start); }));
+    var hi = Math.max.apply(null, b.shifts.map(function (s) { return mins(s.end); }));
+    var pct = function (m) { return ((m - lo) / (hi - lo) * 100).toFixed(2) + "%"; };
+    var ticks = [];
+    b.shifts.forEach(function (s) { [s.start, s.end].forEach(function (t) { if (ticks.indexOf(t) < 0) ticks.push(t); }); });
+    ticks.sort(function (x, y) { return mins(x) - mins(y); });
+    var people = b.volunteers.map(function (v) {
+      var parts = (v.name || "").split(" ");
+      return { first: v.first || parts.slice(0, -1).join(" "), last: v.last || parts[parts.length - 1], shifts: v.shifts || [] };
+    }).sort(function (x, y) { return x.last.localeCompare(y.last) || x.first.localeCompare(y.first); });
+    var idx = function (name) { for (var i = 0; i < b.shifts.length; i++) if (b.shifts[i].name === name) return i; return -1; };
+    var nowM = day ? mins(new Intl.DateTimeFormat("en-GB", { timeZone: TIMEZONE, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(now))) : -1;
+    var counts = b.shifts.map(function (s) { return people.filter(function (p) { return p.shifts.indexOf(s.name) >= 0; }).length; });
+    return '<section class="bf-sec"><h3 class="cond">Who&rsquo;s volunteering</h3>' +
+      '<div class="bf-legend">' + b.shifts.map(function (s, i) {
+        return '<span><i style="background:' + CREW_COLORS[i % 2] + '"></i>' + esc(s.name) + " (" + counts[i] + ")</span>";
+      }).join("") + (b.shifts.length > 1 ? '<span><i style="background:' + CREW_BOTH + '"></i>Both</span>' : "") + "</div>" +
+      '<div class="bf-gantt"><div class="bf-axis"><span></span><div class="track">' + ticks.map(function (t) {
+        return '<span style="left:' + pct(mins(t)) + '">' + esc(hm12(t).replace(" PM", "").replace(" AM", "")) + "</span>";
+      }).join("") + "</div></div>" +
+      '<div class="bf-rows"><div class="bf-grid">' + ticks.map(function (t) { return '<i style="left:' + pct(mins(t)) + '"></i>'; }).join("") +
+        (nowM >= lo && nowM <= hi ? '<i class="nowline" style="left:' + pct(nowM) + '"></i>' : "") + "</div>" +
+      people.map(function (p) {
+        var ii = p.shifts.map(idx).filter(function (i) { return i >= 0; });
+        if (!ii.length) return "";
+        var s0 = Math.min.apply(null, ii.map(function (i) { return mins(b.shifts[i].start); }));
+        var s1 = Math.max.apply(null, ii.map(function (i) { return mins(b.shifts[i].end); }));
+        var bg = ii.length > 1 ? CREW_BOTH : CREW_COLORS[ii[0] % 2];
+        return '<div class="bf-row"><div class="nm"><b>' + esc(p.last) + "</b>, " + esc(p.first) + '</div><div class="track">' +
+          '<span class="bf-bar" style="left:' + pct(s0) + ";width:calc(" + pct(s1) + " - " + pct(s0) + ");background:" + bg + '"></span></div></div>';
+      }).join("") + "</div></div>" +
+      '<p class="bf-count-line">' + people.length + " volunteers, sorted by last name" + (nowM >= lo && nowM <= hi ? " &middot; red line = now" : "") + "</p></section>";
   }
   function findBrief(id) { return (data.briefings || []).filter(function (b) { return b.id === id; })[0]; }
   function toggleCheck(id, key) {
