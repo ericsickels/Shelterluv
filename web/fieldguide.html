@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#faf7f2">
 <meta name="robots" content="noindex">
 <meta name="apple-mobile-web-app-title" content="RR Field Guide">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="application-name" content="RR Field Guide">
 <link rel="apple-touch-icon" href="/fieldguide-icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/fieldguide-icon-192.png">
@@ -251,6 +254,21 @@
     background: #fff; color: var(--text); font-size: 26px; line-height: 1; box-shadow: 0 1px 4px rgba(0,0,0,.15); cursor: pointer; }
   .info-sheet .body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 18px 16px calc(24px + var(--safe-b)); }
   .info-sheet h2 { margin: 2px 56px 4px 2px; font-size: 26px; color: var(--brand-ink); }
+  .install-sheet { z-index: 46; }
+  .install-sheet .hero { display: flex; align-items: center; gap: 14px; margin: 4px 50px 14px 2px; }
+  .install-sheet .hero img { width: 64px; height: 64px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  .install-sheet .hero b { display: block; font-size: 18px; }
+  .install-sheet .hero span { font-size: 14px; color: var(--muted); }
+  .install-sheet ol { margin: 0; padding-left: 22px; }
+  .install-sheet ol li { margin-bottom: 10px; font-size: 16px; line-height: 1.45; color: var(--text-2); }
+  .install-sheet .ico { display: inline-flex; vertical-align: -5px; width: 24px; height: 24px; align-items: center; justify-content: center; border-radius: 6px;
+    background: #fff; border: 1px solid var(--line); margin: 0 2px; }
+  .install-sheet .ico svg { width: 16px; height: 16px; fill: none; stroke: #1a73e8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .install-sheet .big { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 54px; margin: 6px 0 10px; border: none; border-radius: 14px;
+    background: var(--brand); color: #fff; font-size: 18px; font-weight: 700; cursor: pointer; }
+  .install-sheet .alt { display: block; width: 100%; min-height: 46px; border: 1.5px solid var(--brand); border-radius: 12px; background: var(--card);
+    color: var(--brand-ink); font-size: 16px; font-weight: 600; cursor: pointer; }
+  .install-sheet .tip { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
   .bf-time { list-style: none; padding: 0 !important; }
   .bf-time li { display: flex; gap: 12px; padding: 8px 10px; margin: 0 !important; border-radius: 10px; }
   .bf-time .t { flex: none; width: 74px; font-weight: 700; color: var(--text); }
@@ -375,6 +393,9 @@
   </div>
 
   <div class="bf-alert" aria-live="polite"><button type="button"><span class="ic" aria-hidden="true">&#9201;</span><span class="what"></span><span class="clock"></span></button></div>
+  <div class="info-sheet install-sheet" role="dialog" aria-modal="true" aria-label="Add to home screen">
+    <div class="panel"><button type="button" class="close install-close" aria-label="Close">&times;</button><div class="body"></div></div>
+  </div>
   <div class="info-sheet" role="dialog" aria-modal="true" aria-label="More info">
     <div class="panel"><button type="button" class="close" aria-label="Close">&times;</button><div class="body"></div></div>
   </div>
@@ -893,6 +914,45 @@
     img.onload = function () { img.onload = null; window.print(); };
   }
 
+  // ---- "Add to home screen" helper: open the guide with ?install (e.g. /fieldguide/?install) ----
+  var installEvt = null;
+  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); installEvt = e; if ($(".install-sheet").classList.contains("open")) renderInstall(); });
+  window.addEventListener("appinstalled", function () { installEvt = null; renderInstall("done"); });
+  var ua = navigator.userAgent;
+  var isStandalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+  var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/.test(ua);
+  var inAppBrowser = /FBAN|FBAV|FB_IAB|FBIOS|Messenger|Instagram|Line\/|LinkedInApp|GSA\//.test(ua);
+  var ICO_SHARE = '<span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/></svg></span>';
+  var ICO_PLUS = '<span class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg></span>';
+  var ICO_MORE = '<span class="ico"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span>';
+  var ICO_DOTS = '<span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>';
+  function renderInstall(state) {
+    var url = location.origin + "/fieldguide/?install", html = '<div class="hero"><img src="/fieldguide-icon-180.png" alt=""><div><b>Add RR Field Guide to your home screen</b>' +
+      "<span>One tap to open it at events, even on weak Wi-Fi.</span></div></div>";
+    if (state === "done" || isStandalone) {
+      html += "<p>All set! Open <b>RR Field Guide</b> from your home screen any time.</p>";
+    } else if (inAppBrowser) {
+      html += "<p>This link opened inside another app, which can&rsquo;t add home screen icons. Open it in your phone&rsquo;s browser first:</p><ol>" +
+        (isIOS ? "<li>Tap the " + ICO_MORE + " or " + ICO_SHARE + " button in this app&rsquo;s browser.</li><li>Choose <b>Open in Safari</b> (or <b>Open in browser</b>).</li>"
+               : "<li>Tap the " + ICO_DOTS + " menu in this app&rsquo;s browser.</li><li>Choose <b>Open in Chrome</b> (or <b>Open in browser</b>).</li>") +
+        "</ol><button type=\"button\" class=\"alt install-copy\">Copy link instead</button><p class=\"tip\">Then come back here and follow the steps.</p>";
+    } else if (isIOS) {
+      html += "<ol><li>Tap the <b>Share</b> button " + ICO_SHARE + " (on newer iPhones it&rsquo;s under the " + ICO_MORE + " button).</li>" +
+        "<li>Scroll down and tap <b>Add to Home Screen</b> " + ICO_PLUS + ".</li><li>Tap <b>Add</b>.</li></ol>" +
+        '<p class="tip">Using Chrome on iPhone? Same steps: Share, then Add to Home Screen.</p>';
+    } else if (installEvt) {
+      html += '<button type="button" class="big install-go">Add to Home screen</button><p class="tip">Your phone will ask you to confirm.</p>';
+    } else if (isAndroid) {
+      html += "<ol><li>Tap the <b>menu</b> " + ICO_DOTS + " at the top right of your browser.</li><li>Tap <b>Add to Home screen</b> or <b>Install app</b>.</li><li>Tap <b>Add</b> / <b>Install</b>.</li></ol>";
+    } else {
+      html += "<p>Open this link on your phone to add it to your home screen:</p><p><b>" + esc(url.replace(/^https?:\/\//, "")) + "</b></p>";
+    }
+    $(".install-sheet .body").innerHTML = html;
+  }
+  function openInstall() { renderInstall(); $(".install-sheet").classList.add("open"); }
+  function closeInstall() { $(".install-sheet").classList.remove("open"); }
+
   // ---- QR codes tab ----
   function renderLinks() {
     $(".links").innerHTML = LINKS.map(function (l) {
@@ -927,6 +987,17 @@
     var tab = t.closest(".tabbar button"); if (tab) { tabPicked = true; return showTab(tab.getAttribute("data-tab")); }
     var today = t.closest(".today-card");
     if (today) return today.getAttribute("data-brief") ? showTab("brief") : openEvent(today.getAttribute("data-ev"));
+    if (t.closest(".install-close") || (t.classList && t.classList.contains("install-sheet"))) return closeInstall();
+    if (t.closest(".install-go") && installEvt) {
+      installEvt.prompt();
+      installEvt.userChoice.then(function (c) { if (c.outcome === "accepted") renderInstall("done"); }).catch(function () {});
+      installEvt = null; return;
+    }
+    if (t.closest(".install-copy")) {
+      var lnk2 = location.origin + "/fieldguide/?install";
+      try { navigator.clipboard.writeText(lnk2).then(function () { t.textContent = "Link copied! Paste it in your browser"; }); } catch (e2) { prompt("Copy this link:", lnk2); }
+      return;
+    }
     var ql = t.closest(".bf-qr-link");
     if (ql) { var lq = LINKS.filter(function (x) { return x.key === ql.getAttribute("data-qr"); })[0]; return lq && lq.url && openQr(lq.qrLabel, lq.url, true); }
     if (t.closest(".bf-alert button")) { tabPicked = true; return showTab("brief"); }
@@ -951,6 +1022,10 @@
   $(".search").addEventListener("input", function (e) { query = e.target.value.trim().toLowerCase(); renderAnimals(); });
 
   renderLinks();
+  if (/[?&]install\b/.test(location.search)) {
+    history.replaceState(null, "", location.pathname + location.hash);   // keep ?install out of the saved address
+    openInstall();
+  }
   load().then(function () {
     var m = location.hash.match(/^#animal-(.+)$/);
     if (m) { history.replaceState(null, "", location.pathname); showTab("animals"); openAnimal(decodeURIComponent(m[1]), true); }
