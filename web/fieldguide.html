@@ -734,23 +734,24 @@
     $(".pass-view .pass-print").setAttribute("data-b", id);
     var pdf = $(".pass-view .pass-pdf");
     if (b.pass.pdf) { pdf.href = asset(b.pass.pdf); pdf.style.display = ""; } else pdf.style.display = "none";
+    // While the pass is on screen, printing (our Print button, or Share > Print) prints only the pass.
+    // iPhone/iPad build the print preview after a delay, so this stays on until the pass is closed.
+    $("#print-pass img").src = asset(b.pass.image);
+    document.documentElement.classList.add("printing-pass");
     $(".pass-view").classList.add("open");
     if (push) history.pushState({ v: "pass", id: id }, "", location.hash);
   }
-  function closePass() { $(".pass-view").classList.remove("open"); }
+  function closePass() {
+    $(".pass-view").classList.remove("open");
+    document.documentElement.classList.remove("printing-pass");
+  }
   function printPass(id) {
     var b = findBrief(id); if (!b || !b.pass) return;
-    var img = $("#print-pass img"), go = function () {
-      document.documentElement.classList.add("printing-pass");
-      window.print();
-      setTimeout(function () { document.documentElement.classList.remove("printing-pass"); }, 1000);
-    };
-    var src = asset(b.pass.image);
-    if (img.getAttribute("src") === src && img.complete) return go();
-    img.onload = function () { img.onload = null; go(); };
-    img.src = src;
+    if (!$(".pass-view").classList.contains("open")) openPass(id, true);   // show the pass, then print it
+    var img = $("#print-pass img");
+    if (img.complete && img.naturalWidth) return window.print();
+    img.onload = function () { img.onload = null; window.print(); };
   }
-  window.addEventListener("afterprint", function () { document.documentElement.classList.remove("printing-pass"); });
 
   // ---- QR codes tab ----
   function renderLinks() {
