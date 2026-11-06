@@ -627,11 +627,11 @@
   function upcomingEvents() { var now = Date.now(); return data.events.filter(function (e) { return (e.end || e.start) > now; }); }
   function isNow(e) { var now = Date.now(); return e.start <= now && now < (e.end || e.start); }
   function isToday(e) { return isNow(e) || dayKey(e.start) === dayKey(Date.now()); }
-  // From the home screen app, iPhone opens outside links in a mini-browser that goes blank when the link jumps to
-  // another app (Messenger, Maps). Route those through go.html so people come back to instructions instead.
-  function handoff(url, label) {
+  // Links that jump to another app (Messenger, Maps). In the home screen app, open them in the same window: iPhone then
+  // shows its mini-browser only briefly and closes it once the other app opens (target=_blank leaves it behind, blank).
+  function appLink(url) {
     var standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
-    return standalone ? "/go.html?to=" + encodeURIComponent(url) + "&label=" + encodeURIComponent(label) : url;
+    return 'href="' + esc(url) + '"' + (standalone ? "" : ' target="_blank" rel="noopener"');
   }
   function directionsUrl(e) {
     var q = encodeURIComponent([e.venue, e.address].filter(Boolean).join(", "));
@@ -652,7 +652,7 @@
             (e.venue || e.address ? '<div class="line"><b>' + esc(e.venue) + "</b>" + (e.venue && e.address ? "<br>" : "") + esc(e.address) + "</div>" : "") +
             (e.excerpt ? '<p class="excerpt">' + esc(e.excerpt.replace(/\s*\n\s*/g, " ")) + "</p>" : "") +
           "</div></div>" +
-          '<div class="actions">' + (e.venue || e.address ? '<a class="primary" href="' + esc(handoff(directionsUrl(e), "Open in Maps")) + '" target="_blank" rel="noopener">' + ICON_PIN + "Directions</a>" : "") +
+          '<div class="actions">' + (e.venue || e.address ? '<a class="primary" ' + appLink(directionsUrl(e)) + '>' + ICON_PIN + "Directions</a>" : "") +
             (e.url ? '<a href="' + esc(e.url) + '" target="_blank" rel="noopener">' + ICON_LINK + "Event page</a>" : "") + "</div>" +
           "</article>";
       }).join("") : '<p class="none">No upcoming events on our website right now.</p>');
@@ -767,9 +767,9 @@
           (b.venue || b.address ? '<div class="where">' + esc([b.venue, b.address].filter(Boolean).join(", ")) + "</div>" : "") +
           '<div class="bf-count">' + esc(c.text) + (c.sub ? "<small>" + esc(c.sub) + "</small>" : "") + "</div></div>" +
         '<div class="bf-actions">' +
-          (b.venue || b.address ? '<a class="primary" href="' + esc(handoff(directionsUrl(b), "Open in Maps")) + '" target="_blank" rel="noopener">' + ICON_PIN + "Directions</a>" : "") +
+          (b.venue || b.address ? '<a class="primary" ' + appLink(directionsUrl(b)) + '>' + ICON_PIN + "Directions</a>" : "") +
           (b.pass ? '<button type="button" class="bf-pass-open" data-b="' + esc(b.id) + '">' + ICON_TICKET + esc(b.pass.label || "Parking pass") + "</button>" : "") +
-          (chat ? '<a class="chat" href="' + esc(handoff(chat.url, "Open group chat")) + '" target="_blank" rel="noopener">' + ICON_MESSENGER + esc(chat.label || "Group chat") + "</a>" : "") +
+          (chat ? '<a class="chat" ' + appLink(chat.url) + '>' + ICON_MESSENGER + esc(chat.label || "Group chat") + "</a>" : "") +
           (tel ? '<a href="tel:' + esc(tel) + '">' + ICON_PHONE + "Call " + esc(b.contact.name || "") + "</a>" +
                  '<a href="sms:' + esc(tel) + '">' + ICON_TEXT + "Text " + esc(b.contact.name || "") + "</a>" : "") +
         "</div>";
