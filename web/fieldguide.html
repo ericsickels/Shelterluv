@@ -217,6 +217,8 @@
   .bf-sec ul, .bf-sec ol { margin: 0; padding-left: 22px; }
   .bf-sec li + li { margin-top: 8px; }
   .bf-sec ol li::marker { color: var(--brand-ink); font-weight: 700; }
+  .bf-video { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; background: #111; }
+  .bf-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
   .bf-note { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
   .bf-shifts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .bf-shifts div { padding: 10px 12px; border-radius: 12px; background: var(--brand-soft); }
@@ -783,6 +785,10 @@
           return '<li class="' + (past ? "past" : i === nextIdx && day ? "next" : "") + '"><span class="t">' + (t.time ? esc(hm12(t.time)) : "&mdash;") + "</span><span>" +
             bold(t.label) + (t.note ? "<small>" + bold(t.note) + "</small>" : "") + "</span></li>";
         }).join("") + "</ol></section>";
+      if (b.video && b.video.vimeo) html += '<section class="bf-sec"><h3 class="cond">' + esc(b.video.title || "Our video") + "</h3>" +
+          '<div class="bf-video"><iframe src="https://player.vimeo.com/video/' + encodeURIComponent(b.video.vimeo) + '?badge=0&amp;autopause=0&amp;dnt=1" loading="lazy" ' +
+          'allow="autoplay; fullscreen; picture-in-picture; encrypted-media" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="' + esc(b.video.title || "Our video") + '"></iframe></div>' +
+          (b.video.note ? '<p class="bf-note">' + bold(b.video.note) + "</p>" : "") + "</section>";
       if ((b.volunteers || []).length && (b.shifts || []).length) html += crewHtml(b, day, now);
       else if ((b.shifts || []).length) html += '<section class="bf-sec"><h3 class="cond">Shifts</h3><div class="bf-shifts">' + b.shifts.map(function (s) {
           var on = day && now >= tzMs(b.date, s.start) && now < tzMs(b.date, s.end);

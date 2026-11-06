@@ -8,6 +8,11 @@
    "title": "Indy Fuel vs. Cincinnati",
    "subtitle": "We're the **Nonprofit of the Game** at Toy Story & Family Fun Day.",
    "startsAt": { "time": "15:00", "label": "doors open" },
+   "video": {
+    "title": "Our video",
+    "vimeo": "1244327694",
+    "note": "Plays on the big screen during the **2nd intermission**. Watch it ahead of time so you know what fans saw when they stop by our table."
+   },
    "venue": "Fishers Event Center",
    "address": "11000 Stockdale Street, Fishers, IN 46037",
    "contact": {
