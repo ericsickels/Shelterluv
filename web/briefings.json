@@ -62,7 +62,7 @@
     "label": "Parking pass",
     "image": "indy-fuel-2026-11-08-parking-pass.jpg",
     "pdf": "indy-fuel-2026-11-08-parking-pass.pdf",
-    "note": "Print it and place it on your dashboard. Eric will have a few printed copies in case you forget."
+    "note": "Print it and place it on your dashboard. Forgot it? A few printed copies will be available at our table."
    },
    "sections": [
     {
@@ -79,8 +79,10 @@
      "items": [
       "Selling **Chuck-a-Puck** foam pucks at our entrance table and around the concourse. **The rescue keeps 60% of every sale!** [[chuck|How Chuck-a-Puck works]]",
       "Offering **animal and fall temporary tattoos** for kids. It's a fun ice breaker before following up with a Chuck-a-Puck ask!",
-      "Chatting with fans and staffing our rescue table: answering questions and sharing how to adopt, foster and volunteer.",
-      "Collecting **donations** for the rescue. **Cash is welcome**, and our Donate QR code is ready to scan on the QR codes tab. [[qr:donate|Show Donate QR code]]",
+      "Talking with fans about our **adoptable animals**. The full listing is on the **Animals** tab.",
+      "Inviting people to **follow us on Facebook and Instagram**. Scannable QR codes are on the **QR codes** tab.",
+      "Collecting **donations** for the rescue. **Cash is welcome**, and our Donate QR code is on the **QR codes** tab.",
+      "Staffing our rescue table: answering questions and sharing how to adopt, foster and volunteer.",
       "Helping set up our table and materials before doors open.",
       "The most helpful thing you can bring is a **friendly, outgoing attitude**. Enthusiasm makes a big difference in puck sales!"
      ]
@@ -88,7 +90,7 @@
     {
      "title": "Before you leave home",
      "checklist": [
-      "Redemption Rescue shirt (any RR shirt works; no shirt? We'll try to get you one)",
+      "Wear your **Redemption Rescue shirt** (any RR shirt works; no shirt? We'll try to get you one)",
       "Comfortable shoes: you'll be on your feet",
       "Clear bag only: leave large or non-clear bags in the car",
       "Card or phone: the venue takes card and mobile payments only",
@@ -99,7 +101,8 @@
      "title": "Good to know",
      "items": [
       "We're **not bringing animals** to this event. The venue doesn't allow animals inside, and with only a few event-ready animals and colder temperatures, we decided to sit this one out.",
-      "Our video is expected to play during the **2nd intermission**, right before the Chuck-a-Puck game that benefits Redemption Rescue."
+      "Our video is expected to play during the **2nd intermission**, right before the Chuck-a-Puck game that benefits Redemption Rescue. We may also have **short videos** during media timeouts and other stoppages in play.",
+      "**Claimed a complimentary ticket?** There will be natural lulls during your shift to catch some of the game. Just let a fellow volunteer know before you step away, and keep an eye on the group chat in case we need you."
      ]
     }
    ],
