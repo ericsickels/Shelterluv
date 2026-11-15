@@ -1,5 +1,12 @@
 # Shelterluv → Squarespace adoptable animals
 
+> **Hosting (since November 2026):** the live site at animals.redemptionrescueinc.com runs on **Cloudflare Pages**
+> (project `redemption-rescue-animals`). `functions/_lib/data.js` builds the data files live from Shelterluv and the
+> website's events feed (refreshed in the background every 30-60 minutes, last good copy kept in KV), and
+> `worker/index.js` serves everything. To publish: `scripts/build_site.sh`, then `node scripts/build_worker.mjs
+> <esbuild>` and upload `dist/_worker.js` as a Pages deployment. The Shelterluv key is the project's
+> `SHELTERLUV_API_KEY` secret. The GitHub Actions export below is kept only as a manual fallback.
+
 Shows the shelter's adoptable animals on our Squarespace site using the Shelterluv
 API instead of the Shelterluv iFrame.
 

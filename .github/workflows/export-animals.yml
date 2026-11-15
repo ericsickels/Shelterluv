@@ -1,11 +1,9 @@
 name: Export adoptable animals
 
+# The live site is hosted on Cloudflare Pages now (see README), which builds the data files itself.
+# This old GitHub Pages export only runs if started by hand from the Actions tab.
 on:
-  schedule:
-    - cron: "*/30 * * * *"   # every 30 minutes (GitHub may delay scheduled runs)
-  workflow_dispatch:          # "Run workflow" button for an immediate refresh
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
