@@ -33,7 +33,9 @@ export default {
       headers: {
         "Content-Type": TYPES[ext] || "application/octet-stream",
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": ext === "html" || ext === "json" || ext === "webmanifest" ? "public, max-age=300" : "public, max-age=3600",
+        // Pages, data and the widget scripts/styles are rechecked every 5 minutes so changes reach visitors quickly;
+        // images and PDFs can be kept for an hour.
+        "Cache-Control": /^(html|json|webmanifest|js|css)$/.test(ext) ? "public, max-age=300" : "public, max-age=3600",
       },
     });
   },
