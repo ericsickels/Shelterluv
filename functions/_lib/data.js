@@ -13,6 +13,7 @@ const DEFAULTS = {
   COMING_SOON_STATUSES: "Unavailable - Intake / Assessment",
   UNAVAILABLE_STATUSES: "Unavailable - Medical Recovery,Unavailable - Routine Vetting",
   ADOPTED_DAYS: "60",
+  TRIAL_DAYS: "30",   // an adoption returned within this many days doesn't restart an animal's days-waiting count
   SHELTER_TIMEZONE: "America/New_York",
   EVENTS_URL: "https://www.redemptionrescueinc.com/events?format=json",
 };
@@ -76,8 +77,8 @@ function toPublic(a) {
     photos,
     videos: a.Videos || [],
     description: a.Description || "",
-    // Start of the current stay, used to give longer-staying animals more homepage exposure.
-    intakeDate: a.LastIntakeUnixTime ? new Date(+a.LastIntakeUnixTime * 1000).toISOString().slice(0, 10) : null,
+    // Start of the current stay (see stayStart), for "days waiting" and to give longer stays more exposure.
+    intakeDate: (a.StayStartUnixTime || a.LastIntakeUnixTime) ? new Date(+(a.StayStartUnixTime || a.LastIntakeUnixTime) * 1000).toISOString().slice(0, 10) : null,
     attributes: (a.Attributes || []).filter((x) => x.Publish === "Yes" && x.AttributeName).map((x) => x.AttributeName),
   };
 }
@@ -90,9 +91,40 @@ const byTypeName = (x, y) => {
 };
 const listFile = (animals) => ({ updated: isoNow(), count: animals.length, animals });
 
-// animals.json, coming-soon.json, unavailable.json and fosters.json all come from one "in custody" call.
+// When the animal's current stay with us began, from its intake/outcome history: foster moves don't
+// count, and neither does an adoption that came back within TRIAL_DAYS (a trial that didn't work out).
+// A longer adoption, or a transfer out, ends the stay; the next intake starts a new one.
+function stayStart(events, trialDays) {
+  let start = null, out = false, adoptedAt = null;
+  for (const e of events.slice().sort((x, y) => parseInt(x.Time, 10) - parseInt(y.Time, 10))) {
+    const t = parseInt(e.Time, 10), type = e.Type || "";
+    if (type === "Outcome.Foster") continue;
+    if (type.startsWith("Outcome.")) { out = true; adoptedAt = type === "Outcome.Adoption" ? t : null; continue; }
+    if (!type.startsWith("Intake.")) continue;
+    if (type === "Intake.FosterReturn") { if (start === null) start = t; continue; }
+    const trial = out && adoptedAt !== null && t - adoptedAt <= trialDays * 86400;
+    if (start === null || (out && !trial)) start = t;
+    out = false; adoptedAt = null;
+  }
+  return start;
+}
+const MAX_HISTORY_LOOKUPS = 40;   // Cloudflare's free plan allows 50 outside requests per refresh
+
+// animals.json, coming-soon.json, unavailable.json and fosters.json all come from one "in custody" call
+// (plus each listed animal's history, for when its current stay began).
 async function buildCustody(env) {
   const inCustody = await getAll(env, "animals", "animals", { status_type: "in custody" });
+  const trialDays = parseInt(cfg(env, "TRIAL_DAYS"), 10) || 30;
+  const listed = inCustody.filter((a) => ["PUBLISH_STATUSES", "COMING_SOON_STATUSES", "UNAVAILABLE_STATUSES"].some((k) => statusSet(env, k).has(a.Status)));
+  const look = listed.slice(0, MAX_HISTORY_LOOKUPS);
+  for (let i = 0; i < look.length; i += 4) {
+    await Promise.all(look.slice(i, i + 4).map(async (a) => {
+      try {
+        const t = stayStart(await getAll(env, `animals/${a["Internal-ID"]}/events`, "events", {}), trialDays);
+        if (t) a.StayStartUnixTime = t;
+      } catch (e) { /* fall back to Shelterluv's last intake date */ }
+    }));
+  }
   const sets = { animals: statusSet(env, "PUBLISH_STATUSES"), "coming-soon": statusSet(env, "COMING_SOON_STATUSES"), unavailable: statusSet(env, "UNAVAILABLE_STATUSES") };
   const out = {};
   for (const [name, wanted] of Object.entries(sets)) {
