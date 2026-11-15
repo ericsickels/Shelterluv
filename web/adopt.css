@@ -146,7 +146,9 @@ html.slv-lock { overflow: hidden; }
   /* The whole pop-up scrolls as one page: the photo starts at about 40% of the screen and slides away as you read. */
   .slv-modal[open] { display: block; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
   .slv-gallery { flex: 0 0 auto; }
-  .slv-stage { flex: none; height: min(42vh, 100vw); }
+  /* Shelterluv photos are square: fill the full width, cropped from the centre if the screen is short. */
+  .slv-stage { flex: none; height: min(100vw, 70vh); }
+  .slv-slide img { object-fit: cover; object-position: 50% 50%; }
   .slv-close { position: fixed; }
   .slv-minibar { display: flex; align-items: center; position: sticky; top: 0; z-index: 2; height: 60px; margin-bottom: -60px;
     padding: 0 64px 0 20px; background: #fff; border-bottom: 1px solid #eee; font-weight: 700; font-size: 1.15em;
