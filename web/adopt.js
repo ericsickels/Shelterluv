@@ -427,7 +427,8 @@
       .then(function (lists) {
         var all = [];
         lists.forEach(function (d) { all = all.concat(d.animals || []); });
-        if (lists.length > 1) all.sort(function (x, y) { return (x.type || "").localeCompare(y.type || "") || x.name.localeCompare(y.name); });
+        // A fresh random order on every page load, so nobody is always at the top (and cats aren't always first).
+        for (var i = all.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = all[i]; all[i] = all[j]; all[j] = t; }
         animals = all.map(function (a) { a.photos = a.photos || []; return a; });
         renderFilters();
         renderGrid();
