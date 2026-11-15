@@ -375,6 +375,13 @@
       currentType = b.getAttribute("data-type");
       renderFilters();
       renderGrid();
+      // Keep the choice in the address (?show=dogs / ?show=cats), so the page can be linked to on a filter.
+      try {
+        var q = new URLSearchParams(location.search);
+        if (currentType === "All") q.delete("show"); else q.set("show", currentType.toLowerCase() + "s");
+        var qs = q.toString();
+        history.replaceState(history.state, "", location.pathname + (qs ? "?" + qs : "") + location.hash);
+      } catch (x) {}
     });
 
     grid.addEventListener("click", function (e) {
@@ -442,6 +449,9 @@
         // A fresh random order on every page load, so nobody is always at the top (and cats aren't always first).
         for (var i = all.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = all[i]; all[i] = all[j]; all[j] = t; }
         animals = all.map(function (a) { a.photos = a.photos || []; return a; });
+        // Open on a filter from the address: ?show=dogs or ?show=cats (also #dogs / #cats).
+        var want = (new URLSearchParams(location.search).get("show") || (location.hash.match(/^#(dogs|cats)$/i) || [])[1] || "").toLowerCase().replace(/s$/, "");
+        if (want) animals.some(function (a) { if ((a.type || "").toLowerCase() === want) { currentType = a.type; return true; } });
         renderFilters();
         renderGrid();
         var m = location.hash.match(/^#animal-(.+)$/);
