@@ -163,6 +163,33 @@
         (a.breed ? '<p class="slv-breed" title="' + esc(a.breed) + '">' + esc(a.breed) + "</p>" : "");
     }
 
+    // Opened on a filter (?show=...): skip the page intro and bring the listings up, with the heading just above
+    // the widget (e.g. "Adoptable animals") at the top, below any fixed site header. Done again once the page's
+    // images have loaded (they can push things down), unless the visitor has started scrolling.
+    function scrollToList() {
+      var heading = null, all = document.querySelectorAll("h1, h2, h3");
+      for (var i = 0; i < all.length; i++) {
+        var h = all[i];
+        if (root.contains(h)) break;
+        if (h.compareDocumentPosition(root) & Node.DOCUMENT_POSITION_FOLLOWING) heading = h;
+      }
+      var go = function () {
+        var target = root.getBoundingClientRect().top;
+        if (heading) { var ht = heading.getBoundingClientRect().top; if (target - ht < 400) target = ht; }
+        var header = 0;
+        [].forEach.call(document.querySelectorAll("header, .header, #header"), function (el) {
+          var cs = getComputedStyle(el);
+          if (cs.position === "fixed" || cs.position === "sticky") header = Math.max(header, el.getBoundingClientRect().bottom);
+        });
+        window.scrollTo(0, Math.max(0, window.pageYOffset + target - header - 16));
+      };
+      var moved = false, mark = function () { moved = true; };
+      ["wheel", "touchmove", "keydown"].forEach(function (ev) { window.addEventListener(ev, mark, { once: true, passive: true }); });
+      go();
+      var again = function () { if (!moved) go(); };
+      if (document.readyState === "complete") setTimeout(again, 300); else window.addEventListener("load", function () { setTimeout(again, 100); });
+    }
+
     function sponsored(a) {
       return !!(w.apply && SPONSORED && a.type === SPONSORED.type && Date.now() < Date.parse(SPONSORED.ends));
     }
@@ -469,6 +496,7 @@
         if (want) animals.some(function (a) { if ((a.type || "").toLowerCase() === want) { currentType = a.type; return true; } });
         renderFilters();
         renderGrid();
+        if (want && w.apply) scrollToList();
         var m = location.hash.match(/^#animal-(.+)$/);
         if (m) openAnimal(decodeURIComponent(m[1]));
       })
