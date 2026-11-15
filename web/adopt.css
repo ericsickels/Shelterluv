@@ -9,6 +9,13 @@
 }
 .slv-filters button[aria-pressed="true"] { opacity: 1; font-weight: 600; border-width: 2px; }
 .slv-grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+/* Phones: two cards across (one across meant a lot of scrolling), with slightly tighter card text. */
+@media (max-width: 560px) {
+  .slv-grid:not(.slv-grid-adopted) { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .slv-grid:not(.slv-grid-adopted) .slv-card-body { padding: 10px 12px 12px; }
+  .slv-grid:not(.slv-grid-adopted) .slv-card-body h3 { font-size: 1.05em; margin-bottom: 4px; }
+  .slv-grid:not(.slv-grid-adopted) .slv-card-body p { font-size: .82em; }
+}
 .slv-card {
   position: relative; font: inherit; color: inherit; text-align: left; cursor: pointer; padding: 0;
   border: 1px solid rgba(127,127,127,.25); border-radius: var(--slv-radius);
