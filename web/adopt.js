@@ -23,6 +23,14 @@
   var PENDING_NOTICE = "This pet has applications under review or an adoption pending. You\u2019re welcome to apply, " +
     "but they may find their home before we review your application. If that happens, we\u2019d love to help you " +
     "find another great match!";
+  // Sponsored adoption fees: every animal of this type shows a "100% OFF" sticker on its card and a $0 fee in
+  // its pop-up until the end date (Eastern time), then it all switches off by itself. Shelterluv's price is unchanged.
+  var SPONSORED = {
+    type: "Cat",
+    ends: "2026-11-27T00:00:00-05:00",   // 12:00 a.m. Friday Nov 27: the end of Thanksgiving Day
+    sticker: ["100%", "OFF"],
+    note: "Sponsored! All cat adoption fees are covered through Thanksgiving."
+  };
   // Coming Soon note for animals getting vet care or recovering before adoption. {name} is the animal's name.
   var CARE_NOTICE = "{name} is getting some extra care right now to make sure they\u2019re healthy and ready for " +
     "their new home. They\u2019ll be available for adoption as soon as they\u2019re ready, so check back for updates!";
@@ -155,6 +163,10 @@
         (a.breed ? '<p class="slv-breed" title="' + esc(a.breed) + '">' + esc(a.breed) + "</p>" : "");
     }
 
+    function sponsored(a) {
+      return !!(w.apply && SPONSORED && a.type === SPONSORED.type && Date.now() < Date.parse(SPONSORED.ends));
+    }
+
     function isPending(a) {
       return PENDING_STATUSES.indexOf(a.status) >= 0;
     }
@@ -209,6 +221,7 @@
         return '<button type="button" class="slv-card' + (isPending(a) ? " slv-card-pending" : "") + '" data-id="' + esc(a.id) +
           '" data-type="' + esc(a.type) + '">' + badge(a) +
           (isPending(a) ? '<span class="slv-ribbon slv-ribbon-pending">' + esc(PENDING_RIBBON) + "</span>" : "") +
+          (sponsored(a) ? '<span class="slv-sticker">' + esc(SPONSORED.sticker[0]) + "<b>" + esc(SPONSORED.sticker[1]) + "</b></span>" : "") +
           (a.photos[0] ? '<img loading="lazy" src="' + esc(a.photos[0]) + '" alt="Photo of ' + esc(a.name) + '">' : placeholder(a.type)) +
           '<div class="slv-card-body">' + cardText(a) + "</div></button>";
       }).join("");
@@ -260,14 +273,14 @@
       var many = a.photos.length > 1;
       var paragraphs = (a.description || "").split(/\n\s*\n/).filter(Boolean)
         .map(function (p) { return "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>"; }).join("");
-      // Age, sex and breed are already in the line under the name, so the facts box skips them.
-      var factRows = facts(a).filter(function (f) { return ["Age", "Sex", "Breed"].indexOf(f[0]) < 0; }).map(function (f) {
+      var factRows = facts(a).map(function (f) {
         return "<div><dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd></div>";
       }).join("");
       var tags = (a.attributes || []).length
         ? '<div class="slv-tags">' + a.attributes.map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</div>" : "";
       var cta = w.apply
-        ? (a.adoptionFee ? '<div class="slv-fee">Adoption fee<strong>$' + esc(a.adoptionFee) + "</strong></div>" : "<div></div>") +
+        ? (sponsored(a) ? '<div class="slv-fee">Adoption fee<strong>' + (a.adoptionFee ? "<s>$" + esc(a.adoptionFee) + "</s> " : "") + '<span class="slv-free">$0</span></strong></div>'
+          : a.adoptionFee ? '<div class="slv-fee">Adoption fee<strong>$' + esc(a.adoptionFee) + "</strong></div>" : "<div></div>") +
           '<a class="slv-apply" target="_blank" rel="noopener" href="' + esc(applyUrl.replace("{id}", encodeURIComponent(a.id))) + '">Apply to adopt ' + esc(a.name) + "</a>"
         : '<p class="slv-notice">' + esc(noticeFor(a)) + "</p>";
 
@@ -294,6 +307,7 @@
             badge(a) +
             '<h2 id="' + titleId + '">' + esc(a.name) + "</h2>" +
             '<p class="slv-sub">' + esc(summary(a)) + "</p>" +
+            (sponsored(a) ? '<div class="slv-sponsor-note" role="note">&#127881; ' + esc(SPONSORED.note) + "</div>" : "") +
             (isPending(a) ? '<div class="slv-pending-note" role="note"><strong>' + esc(PENDING_RIBBON) + "</strong>" +
               "<p>" + esc(PENDING_NOTICE) + "</p></div>" : "") +
             // The story first; the quick facts after it.
@@ -330,7 +344,8 @@
       var site = (location.host + location.pathname).replace(/^www\./, "").replace(/\/$/, "");
       var photos = a.photos.slice(0, 3);
       var factList = facts(a);
-      if (w.apply && a.adoptionFee) factList.push(["Adoption fee", "$" + a.adoptionFee]);
+      if (sponsored(a)) factList.push(["Adoption fee", "$0 (sponsored)"]);
+      else if (w.apply && a.adoptionFee) factList.push(["Adoption fee", "$" + a.adoptionFee]);
       var tag = w.badge || (isPending(a) ? (a.status === "Hold - Pending Adoption" ? "Adoption pending" : "Applications pending") : STATUS_BADGES[a.status]);
       var sheet = printSheet();
       sheet.innerHTML =

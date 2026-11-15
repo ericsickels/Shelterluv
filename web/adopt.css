@@ -30,6 +30,17 @@
 .slv-card-body p { margin: 0; opacity: .75; font-size: .9em; line-height: 1.45; }
 .slv-card-body .slv-breed { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .slv-card .slv-badge { position: absolute; top: 10px; left: 10px; }
+/* Sponsored fee sticker (SPONSORED in adopt.js): a tilted "100% OFF" on the photo corner. */
+.slv-sticker { position: absolute; z-index: 2; top: 10px; left: 10px; width: 66px; height: 66px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-12deg);
+  background: #e4572e; color: #fff; font-weight: 800; font-size: 17px; line-height: 1; letter-spacing: -.02em;
+  box-shadow: 0 3px 10px rgba(0,0,0,.25), inset 0 0 0 3px rgba(255,255,255,.35); }
+.slv-sticker b { font-size: 13px; letter-spacing: .08em; margin-top: 2px; }
+@media (max-width: 560px) { .slv-sticker { width: 54px; height: 54px; font-size: 14px; top: 8px; left: 8px; } .slv-sticker b { font-size: 11px; } }
+.slv-sponsor-note { margin: 4px 0 6px; padding: 10px 14px; border-radius: 10px; background: #fff1ea; border-left: 4px solid #e4572e;
+  font-size: .95em; line-height: 1.45; font-weight: 600; color: #8a2b10; }
+.slv-fee s { font-weight: 500; opacity: .5; text-decoration-thickness: 2px; margin-right: 4px; }
+.slv-free { color: #e4572e; }
 .slv-msg { grid-column: 1 / -1; opacity: .75; }
 
 /* ---- Recently adopted (adopted.js): not clickable, ribbon across the photo ---- */
