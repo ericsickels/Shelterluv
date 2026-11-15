@@ -1,2 +1,7 @@
 public/
 __pycache__/
+site/
+.wrangler/
+node_modules/
+dist/
+worker/assets.js

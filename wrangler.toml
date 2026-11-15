@@ -1,0 +1,8 @@
+name = "redemption-rescue-animals"
+pages_build_output_dir = "site"
+compatibility_date = "2025-09-01"
+
+# Where the data files are stored between refreshes (functions/_lib/data.js).
+[[kv_namespaces]]
+binding = "DATA"
+id = "7a768065568e446da6712455d0350d6d"
