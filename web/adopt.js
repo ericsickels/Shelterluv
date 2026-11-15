@@ -260,7 +260,8 @@
       var many = a.photos.length > 1;
       var paragraphs = (a.description || "").split(/\n\s*\n/).filter(Boolean)
         .map(function (p) { return "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>"; }).join("");
-      var factRows = facts(a).map(function (f) {
+      // Age, sex and breed are already in the line under the name, so the facts box skips them.
+      var factRows = facts(a).filter(function (f) { return ["Age", "Sex", "Breed"].indexOf(f[0]) < 0; }).map(function (f) {
         return "<div><dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd></div>";
       }).join("");
       var tags = (a.attributes || []).length
@@ -272,6 +273,8 @@
 
       modal.innerHTML =
         '<button type="button" class="slv-close" aria-label="Close">&times;</button>' +
+        // Phones in portrait: a slim bar with the name that appears once the photo has scrolled away.
+        '<div class="slv-minibar" aria-hidden="true">' + esc(a.name) + "</div>" +
         '<div class="slv-gallery">' +
           '<div class="slv-stage"><div class="slv-track">' + (a.photos.length ? "" : '<div class="slv-slide">' + placeholder(a.type, "slv-ph-large") + "</div>") +
             a.photos.map(function (src, i) {
@@ -293,8 +296,9 @@
             '<p class="slv-sub">' + esc(summary(a)) + "</p>" +
             (isPending(a) ? '<div class="slv-pending-note" role="note"><strong>' + esc(PENDING_RIBBON) + "</strong>" +
               "<p>" + esc(PENDING_NOTICE) + "</p></div>" : "") +
-            (factRows ? '<h3 class="slv-section-title">At a glance</h3><dl class="slv-facts">' + factRows + "</dl>" + tags : "") +
+            // The story first; the quick facts after it.
             (paragraphs ? '<h3 class="slv-section-title">About ' + esc(a.name) + '</h3><div class="slv-desc">' + paragraphs + "</div>" : "") +
+            (factRows || tags ? '<h3 class="slv-section-title">At a glance</h3>' + (factRows ? '<dl class="slv-facts">' + factRows + "</dl>" : "") + tags : "") +
           "</div>" +
           '<div class="slv-cta">' + cta + "</div>" +
         "</div>";
@@ -309,6 +313,14 @@
         }, { passive: true });
       }
       modal.querySelector(".slv-scroll").scrollTop = 0;
+      modal.scrollTop = 0;   // phones in portrait scroll the whole pop-up
+      if (!modal.slvMini) {
+        modal.slvMini = true;
+        modal.addEventListener("scroll", function () {
+          var g = modal.querySelector(".slv-gallery"), bar = modal.querySelector(".slv-minibar");
+          if (g && bar) bar.classList.toggle("show", modal.scrollTop > g.offsetHeight - 64);
+        }, { passive: true });
+      }
       modal.querySelector(".slv-close").focus();
       if (location.hash !== "#animal-" + a.id) history.replaceState(null, "", "#animal-" + a.id);
     }

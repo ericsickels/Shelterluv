@@ -117,17 +117,21 @@ html.slv-lock { overflow: hidden; }
   text-transform: uppercase; color: #777;
 }
 .slv-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 0; background: #e7e7e7; border: 1px solid #e7e7e7; border-radius: 10px; overflow: hidden; }
-.slv-facts div { background: #fafafa; padding: 10px 14px; }
+.slv-facts div { background: #fafafa; padding: 8px 12px; }
 .slv-facts div:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.slv-facts dt { margin: 0; font-size: 12px; color: #777; }
-.slv-facts dd { margin: 2px 0 0; font-weight: 600; }
+.slv-facts dt { margin: 0; font-size: 11px; color: #777; }
+.slv-facts dd { margin: 1px 0 0; font-size: .92em; font-weight: 600; }
 .slv-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .slv-tags span { padding: 4px 10px; border-radius: 999px; background: #f0f0f0; font-size: 13px; }
 .slv-desc p { margin: 0 0 14px; line-height: 1.65; }
 .slv-cta {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px;
   padding: 16px 32px; border-top: 1px solid #eee; background: #fff;
 }
+/* A soft fade above the Apply bar: the text visibly carries on underneath, so it's clear there's more to read. */
+.slv-cta::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 44px; pointer-events: none;
+  background: linear-gradient(rgba(255,255,255,0), #fff); }
+.slv-minibar { display: none; }
 .slv-fee { font-size: .95em; color: #555; }
 .slv-fee strong { display: block; font-size: 1.3em; color: #222; }
 .slv-apply {
@@ -137,17 +141,37 @@ html.slv-lock { overflow: hidden; }
 .slv-apply:hover { filter: brightness(1.15); }
 
 /* ---- Phones: single column, gallery on top, Apply pinned at bottom ---- */
-@media (max-width: 760px) {
+@media (max-width: 760px) and (orientation: portrait) {
   .slv-modal { width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; }
-  .slv-modal[open] { display: flex; flex-direction: column; }
+  /* The whole pop-up scrolls as one page: the photo starts at about 40% of the screen and slides away as you read. */
+  .slv-modal[open] { display: block; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
   .slv-gallery { flex: 0 0 auto; }
-  .slv-stage { flex: none; height: min(56vh, 100vw); }
+  .slv-stage { flex: none; height: min(42vh, 100vw); }
+  .slv-close { position: fixed; }
+  .slv-minibar { display: flex; align-items: center; position: sticky; top: 0; z-index: 2; height: 60px; margin-bottom: -60px;
+    padding: 0 64px 0 20px; background: #fff; border-bottom: 1px solid #eee; font-weight: 700; font-size: 1.15em;
+    opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .slv-minibar.show { opacity: 1; }
+  .slv-details { display: block; }
+  .slv-scroll { overflow: visible; }
+  .slv-cta { position: sticky; bottom: 0; z-index: 2; }
   .slv-thumbs { display: none; }
   .slv-nav { display: none; }
-  .slv-details { flex: 1; }
-  .slv-scroll { padding: 20px 20px 16px; }
+  .slv-scroll { padding: 20px 20px 8px; }
   .slv-details h2 { margin-right: 0; font-size: 1.7em; }
-  .slv-cta { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); }
+  .slv-cta { padding: 10px 20px calc(10px + env(safe-area-inset-bottom)); }
+  .slv-apply { flex: 1; }
+}
+
+/* Phones held sideways: full screen, photo on the left and the details scrolling on the right. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .slv-modal { width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; }
+  .slv-modal[open] { grid-template-columns: 1fr 1fr; }
+  .slv-thumbs { display: none; }
+  .slv-scroll { padding: 16px 20px 8px; }
+  .slv-details h2 { font-size: 1.5em; }
+  .slv-section-title { margin: 18px 0 8px; }
+  .slv-cta { padding: 8px 20px calc(8px + env(safe-area-inset-bottom)); }
   .slv-apply { flex: 1; }
 }
 
