@@ -80,6 +80,15 @@
      "label": "Second shift ends"
     }
    ],
+   "map": {
+    "label": "Venue map",
+    "image": "fishers-event-center-map.jpg",
+    "points": [
+     { "label": "Volunteer entrance", "sub": "Honda Entrance \u00b7 before 3 PM", "x": 0.075, "y": 0.763 },
+     { "label": "Our table", "sub": "Approximate spot by the main entrance", "x": 0.622, "y": 0.302 },
+     { "label": "Our seats", "sub": "Section 107NC", "x": 0.38, "y": 0.39 }
+    ]
+   },
    "pass": {
     "label": "Parking pass",
     "image": "indy-fuel-2026-11-08-parking-pass.jpg",
@@ -302,7 +311,7 @@
       },
       {
        "title": "Price",
-       "text": "**$3 per puck** (price not confirmed yet). Encourage fans to grab a few: more pucks, more chances to win."
+       "text": "**1 puck for $2 \u00b7 3 pucks for $5 \u00b7 8 pucks for $10.** Point fans to the bigger bundles: more pucks, more chances to win."
       },
       {
        "title": "Where the money goes",
@@ -310,7 +319,7 @@
       },
       {
        "title": "Quick pitch",
-       "text": "“Want to play Chuck-a-Puck? Pucks are $3, you throw them at the 2nd intermission for a prize, and the money helps rescue dogs and cats!”"
+       "text": "“Want to play Chuck-a-Puck? Pucks are 1 for $2, 3 for $5 or 8 for $10. You throw them at the 2nd intermission for a prize, and the money helps rescue dogs and cats!”"
       }
      ]
     }
