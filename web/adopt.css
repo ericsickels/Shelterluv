@@ -380,3 +380,32 @@ html.slv-lock { overflow: hidden; }
 .slv-p-qr strong { display: block; font-size: 12pt; line-height: 1.25; }
 .slv-p-qr span { display: block; margin-top: 3pt; font-size: 8pt; color: #555; word-break: break-all; }
 .slv-p-foot { flex: none; display: flex; justify-content: space-between; gap: .2in; margin-top: .1in; padding-top: .07in; border-top: 1px solid #ccc; font-size: 9pt; color: #666; }
+
+/* ---- Link to an animal that's no longer listed: celebration if recently adopted, else "not found" ---- */
+.slv-modal.slv-gone { margin: auto; width: min(440px, calc(100vw - 32px)); height: fit-content; max-height: calc(100dvh - 32px); border-radius: 20px; overflow: hidden auto; }
+.slv-modal.slv-gone[open] { display: block; }
+.slv-gone .slv-close { position: absolute; }
+.slv-gone-photo { position: relative; aspect-ratio: 5 / 4; overflow: hidden; background: #eee; animation: slv-gone-pop .7s cubic-bezier(.2,1.3,.4,1) both; }
+.slv-gone-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.slv-gone-ribbon { position: absolute; top: 30px; left: -46px; width: 200px; transform: rotate(-45deg); padding: 8px 0; text-align: center;
+  background: #2e7d4f; color: #fff; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 3px 10px rgba(0,0,0,.25);
+  animation: slv-gone-ribbon .6s .45s cubic-bezier(.2,1.4,.4,1) both; }
+.slv-gone-body { padding: 22px 24px 24px; text-align: center; }
+.slv-gone-body h2 { margin: 0 0 6px; font-size: 1.7em; line-height: 1.15; }
+.slv-gone-body p { margin: 0 0 12px; line-height: 1.5; }
+.slv-gone-body .slv-sub { color: #555; margin-bottom: 8px; }
+.slv-gone-kicker { color: #2e7d4f; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: 13px; }
+.slv-gone-date { display: inline-block; padding: 6px 14px; border-radius: 999px; background: #e8f4ed; color: #2e7d4f; font-weight: 700; font-size: .95em; }
+.slv-gone-cta { margin-top: 6px; width: 100%; padding: 14px 18px; border: none; border-radius: 999px; background: #222; color: #fff;
+  font: inherit; font-weight: 700; font-size: 1.05em; cursor: pointer; }
+.slv-gone-missing { padding-top: 40px; }
+.slv-gone-paw { font-size: 56px; line-height: 1; margin-bottom: 12px; }
+.slv-confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.slv-confetti i { position: absolute; top: -20px; height: 14px; border-radius: 2px; opacity: 0; animation-name: slv-confetti; animation-timing-function: ease-in; animation-fill-mode: both; }
+@keyframes slv-confetti {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  100% { opacity: .9; transform: translate(var(--sway, 0), 110vh) rotate(720deg); }
+}
+@keyframes slv-gone-pop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes slv-gone-ribbon { from { opacity: 0; transform: rotate(-45deg) translateY(-30px); } to { opacity: 1; transform: rotate(-45deg); } }
+@media (prefers-reduced-motion: reduce) { .slv-gone-photo, .slv-gone-ribbon { animation: none; } }
