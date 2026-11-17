@@ -116,9 +116,85 @@
     if (el) el.innerHTML = "";
   }
 
+  // ---- Links to an animal that's no longer listed (#animal-<id>, e.g. from an old Facebook post) ----
+  // Each widget on the page reports whether it found the animal. If none did, check the recently adopted list:
+  // adopted -> a celebration pop-up; otherwise a friendly "couldn't find that animal" pop-up.
+  var hashLink = { id: (location.hash.match(/^#animal-(.+)$/) || [])[1], expected: 0, reported: 0, found: false, failed: false };
+  function reportHash(found) {
+    if (found === true) hashLink.found = true; else if (found === null) hashLink.failed = true;
+    if (++hashLink.reported === hashLink.expected && hashLink.id && !hashLink.found && !hashLink.failed) showGone(decodeURIComponent(hashLink.id));
+  }
+  function goneEsc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function goneAge(m) {
+    if (m == null || m === "") return "";
+    var y = Math.floor(m / 12), r = m % 12;
+    return y ? y + (y === 1 ? " year" : " years") + (r ? ", " + r + " mo" : "") : r + (r === 1 ? " month" : " months");
+  }
+  function showGone(id) {
+    fetch(BASE + "adopted.json?v=" + version).then(function (r) { return r.ok ? r.json() : { animals: [] }; })
+      .catch(function () { return { animals: [] }; })
+      .then(function (d) { goneDialog((d.animals || []).filter(function (a) { return String(a.id) === String(id); })[0]); });
+  }
+  function goneDialog(a) {
+    var dlg = document.createElement("dialog");
+    dlg.className = "slv-modal slv-gone";
+    var cta = '<button type="button" class="slv-gone-cta">Meet our adoptable animals</button>';
+    if (a) {
+      var dm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(a.adoptedDate || "");
+      var when = dm ? new Date(+dm[1], dm[2] - 1, +dm[3]).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "";
+      dlg.setAttribute("aria-label", a.name + " was adopted");
+      dlg.innerHTML = '<button type="button" class="slv-close" aria-label="Close">&times;</button>' +
+        '<div class="slv-gone-photo">' + (a.photo ? '<img src="' + goneEsc(a.photo) + '" alt="Photo of ' + goneEsc(a.name) + '">' : "") +
+          '<span class="slv-gone-ribbon">Adopted!</span></div>' +
+        '<div class="slv-gone-body">' +
+          '<p class="slv-gone-kicker">&#127881; Happy tail!</p>' +
+          "<h2>" + goneEsc(a.name) + " found a home!</h2>" +
+          '<p class="slv-sub">' + goneEsc([goneAge(a.ageMonths), a.breed].filter(Boolean).join(" \u00b7 ")) + "</p>" +
+          (when ? '<p class="slv-gone-date">Adopted ' + goneEsc(when) + "</p>" : "") +
+          "<p>Thank you for helping " + goneEsc(a.name) + " find a family. Lots of other friends are still waiting for theirs!</p>" + cta +
+        '</div><div class="slv-confetti" aria-hidden="true"></div>';
+    } else {
+      dlg.setAttribute("aria-label", "Animal not found");
+      dlg.innerHTML = '<button type="button" class="slv-close" aria-label="Close">&times;</button>' +
+        '<div class="slv-gone-body slv-gone-missing">' +
+          '<div class="slv-gone-paw" aria-hidden="true">&#128062;</div>' +
+          "<h2>We couldn\u2019t find that animal</h2>" +
+          "<p>They may have found their home already, or this link is out of date. Plenty of friends are still looking for theirs!</p>" + cta +
+        "</div>";
+    }
+    document.body.appendChild(dlg);
+    var done = function () {
+      document.documentElement.classList.remove("slv-lock");
+      if (/^#animal-/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
+      if (dlg.parentNode) dlg.parentNode.removeChild(dlg);
+    };
+    dlg.addEventListener("close", done);
+    dlg.addEventListener("click", function (e) {
+      if (e.target === dlg || e.target.closest(".slv-close")) dlg.close();
+      if (e.target.closest(".slv-gone-cta")) {
+        dlg.close();
+        var list = document.getElementById("slv-adopt");
+        if (list) list.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+    dlg.showModal();
+    document.documentElement.classList.add("slv-lock");
+    var box = dlg.querySelector(".slv-confetti");
+    if (box && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+      var colors = ["#e4572e", "#f3a712", "#2e7d4f", "#4f7cac", "#d16ba5", "#ffd23f"], html = "";
+      for (var i = 0; i < 110; i++) {
+        html += '<i style="left:' + (Math.random() * 100).toFixed(1) + "%;background:" + colors[i % colors.length] +
+          ";animation-delay:" + (Math.random() * 1.6).toFixed(2) + "s;animation-duration:" + (2.4 + Math.random() * 1.8).toFixed(2) +
+          "s;width:" + (6 + Math.random() * 6).toFixed(0) + "px;--sway:" + (Math.random() * 80 - 40).toFixed(0) + 'px"></i>';
+      }
+      box.innerHTML = html;
+      setTimeout(function () { box.innerHTML = ""; }, 6000);
+    }
+  }
+
   WIDGETS.forEach(function (w) {
     var root = document.getElementById(w.id);
-    if (root && !root.getAttribute("data-slv-ready")) init(root, w);
+    if (root && !root.getAttribute("data-slv-ready")) { hashLink.expected++; init(root, w); }
   });
 
   function init(root, w) {
@@ -295,7 +371,7 @@
 
     function openAnimal(id) {
       var a = animals.filter(function (x) { return String(x.id) === String(id); })[0];
-      if (!a) return;
+      if (!a) return false;
       current = a;
       var many = a.photos.length > 1;
       var paragraphs = (a.description || "").split(/\n\s*\n/).filter(Boolean)
@@ -498,10 +574,11 @@
         renderGrid();
         if (want && w.apply) scrollToList();
         var m = location.hash.match(/^#animal-(.+)$/);
-        if (m) openAnimal(decodeURIComponent(m[1]));
+        reportHash(m ? openAnimal(decodeURIComponent(m[1])) !== false : false);
       })
       .catch(function () {
         grid.innerHTML = emptyState("We couldn\u2019t load our animals", "Please refresh the page or try again in a few minutes.");
+        reportHash(null);
       });
   }
 })();
