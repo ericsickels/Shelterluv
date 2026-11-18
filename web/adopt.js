@@ -269,16 +269,20 @@
     // Google Analytics: "apply_click" when someone taps Apply to adopt. Uses the site's gtag (Squarespace's built-in
     // GA4) if it's there, else Google Tag Manager's dataLayer. The Apply page opens in a new tab, so this page stays
     // open while the event is sent.
-    function trackApply(a) {
+    // Also "animal_view" whenever an animal's pop-up opens (tapped or from a shared link), so views don't depend on
+    // Google Analytics recording the #animal-... part of the address.
+    function sendEvent(name, a) {
       var params = {
         animal_id: String(a.id), animal_name: a.name, animal_type: a.type || "", animal_status: a.status || "",
-        adoption_fee: sponsored(a) ? 0 : Number(a.adoptionFee) || 0, fee_sponsored: sponsored(a) ? "yes" : "no"
+        adoption_fee: sponsored(a) ? 0 : Number(a.adoptionFee) || 0, fee_sponsored: sponsored(a) ? "yes" : "no",
+        listing: w.apply ? "available" : "coming_soon"
       };
       try {
-        if (typeof window.gtag === "function") window.gtag("event", "apply_click", params);
-        else if (window.dataLayer && window.dataLayer.push) window.dataLayer.push(Object.assign({ event: "apply_click" }, params));
+        if (typeof window.gtag === "function") window.gtag("event", name, params);
+        else if (window.dataLayer && window.dataLayer.push) window.dataLayer.push(Object.assign({ event: name }, params));
       } catch (x) {}
     }
+    function trackApply(a) { sendEvent("apply_click", a); }
 
     function sponsored(a) {
       return !!(w.apply && SPONSORED && a.type === SPONSORED.type && Date.now() < Date.parse(SPONSORED.ends));
@@ -435,6 +439,7 @@
         "</div>";
 
       renderPrint(a, paragraphs);
+      sendEvent("animal_view", a);
       if (!modal.open) { modal.showModal(); document.documentElement.classList.add("slv-lock"); }
       if (a.photos.length) {
         showPhoto(0, true);
