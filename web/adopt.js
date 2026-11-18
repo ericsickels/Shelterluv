@@ -271,16 +271,39 @@
     // open while the event is sent.
     // Also "animal_view" whenever an animal's pop-up opens (tapped or from a shared link), so views don't depend on
     // Google Analytics recording the #animal-... part of the address.
-    function sendEvent(name, a) {
-      var params = {
-        animal_id: String(a.id), animal_name: a.name, animal_type: a.type || "", animal_status: a.status || "",
-        adoption_fee: sponsored(a) ? 0 : Number(a.adoptionFee) || 0, fee_sponsored: sponsored(a) ? "yes" : "no",
-        listing: w.apply ? "available" : "coming_soon"
-      };
+    function ga(name, params) {
       try {
         if (typeof window.gtag === "function") window.gtag("event", name, params);
         else if (window.dataLayer && window.dataLayer.push) window.dataLayer.push(Object.assign({ event: name }, params));
       } catch (x) {}
+    }
+    function sendEvent(name, a, extra) {
+      ga(name, Object.assign({
+        animal_id: String(a.id), animal_name: a.name, animal_type: a.type || "", animal_status: a.status || "",
+        adoption_fee: sponsored(a) ? 0 : Number(a.adoptionFee) || 0, fee_sponsored: sponsored(a) ? "yes" : "no",
+        listing: w.apply ? "available" : "coming_soon"
+      }, extra || {}));
+    }
+    // "animal_engagement": one summary per pop-up, sent when it closes (or the page is left while it's open):
+    // how many different photos were looked at, whether the bio was read to the end, and seconds open.
+    var visit = null;
+    function startVisit(a) { endVisit(); visit = { a: a, t: Date.now(), photos: { 0: true }, bio: false }; setTimeout(checkBio, 400); }
+    function checkBio() {
+      if (!visit || visit.bio) return;
+      var d = modal.querySelector(".slv-desc"), cta = modal.querySelector(".slv-cta");
+      if (!d) { visit.bio = null; return; }   // no bio to read
+      var limit = (cta ? cta.getBoundingClientRect().top : window.innerHeight) + 8;
+      if (d.getBoundingClientRect().bottom <= limit) visit.bio = true;
+    }
+    function endVisit(beacon) {
+      if (!visit) return;
+      var v = visit; visit = null;
+      var extra = {
+        photos_viewed: Object.keys(v.photos).length, photos_total: (v.a.photos || []).length,
+        read_bio: v.bio === null ? "no_bio" : v.bio ? "yes" : "no", seconds_open: Math.round((Date.now() - v.t) / 1000)
+      };
+      if (beacon) extra.transport_type = "beacon";
+      sendEvent("animal_engagement", v.a, extra);
     }
     function trackApply(a) { sendEvent("apply_click", a); }
 
@@ -376,6 +399,7 @@
 
     function markPhoto(i) {
       photoIndex = i;
+      if (visit) visit.photos[i] = true;
       var n = current.photos.length;
       var count = modal.querySelector(".slv-count");
       if (count) count.textContent = (i + 1) + " / " + n;
@@ -440,6 +464,7 @@
 
       renderPrint(a, paragraphs);
       sendEvent("animal_view", a);
+      startVisit(a);
       if (!modal.open) { modal.showModal(); document.documentElement.classList.add("slv-lock"); }
       if (a.photos.length) {
         showPhoto(0, true);
@@ -450,6 +475,11 @@
       }
       modal.querySelector(".slv-scroll").scrollTop = 0;
       modal.scrollTop = 0;   // phones in portrait scroll the whole pop-up
+      if (!modal.slvBio) {
+        modal.slvBio = true;
+        modal.addEventListener("scroll", checkBio, { passive: true, capture: true });   // catches the inner .slv-scroll too
+        window.addEventListener("pagehide", function () { endVisit(true); });
+      }
       if (!modal.slvMini) {
         modal.slvMini = true;
         modal.addEventListener("scroll", function () {
@@ -512,6 +542,7 @@
       currentType = b.getAttribute("data-type");
       renderFilters();
       renderGrid();
+      ga("filter_click", { filter: currentType === "All" ? "all" : currentType.toLowerCase() + "s", listing: w.apply ? "available" : "coming_soon" });
       // Keep the choice in the address (?show=dogs / ?show=cats), so the page can be linked to on a filter.
       try {
         var q = new URLSearchParams(location.search);
@@ -554,6 +585,7 @@
     });
 
     modal.addEventListener("close", function () {
+      endVisit();
       document.documentElement.classList.remove("slv-lock");
       clearPrint();
       current = null;
