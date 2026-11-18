@@ -266,6 +266,20 @@
       if (document.readyState === "complete") setTimeout(again, 300); else window.addEventListener("load", function () { setTimeout(again, 100); });
     }
 
+    // Google Analytics: "apply_click" when someone taps Apply to adopt. Uses the site's gtag (Squarespace's built-in
+    // GA4) if it's there, else Google Tag Manager's dataLayer. The Apply page opens in a new tab, so this page stays
+    // open while the event is sent.
+    function trackApply(a) {
+      var params = {
+        animal_id: String(a.id), animal_name: a.name, animal_type: a.type || "", animal_status: a.status || "",
+        adoption_fee: sponsored(a) ? 0 : Number(a.adoptionFee) || 0, fee_sponsored: sponsored(a) ? "yes" : "no"
+      };
+      try {
+        if (typeof window.gtag === "function") window.gtag("event", "apply_click", params);
+        else if (window.dataLayer && window.dataLayer.push) window.dataLayer.push(Object.assign({ event: "apply_click" }, params));
+      } catch (x) {}
+    }
+
     function sponsored(a) {
       return !!(w.apply && SPONSORED && a.type === SPONSORED.type && Date.now() < Date.parse(SPONSORED.ends));
     }
@@ -514,6 +528,7 @@
     });
 
     modal.addEventListener("click", function (e) {
+      if (e.target.closest(".slv-apply") && current) trackApply(current);
       if (e.target === modal || e.target.closest(".slv-close")) return closeModal();
       if (e.target.closest(".slv-prev")) return showPhoto(photoIndex - 1);
       if (e.target.closest(".slv-next")) return showPhoto(photoIndex + 1);
