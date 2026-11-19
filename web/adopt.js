@@ -110,6 +110,40 @@
     }
     return el;
   }
+  // Make the flyer's bio fit its space: lay the sheet out off screen at page size, step the bio's type size down
+  // (10.5pt to 8.5pt), and only if it still doesn't fit, cut it at a word with "..." and a note to scan the QR.
+  var PRINT_BIO_SIZES = [10.5, 10, 9.5, 9, 8.5];
+  function fitPrintBio(sheet, name) {
+    var about = sheet.querySelector(".slv-p-about");
+    if (!about || !about.querySelector("p")) return;
+    var saved = sheet.getAttribute("style") || "";
+    sheet.setAttribute("style", "display:block !important;position:fixed;left:-20000px;top:0;width:7.3in;visibility:hidden");
+    var fits = function () { return about.scrollHeight <= about.clientHeight + 1; };
+    try {
+      for (var i = 0; i < PRINT_BIO_SIZES.length; i++) {
+        about.style.setProperty("--bio", PRINT_BIO_SIZES[i] + "pt");
+        if (fits()) return;
+      }
+      var more = document.createElement("p");
+      more.className = "slv-p-more";
+      more.textContent = "Scan the QR code to read more about " + name + ".";
+      about.appendChild(more);
+      var ps = [].slice.call(about.querySelectorAll("p:not(.slv-p-more)")), cut = null;
+      while (!fits() && ps.length > 1) { cut = ps.pop(); cut.parentNode.removeChild(cut); }
+      var last = cut || ps[ps.length - 1];
+      if (cut) about.insertBefore(cut, more);
+      var words = last.textContent.split(/\s+/), lo = 0, hi = words.length;
+      while (lo < hi) {   // the most words of the last paragraph that still fit
+        var mid = Math.ceil((lo + hi) / 2);
+        last.textContent = words.slice(0, mid).join(" ") + "\u2026";
+        if (fits()) lo = mid; else hi = mid - 1;
+      }
+      if (lo) last.textContent = words.slice(0, lo).join(" ").replace(/[\s,;:.\u2014-]+$/, "") + "\u2026";
+      else { last.parentNode.removeChild(last); var prev = about.querySelectorAll("p:not(.slv-p-more)"); if (prev.length) prev[prev.length - 1].textContent += "\u2026"; }
+    } finally {
+      if (saved) sheet.setAttribute("style", saved); else sheet.removeAttribute("style");
+    }
+  }
   function clearPrint() {
     document.documentElement.classList.remove("slv-printing");
     var el = document.getElementById("slv-print");
@@ -494,7 +528,7 @@
     function renderPrint(a, paragraphs) {
       var url = location.origin + location.pathname + "#animal-" + encodeURIComponent(a.id);
       var site = (location.host + location.pathname).replace(/^www\./, "").replace(/\/$/, "");
-      var photos = a.photos.slice(0, 3);
+      var photo = a.photos[0];
       var factList = facts(a);
       if (sponsored(a)) factList.push(["Adoption fee", "$0 (sponsored)"]);
       else if (w.apply && a.adoptionFee) factList.push(["Adoption fee", "$" + a.adoptionFee]);
@@ -507,16 +541,15 @@
             '<span class="slv-p-site">' + esc(site) + "</span></header>" +
           '<div class="slv-p-title"><h1>' + esc(a.name) + "</h1>" + (tag ? '<span class="slv-p-tag">' + esc(tag) + "</span>" : "") + "</div>" +
           '<p class="slv-p-sub">' + esc(summary(a)) + "</p>" +
-          '<div class="slv-p-photos slv-p-n' + Math.max(1, photos.length) + '">' + (photos.length ? photos.map(function (src, i) {
-            return '<img class="' + (i ? "" : "slv-p-main") + '" src="' + esc(src) + '" alt="">';
-          }).join("") : placeholder(a.type, "slv-ph-large")) + "</div>" +
-          (factList.length ? '<dl class="slv-p-facts">' + factList.map(function (f) {
-            return "<div><dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd></div>";
-          }).join("") + "</dl>" : "") +
+          // The main photo, square, with the quick facts in large type beside it; the rest of the page is the bio.
+          '<div class="slv-p-hero"><div class="slv-p-photo">' + (photo ? '<img src="' + esc(photo) + '" alt="">' : placeholder(a.type, "slv-ph-large")) + "</div>" +
+            (factList.length ? '<dl class="slv-p-facts">' + factList.map(function (f) {
+              return "<div><dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd></div>";
+            }).join("") + "</dl>" : "") + "</div>" +
           '<div class="slv-p-body">' +
-            '<div class="slv-p-about">' + (paragraphs ? "<h2>About " + esc(a.name) + "</h2>" : "") +
-              ((a.attributes || []).length ? '<div class="slv-p-tags">' + a.attributes.map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</div>" : "") + paragraphs + "</div>" +
+            '<div class="slv-p-about">' + (paragraphs ? "<h2>About " + esc(a.name) + "</h2>" : "") + paragraphs + "</div>" +
             '<div class="slv-p-side">' +
+              ((a.attributes || []).length ? '<div class="slv-p-tags">' + a.attributes.map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") + "</div>" : "") +
               '<div class="slv-p-qr"><div class="slv-p-code"></div><strong>' +
                 esc(w.apply ? "Scan to meet " + a.name + " & apply" : "Scan to follow " + a.name) + "</strong>" +
                 "<span>" + esc(site + "#animal-" + a.id) + "</span></div>" +
@@ -525,6 +558,7 @@
           '<footer class="slv-p-foot"><span>' + esc(w.apply ? "Apply online at " + site : noticeFor(a)) + "</span>" +
             "<span>Details as of " + esc(new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })) + "</span></footer>" +
         "</div>";
+      fitPrintBio(sheet, a.name);
       document.documentElement.classList.add("slv-printing");
       withQr(function () {
         var box = sheet.querySelector(".slv-p-code");
