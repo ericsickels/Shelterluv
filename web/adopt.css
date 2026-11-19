@@ -356,21 +356,20 @@ html.slv-lock { overflow: hidden; }
 .slv-p-title h1 { margin: 0; font-size: 36pt; line-height: 1.1; color: #222; }
 .slv-p-tag { padding: 3pt 9pt; border-radius: 999px; font-size: 10pt; font-weight: 700; background: #fff3d6; color: #6b4a00; border: 1px solid #f0d58a; }
 .slv-p-sub { margin: .02in 0 .12in; font-size: 13pt; color: #444; }
-.slv-p-photos { flex: none; display: grid; gap: .08in; height: 2.8in; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
-.slv-p-photos img { width: 100%; height: 100%; min-height: 0; object-fit: cover; object-position: 50% 30%; border-radius: 6pt; display: block; }
-.slv-p-photos .slv-p-main { grid-row: 1 / 3; }
-.slv-p-n1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
-.slv-p-n2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
-.slv-p-n1 .slv-p-main, .slv-p-n2 .slv-p-main { grid-row: auto; }
-.slv-p-photos .slv-ph { border-radius: 6pt; }
-.slv-p-facts { flex: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: .06in .15in; margin: .14in 0 0; padding: .08in 0; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
-.slv-p-facts dt { font-size: 8pt; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #777; }
-.slv-p-facts dd { margin: 0; font-size: 11pt; font-weight: 700; line-height: 1.25; }
-.slv-p-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 2.3in; gap: .25in; margin-top: .14in; }
+/* Main photo (square) with the quick facts beside it */
+.slv-p-hero { flex: none; display: grid; grid-template-columns: 2.6in 1fr; gap: .25in; align-items: center; margin-top: .02in; }
+.slv-p-photo { height: 2.6in; border-radius: 8pt; overflow: hidden; }
+.slv-p-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
+.slv-p-photo .slv-ph { height: 100%; border-radius: 8pt; }
+.slv-p-facts { display: grid; grid-template-columns: 1fr 1fr; gap: .1in .2in; margin: 0; }
+.slv-p-facts dt { font-size: 8.5pt; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #777; }
+.slv-p-facts dd { margin: 0; font-size: 13pt; font-weight: 700; line-height: 1.25; }
+.slv-p-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 2.2in; gap: .25in; margin-top: .16in; padding-top: .12in; border-top: 1px solid #ccc; }
 .slv-p-about { position: relative; min-height: 0; overflow: hidden; }
-.slv-p-about::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: .35in; background: linear-gradient(rgba(255,255,255,0), #fff); }
 .slv-p-about h2 { margin: 0 0 .05in; font-size: 12pt; letter-spacing: .06em; text-transform: uppercase; color: #222; }
-.slv-p-about p { margin: 0 0 .07in; font-size: 10.5pt; line-height: 1.45; }
+/* The bio's size is set by fitPrintBio() in adopt.js (--bio), so the whole story fits whenever it can. */
+.slv-p-about p { margin: 0 0 .06in; font-size: var(--bio, 10.5pt); line-height: 1.4; }
+.slv-p-about p.slv-p-more { margin-top: .08in; font-size: 10pt; font-weight: 700; font-style: italic; }
 .slv-p-side { display: flex; flex-direction: column; min-height: 0; }
 .slv-p-tags { display: flex; flex-wrap: wrap; gap: 4pt; margin: .02in 0 .08in; }
 .slv-p-tags span { padding: 2pt 7pt; border-radius: 999px; border: 1px solid #ccc; font-size: 8.5pt; }
