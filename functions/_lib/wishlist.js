@@ -127,7 +127,7 @@ export async function fetchWishlist() {
   items.sort((a, b) => (a.fulfilled === b.fulfilled ? 0 : a.fulfilled ? 1 : -1));
   return {
     updated: new Date().toISOString().replace(/\.\d+Z$/, "+00:00"),
-    registryUrl: `https://www.amazon.com/registries/holiday/${REGISTRY_ID}/guest-view`,
+    registryUrl: `https://www.amazon.com/registries/gl/guest-view/${REGISTRY_ID}`,
     fund,
     count: items.length,
     stillNeeded: items.reduce((n, it) => n + (it.fulfilled ? 0 : it.needed || 0), 0),
