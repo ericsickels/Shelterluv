@@ -6,6 +6,8 @@
 // Only a whitelist of public fields is written. Nothing about people (fosters, adopters), microchips or
 // internal attributes is ever written out, except the foster's FIRST name in fosters.json (field guide).
 
+import { fetchWishlist } from "./wishlist.js";
+
 const API_URL = "https://new.shelterluv.com/api/v1/";
 const PAGE_SIZE = 100;
 const DEFAULTS = {
@@ -18,7 +20,7 @@ const DEFAULTS = {
   EVENTS_URL: "https://www.redemptionrescueinc.com/events?format=json",
 };
 const ADOPTED_STATUS = "Healthy In Home";
-const MAX_AGE = { custody: 30 * 60, adoptions: 60 * 60, events: 30 * 60 };
+const MAX_AGE = { custody: 30 * 60, adoptions: 60 * 60, events: 30 * 60, wishlist: 8 * 60 * 60 };   // wish list: at most 3 times a day
 
 const cfg = (env, k) => (env && env[k]) || DEFAULTS[k];
 const statusSet = (env, k) => new Set(cfg(env, k).split(",").map((s) => s.trim()).filter(Boolean));
@@ -238,6 +240,7 @@ const GROUPS = {
   custody: { files: ["animals", "coming-soon", "unavailable", "fosters"], build: buildCustody },
   adoptions: { files: ["adopted", "stats"], build: buildAdoptions },
   events: { files: ["events"], build: buildEvents },
+  wishlist: { files: ["wishlist"], build: async () => ({ wishlist: await fetchWishlist() }) },
 };
 const FILE_GROUP = {};
 for (const [g, def] of Object.entries(GROUPS)) for (const f of def.files) FILE_GROUP[f] = g;

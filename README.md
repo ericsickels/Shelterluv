@@ -6,6 +6,11 @@
 > `worker/index.js` serves everything. To publish: `scripts/build_site.sh`, then `node scripts/build_worker.mjs
 > <esbuild>` and upload `dist/_worker.js` as a Pages deployment. The Shelterluv key is the project's
 > `SHELTERLUV_API_KEY` secret. The GitHub Actions export below is kept only as a manual fallback.
+>
+> **Amazon wish list:** `functions/_lib/wishlist.js` reads our Amazon registry (2BAZJDTMPXLF7) into `wishlist.json`
+> at most every 8 hours (still-needed and fully purchased items, the Urgent Supplies Fund separate, duplicates merged).
+> The endpoint is unofficial, so it identifies itself, backs off on errors and the last good copy is kept.
+> Widget: `web/wishlist.js` + `wishlist.css`; paste `squarespace/wishlist-code-block.html` into a Code Block.
 
 Shows the shelter's adoptable animals on our Squarespace site using the Shelterluv
 API instead of the Shelterluv iFrame.

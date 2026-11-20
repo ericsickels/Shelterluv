@@ -4,7 +4,7 @@
 import { serveFile } from "../functions/_lib/data.js";
 import { FILES } from "./assets.js";
 
-const DATA_FILES = new Set(["animals", "coming-soon", "unavailable", "fosters", "adopted", "stats", "events"]);
+const DATA_FILES = new Set(["animals", "coming-soon", "unavailable", "fosters", "adopted", "stats", "events", "wishlist"]);
 const REDIRECTS = { "/fieldguide": "/fieldguide/", "/fieldguide.html": "/fieldguide/", "/index.html": "/" };
 const TYPES = {
   html: "text/html; charset=utf-8", js: "text/javascript; charset=utf-8", css: "text/css; charset=utf-8",
