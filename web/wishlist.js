@@ -121,6 +121,6 @@
     .then(function (r) { if (!r.ok) throw 0; return r.json(); })
     .then(function (d) { if (!d || !d.items) throw 0; start(d); })
     .catch(function () {
-      root.innerHTML = '<p class="rrw-msg">We couldn\u2019t load our wish list just now. You can still <a href="https://www.amazon.com/registries/holiday/2BAZJDTMPXLF7/guest-view" target="_blank" rel="noopener">see it on Amazon</a>.</p>';
+      root.innerHTML = '<p class="rrw-msg">We couldn\u2019t load our wish list just now. You can still <a href="https://www.amazon.com/registries/gl/guest-view/2BAZJDTMPXLF7" target="_blank" rel="noopener">see it on Amazon</a>.</p>';
     });
 })();
